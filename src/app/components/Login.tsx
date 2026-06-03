@@ -1,35 +1,27 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { Users, BookOpen, FileCheck, Calendar } from 'lucide-react';
+import { useState } from 'react'
+import { Users, BookOpen, FileCheck, Calendar } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
 
-interface LoginProps {
-  onLogin: (user: { role: string; name: string }) => void;
-}
+export default function Login() {
+  const { login } = useAuth()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-const mockUsers = [
-  { username: 'admin', password: 'admin123', role: 'admin', name: 'Nguyễn Văn A', redirect: '/admin' },
-  { username: 'staff', password: 'staff123', role: 'staff', name: 'Phạm Thị D', redirect: '/staff' },
-  { username: 'faculty', password: 'faculty123', role: 'faculty', name: 'Trần Thị B', redirect: '/faculty' },
-  { username: 'reviewer', password: 'reviewer123', role: 'reviewer', name: 'Lê Văn C', redirect: '/reviewer' },
-];
-
-export default function Login({ onLogin }: LoginProps) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const user = mockUsers.find(u => u.username === username && u.password === password);
-
-    if (user) {
-      onLogin({ role: user.role, name: user.name });
-      navigate(user.redirect);
-    } else {
-      setError('Sai tên đăng nhập hoặc mật khẩu');
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    try {
+      await login(email, password)
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || 'Đăng nhập thất bại'
+      setError(msg)
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -65,13 +57,15 @@ export default function Login({ onLogin }: LoginProps) {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tên đăng nhập</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                placeholder="Nhập tên đăng nhập"
+                placeholder="Nhập email"
+                required
+                disabled={loading}
               />
             </div>
 
@@ -83,6 +77,8 @@ export default function Login({ onLogin }: LoginProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                 placeholder="Nhập mật khẩu"
+                required
+                disabled={loading}
               />
             </div>
 
@@ -94,23 +90,14 @@ export default function Login({ onLogin }: LoginProps) {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg hover:shadow-xl"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Đăng nhập
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
           </form>
-
-          <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm font-semibold text-gray-700 mb-2">Tài khoản demo:</p>
-            <div className="space-y-1 text-sm text-gray-600">
-              <p><span className="font-medium">Admin:</span> admin / admin123</p>
-              <p><span className="font-medium">Cán bộ:</span> staff / staff123</p>
-              <p><span className="font-medium">Giảng viên:</span> faculty / faculty123</p>
-              <p><span className="font-medium">Phản biện:</span> reviewer / reviewer123</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

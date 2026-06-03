@@ -1,42 +1,84 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
-import { useState } from 'react';
-import AdminDashboard from './components/AdminDashboard';
-import StaffDashboard from './components/StaffDashboard';
-import ProposalSubmission from './components/ProposalSubmission';
-import ReviewerInterface from './components/ReviewerInterface';
-import MeetingScheduler from './components/MeetingScheduler';
-import Login from './components/Login';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router'
+import { AuthProvider, useAuth } from '../contexts/AuthContext'
+import AdminDashboard from './components/AdminDashboard'
+import StaffDashboard from './components/StaffDashboard'
+import ProposalSubmission from './components/ProposalSubmission'
+import ReviewerInterface from './components/ReviewerInterface'
+import MeetingScheduler from './components/MeetingScheduler'
+import Login from './components/Login'
+import ProtectedRoute from './components/ProtectedRoute'
 
-export default function App() {
-  const [user, setUser] = useState<{ role: string; name: string } | null>(null);
+const accountTypeToRole: Record<string, string> = {
+  Administrator: 'admin',
+  Staff: 'staff',
+  Faculty: 'faculty',
+  ReviewCommittee: 'reviewer',
+}
 
-  const handleLogout = () => setUser(null);
+function AppRoutes() {
+  const { user, logout, isAuthenticated } = useAuth()
+  const legacyUser = user
+    ? { role: accountTypeToRole[user.accountType] || 'admin', name: user.fullName }
+    : null
 
   return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to={`/${accountTypeToRole[user?.accountType || ''] || 'admin'}`} replace /> : <Login />}
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute roles={['Administrator']}>
+            <AdminDashboard user={legacyUser} onLogout={logout} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff"
+        element={
+          <ProtectedRoute roles={['Staff']}>
+            <StaffDashboard user={legacyUser} onLogout={logout} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/faculty"
+        element={
+          <ProtectedRoute roles={['Faculty']}>
+            <ProposalSubmission user={legacyUser} onLogout={logout} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reviewer"
+        element={
+          <ProtectedRoute roles={['ReviewCommittee']}>
+            <ReviewerInterface user={legacyUser} onLogout={logout} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/meetings"
+        element={
+          <ProtectedRoute roles={['Administrator']}>
+            <MeetingScheduler user={legacyUser} />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/change-password" element={<ProtectedRoute><div className="p-8 text-center text-gray-600">Trang đổi mật khẩu (coming soon)</div></ProtectedRoute>} />
+    </Routes>
+  )
+}
+
+export default function App() {
+  return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login onLogin={setUser} />} />
-        <Route
-          path="/admin"
-          element={user?.role === 'admin' ? <AdminDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/staff"
-          element={user?.role === 'staff' ? <StaffDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/faculty"
-          element={user?.role === 'faculty' ? <ProposalSubmission user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/reviewer"
-          element={user?.role === 'reviewer' ? <ReviewerInterface user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/meetings"
-          element={user?.role === 'admin' ? <MeetingScheduler user={user} /> : <Navigate to="/" />}
-        />
-      </Routes>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
-  );
+  )
 }

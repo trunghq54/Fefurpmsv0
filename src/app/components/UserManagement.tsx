@@ -1,97 +1,147 @@
-import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, X, Mail, Phone, Shield, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { Plus, Search, Edit, X, Mail, Phone, ToggleLeft, ToggleRight } from 'lucide-react'
+import { userService } from '../../services/userService'
+import type { UserDto } from '../../types/user'
 
-interface UserData {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  role: 'Admin' | 'Faculty' | 'Reviewer' | 'Student';
-  department: string;
-  status: 'Active' | 'Inactive';
-  joinDate: string;
+const ACCOUNT_TYPES = [
+  { label: 'Administrator', value: 0 },
+  { label: 'Staff', value: 1 },
+  { label: 'Faculty', value: 2 },
+  { label: 'ReviewCommittee', value: 3 },
+]
+
+const departments = [
+  'Software Engineering',
+  'AI & Data Science',
+  'Computer Science',
+  'Information Systems',
+  'Cybersecurity',
+]
+
+interface FormState {
+  fullName: string
+  email: string
+  phoneNumber: string
+  department: string
+  accountType: number
+  temporaryPassword: string
 }
 
-const mockUsers: UserData[] = [
-  { id: 1, name: 'Nguyễn Văn A', email: 'nguyenvana@fpt.edu.vn', phone: '0901234567', role: 'Admin', department: 'Software Engineering', status: 'Active', joinDate: '2024-01-15' },
-  { id: 2, name: 'Trần Thị B', email: 'tranthib@fpt.edu.vn', phone: '0912345678', role: 'Faculty', department: 'AI & Data Science', status: 'Active', joinDate: '2024-02-20' },
-  { id: 3, name: 'Lê Văn C', email: 'levanc@fpt.edu.vn', phone: '0923456789', role: 'Reviewer', department: 'Computer Science', status: 'Active', joinDate: '2024-03-10' },
-  { id: 4, name: 'Phạm Thị D', email: 'phamthid@fpt.edu.vn', phone: '0934567890', role: 'Faculty', department: 'Information Systems', status: 'Inactive', joinDate: '2023-12-05' },
-  { id: 5, name: 'Hoàng Văn E', email: 'hoangvane@fpt.edu.vn', phone: '0945678901', role: 'Reviewer', department: 'Software Engineering', status: 'Active', joinDate: '2024-04-18' },
-];
-
-const departments = ['Software Engineering', 'AI & Data Science', 'Computer Science', 'Information Systems', 'Cybersecurity'];
-const roles = ['Admin', 'Faculty', 'Reviewer', 'Student'];
+const defaultForm: FormState = {
+  fullName: '',
+  email: '',
+  phoneNumber: '',
+  department: '',
+  accountType: 2,
+  temporaryPassword: '',
+}
 
 export default function UserManagement() {
-  const [users, setUsers] = useState<UserData[]>(mockUsers);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState<string>('all');
-  const [showModal, setShowModal] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserData | null>(null);
-  const [formData, setFormData] = useState<Partial<UserData>>({
-    name: '',
-    email: '',
-    phone: '',
-    role: 'Faculty',
-    department: '',
-    status: 'Active',
-  });
+  const [users, setUsers] = useState<UserDto[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterType, setFilterType] = useState<string>('all')
+  const [showModal, setShowModal] = useState(false)
+  const [editingUser, setEditingUser] = useState<UserDto | null>(null)
+  const [formData, setFormData] = useState<FormState>(defaultForm)
+  const [saving, setSaving] = useState(false)
+  const [formError, setFormError] = useState('')
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = filterRole === 'all' || user.role === filterRole;
-    return matchesSearch && matchesRole;
-  });
+  useEffect(() => {
+    userService.getAll().then((res) => {
+      if (res.success && res.data) setUsers(res.data)
+      setLoading(false)
+    })
+  }, [])
 
-  const handleOpenModal = (user?: UserData) => {
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
+      u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesType = filterType === 'all' || u.accountType === filterType
+    return matchesSearch && matchesType
+  })
+
+  const handleOpenModal = (user?: UserDto) => {
     if (user) {
-      setEditingUser(user);
-      setFormData(user);
-    } else {
-      setEditingUser(null);
+      setEditingUser(user)
+      const typeValue = ACCOUNT_TYPES.find((t) => t.label === user.accountType)?.value ?? 2
       setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        role: 'Faculty',
-        department: '',
-        status: 'Active',
-      });
-    }
-    setShowModal(true);
-  };
-
-  const handleSave = () => {
-    if (editingUser) {
-      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...formData } as UserData : u));
+        fullName: user.fullName,
+        email: user.email,
+        phoneNumber: user.phoneNumber || '',
+        department: user.department || '',
+        accountType: typeValue,
+        temporaryPassword: '',
+      })
     } else {
-      const newUser: UserData = {
-        id: Math.max(...users.map(u => u.id)) + 1,
-        ...formData,
-        joinDate: new Date().toISOString().split('T')[0],
-      } as UserData;
-      setUsers([...users, newUser]);
+      setEditingUser(null)
+      setFormData(defaultForm)
     }
-    setShowModal(false);
-  };
+    setFormError('')
+    setShowModal(true)
+  }
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Bạn có chắc muốn xóa người dùng này?')) {
-      setUsers(users.filter(u => u.id !== id));
+  const handleSave = async () => {
+    setSaving(true)
+    setFormError('')
+    try {
+      if (editingUser) {
+        const res = await userService.update(editingUser.id, {
+          fullName: formData.fullName,
+          phoneNumber: formData.phoneNumber || undefined,
+          department: formData.department || undefined,
+          accountType: formData.accountType,
+        })
+        if (res.success && res.data) {
+          setUsers((prev) => prev.map((u) => (u.id === editingUser.id ? res.data! : u)))
+          setShowModal(false)
+        } else {
+          setFormError(res.message || 'Cập nhật thất bại')
+        }
+      } else {
+        const res = await userService.create({
+          email: formData.email,
+          fullName: formData.fullName,
+          phoneNumber: formData.phoneNumber || undefined,
+          department: formData.department || undefined,
+          accountType: formData.accountType,
+          temporaryPassword: formData.temporaryPassword,
+        })
+        if (res.success && res.data) {
+          setUsers((prev) => [...prev, res.data!])
+          setShowModal(false)
+        } else {
+          setFormError(res.message || 'Tạo người dùng thất bại')
+        }
+      }
+    } catch (err: any) {
+      setFormError(err.response?.data?.message || err.message || 'Có lỗi xảy ra')
+    } finally {
+      setSaving(false)
     }
-  };
+  }
 
-  const getRoleBadge = (role: string) => {
-    const colors = {
-      Admin: 'bg-purple-100 text-purple-800',
+  const handleToggle = async (id: string) => {
+    try {
+      const res = await userService.toggleActive(id)
+      if (res.success && res.data) {
+        setUsers((prev) => prev.map((u) => (u.id === id ? res.data! : u)))
+      }
+    } catch (err: any) {
+      console.error('Toggle active failed:', err)
+    }
+  }
+
+  const getRoleBadge = (accountType: string) => {
+    const colors: Record<string, string> = {
+      Administrator: 'bg-purple-100 text-purple-800',
       Faculty: 'bg-blue-100 text-blue-800',
-      Reviewer: 'bg-green-100 text-green-800',
-      Student: 'bg-yellow-100 text-yellow-800',
-    };
-    return colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800';
-  };
+      ReviewCommittee: 'bg-green-100 text-green-800',
+      Staff: 'bg-yellow-100 text-yellow-800',
+    }
+    return colors[accountType] || 'bg-gray-100 text-gray-800'
+  }
 
   return (
     <div className="space-y-6">
@@ -117,12 +167,16 @@ export default function UserManagement() {
           </div>
 
           <select
-            value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           >
             <option value="all">Tất cả vai trò</option>
-            {roles.map(role => <option key={role} value={role}>{role}</option>)}
+            {ACCOUNT_TYPES.map((t) => (
+              <option key={t.label} value={t.label}>
+                {t.label}
+              </option>
+            ))}
           </select>
 
           <button
@@ -143,92 +197,132 @@ export default function UserManagement() {
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Giảng viên</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">{users.filter(u => u.role === 'Faculty').length}</p>
+          <p className="text-2xl font-bold text-blue-600 mt-1">
+            {users.filter((u) => u.accountType === 'Faculty').length}
+          </p>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Phản biện</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">{users.filter(u => u.role === 'Reviewer').length}</p>
+          <p className="text-2xl font-bold text-green-600 mt-1">
+            {users.filter((u) => u.accountType === 'ReviewCommittee').length}
+          </p>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Đang hoạt động</p>
-          <p className="text-2xl font-bold text-purple-600 mt-1">{users.filter(u => u.status === 'Active').length}</p>
+          <p className="text-2xl font-bold text-purple-600 mt-1">
+            {users.filter((u) => u.isActive).length}
+          </p>
         </div>
       </div>
 
       {/* Users Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Người dùng</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Liên hệ</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Vai trò</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Khoa</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Trạng thái</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Hành động</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredUsers.map(user => (
-                <tr key={user.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                        {user.name[0]}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-800">{user.name}</p>
-                        <p className="text-sm text-gray-500">Tham gia: {new Date(user.joinDate).toLocaleDateString('vi-VN')}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Mail className="w-4 h-4" />
-                        {user.email}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Phone className="w-4 h-4" />
-                        {user.phone}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleBadge(user.role)}`}>
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{user.department}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleOpenModal(user)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+        {loading ? (
+          <div className="p-12 text-center text-gray-400">Đang tải dữ liệu...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Người dùng
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Liên hệ
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Vai trò
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Khoa
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Trạng thái
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Hành động
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredUsers.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                          {user.fullName[0]}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800">{user.fullName}</p>
+                          <p className="text-sm text-gray-500">
+                            Tham gia: {new Date(user.createdAt).toLocaleDateString('vi-VN')}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Mail className="w-4 h-4" />
+                          {user.email}
+                        </div>
+                        {user.phoneNumber && (
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Phone className="w-4 h-4" />
+                            {user.phoneNumber}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleBadge(user.accountType)}`}
+                      >
+                        {user.accountType}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{user.department || '—'}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          user.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {user.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleOpenModal(user)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          title="Chỉnh sửa"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleToggle(user.id)}
+                          className={`p-2 rounded-lg transition ${
+                            user.isActive
+                              ? 'text-orange-600 hover:bg-orange-50'
+                              : 'text-green-600 hover:bg-green-50'
+                          }`}
+                          title={user.isActive ? 'Khóa tài khoản' : 'Mở tài khoản'}
+                        >
+                          {user.isActive ? (
+                            <ToggleRight className="w-4 h-4" />
+                          ) : (
+                            <ToggleLeft className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Modal */}
@@ -249,8 +343,8 @@ export default function UserManagement() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Họ tên *</label>
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
@@ -262,15 +356,16 @@ export default function UserManagement() {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    disabled={!!editingUser}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50 disabled:text-gray-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
                   <input
                     type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
@@ -280,37 +375,54 @@ export default function UserManagement() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Vai trò *</label>
                   <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                    value={formData.accountType}
+                    onChange={(e) => setFormData({ ...formData, accountType: Number(e.target.value) })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   >
-                    {roles.map(role => <option key={role} value={role}>{role}</option>)}
+                    {ACCOUNT_TYPES.map((t) => (
+                      <option key={t.value} value={t.value}>
+                        {t.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Khoa *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Khoa</label>
                   <select
                     value={formData.department}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   >
                     <option value="">Chọn khoa</option>
-                    {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
+                    {departments.map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
+              {!editingUser && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Mật khẩu tạm thời *
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.temporaryPassword}
+                    onChange={(e) => setFormData({ ...formData, temporaryPassword: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Người dùng phải đổi mật khẩu khi đăng nhập lần đầu"
+                  />
+                </div>
+              )}
+
+              {formError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  {formError}
+                </div>
+              )}
             </div>
 
             <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
@@ -322,14 +434,15 @@ export default function UserManagement() {
               </button>
               <button
                 onClick={handleSave}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
+                disabled={saving}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {editingUser ? 'Cập nhật' : 'Thêm mới'}
+                {saving ? 'Đang lưu...' : editingUser ? 'Cập nhật' : 'Thêm mới'}
               </button>
             </div>
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }
