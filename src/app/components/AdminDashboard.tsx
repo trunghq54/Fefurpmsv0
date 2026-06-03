@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
   LayoutDashboard, Users, FileText, UserCheck, Calendar, BarChart3,
-  LogOut, Bell, Search, ChevronRight, MessageSquare, Activity, FileDown
+  LogOut, Bell, Search, ChevronRight, MessageSquare, Activity, FileDown,
+  CalendarRange
 } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import UserManagement from './UserManagement';
+import CycleManagement from './CycleManagement';
 import ProposalManagement from './ProposalManagement';
 import Notifications from './Notifications';
 import BudgetTracker from './BudgetTracker';
@@ -66,6 +68,7 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'search', label: 'Advanced Search', icon: Search },
     { id: 'users', label: 'User Management', icon: Users },
+    { id: 'cycles', label: 'Cycles & Tracks', icon: CalendarRange },
     { id: 'proposals', label: 'Proposals', icon: FileText },
     { id: 'documents', label: 'Documents', icon: FileText },
     { id: 'discussions', label: 'Discussions', icon: MessageSquare },
@@ -160,6 +163,7 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
         <div className="p-6">
           {activeMenu === 'search' && <AdvancedSearch />}
           {activeMenu === 'users' && <UserManagement />}
+          {activeMenu === 'cycles' && <CycleManagement />}
           {activeMenu === 'proposals' && <ProposalManagement />}
           {activeMenu === 'documents' && <DocumentRepository />}
           {activeMenu === 'discussions' && <DiscussionThread />}
