@@ -1,230 +1,259 @@
-import { useState } from 'react';
-import { Filter, Download, Eye, MessageSquare, Clock, DollarSign, TrendingUp } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { Search, Eye, X, FileText, Users, Wallet } from 'lucide-react'
+import { proposalService } from '../../services/proposalService'
+import type { ProposalSummaryDto, ProposalDto } from '../../types/proposal'
+import ReviewRoundsPanel from './ReviewRoundsPanel'
+import AiSummaryPanel from './AiSummaryPanel'
+import ProposalDocuments from './ProposalDocuments'
 
-interface Proposal {
-  id: number;
-  title: string;
-  pi: string;
-  category: string;
-  budget: string;
-  status: 'Submitted' | 'Under Review' | 'Approved' | 'Rejected' | 'Revision Required';
-  submittedDate: string;
-  reviewers: number;
-  score?: number;
-  priority: 'High' | 'Medium' | 'Low';
+const STATUSES = [
+  'Draft', 'Submitted', 'UnderReview', 'Approved', 'ContractSigned', 'InProgress',
+  'AcceptancePending', 'Accepted', 'RejectedAtReview', 'RejectedAtAcceptance', 'Withdrawn', 'Suspended',
+]
+
+const statusColor = (status: string) => {
+  const map: Record<string, string> = {
+    Draft: 'bg-gray-100 text-gray-800',
+    Submitted: 'bg-yellow-100 text-yellow-800',
+    UnderReview: 'bg-blue-100 text-blue-800',
+    Approved: 'bg-green-100 text-green-800',
+    Accepted: 'bg-green-100 text-green-800',
+    RejectedAtReview: 'bg-red-100 text-red-800',
+    RejectedAtAcceptance: 'bg-red-100 text-red-800',
+  }
+  return map[status] || 'bg-gray-100 text-gray-800'
 }
 
-const mockProposals: Proposal[] = [
-  { id: 1, title: 'AI-Powered Chatbot for Education', pi: 'Dr. Nguyễn Văn A', category: 'AI & ML', budget: '50,000,000', status: 'Approved', submittedDate: '2026-04-10', reviewers: 3, score: 8.5, priority: 'High' },
-  { id: 2, title: 'IoT Smart Campus System', pi: 'Dr. Trần Thị B', category: 'IoT', budget: '75,000,000', status: 'Under Review', submittedDate: '2026-05-01', reviewers: 2, priority: 'High' },
-  { id: 3, title: 'Blockchain for Academic Credentials', pi: 'Dr. Lê Văn C', category: 'Blockchain', budget: '60,000,000', status: 'Revision Required', submittedDate: '2026-04-25', reviewers: 3, score: 6.8, priority: 'Medium' },
-  { id: 4, title: 'Machine Learning for Student Performance', pi: 'Dr. Phạm Thị D', category: 'AI & ML', budget: '45,000,000', status: 'Rejected', submittedDate: '2026-04-15', reviewers: 3, score: 5.2, priority: 'Low' },
-  { id: 5, title: 'Cloud-Based Learning Platform', pi: 'Dr. Hoàng Văn E', category: 'Cloud', budget: '80,000,000', status: 'Approved', submittedDate: '2026-04-05', reviewers: 3, score: 9.1, priority: 'High' },
-  { id: 6, title: 'Cybersecurity Framework for University', pi: 'Dr. Vũ Thị F', category: 'Cybersecurity', budget: '90,000,000', status: 'Submitted', submittedDate: '2026-05-10', reviewers: 0, priority: 'High' },
-];
+const formatVnd = (n: number) => n.toLocaleString('vi-VN') + ' ₫'
 
 export default function ProposalManagement() {
-  const [proposals, setProposals] = useState<Proposal[]>(mockProposals);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [proposals, setProposals] = useState<ProposalSummaryDto[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [filterType, setFilterType] = useState('all')
 
-  const filteredProposals = proposals.filter(p => {
-    const matchesStatus = filterStatus === 'all' || p.status === filterStatus;
-    const matchesCategory = filterCategory === 'all' || p.category === filterCategory;
-    return matchesStatus && matchesCategory;
-  });
+  const [detail, setDetail] = useState<ProposalDto | null>(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
 
-  const getStatusColor = (status: string) => {
-    const colors = {
-      'Submitted': 'bg-blue-100 text-blue-800',
-      'Under Review': 'bg-yellow-100 text-yellow-800',
-      'Approved': 'bg-green-100 text-green-800',
-      'Rejected': 'bg-red-100 text-red-800',
-      'Revision Required': 'bg-orange-100 text-orange-800',
-    };
-    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
-  };
+  const load = () => {
+    setLoading(true)
+    proposalService
+      .getAll({
+        status: filterStatus === 'all' ? undefined : filterStatus,
+        type: filterType === 'all' ? undefined : filterType,
+        search: search || undefined,
+      })
+      .then((res) => {
+        if (res.success && res.data) setProposals(res.data)
+        setLoading(false)
+      })
+  }
 
-  const getPriorityColor = (priority: string) => {
-    const colors = {
-      'High': 'text-red-600',
-      'Medium': 'text-yellow-600',
-      'Low': 'text-green-600',
-    };
-    return colors[priority as keyof typeof colors];
-  };
+  useEffect(() => {
+    load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterStatus, filterType])
 
-  const stats = [
-    { label: 'Tổng đề xuất', value: proposals.length, icon: TrendingUp, color: 'bg-blue-500' },
-    { label: 'Đang xét duyệt', value: proposals.filter(p => p.status === 'Under Review').length, icon: Clock, color: 'bg-yellow-500' },
-    { label: 'Đã phê duyệt', value: proposals.filter(p => p.status === 'Approved').length, icon: Eye, color: 'bg-green-500' },
-    { label: 'Tổng ngân sách', value: `${(proposals.filter(p => p.status === 'Approved').reduce((sum, p) => sum + parseInt(p.budget.replace(/,/g, '')), 0) / 1000000).toFixed(0)}M`, icon: DollarSign, color: 'bg-purple-500' },
-  ];
+  const openDetail = async (id: string) => {
+    setLoadingDetail(true)
+    setDetail(null)
+    const res = await proposalService.getById(id)
+    if (res.success && res.data) setDetail(res.data)
+    setLoadingDetail(false)
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Proposal Management</h2>
-          <p className="text-gray-500 mt-1">Manage and review research proposals</p>
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition">
-          <Download className="w-5 h-5" />
-          Export Report
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {stats.map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-800 mt-2">{stat.value}</p>
-              </div>
-              <div className={`${stat.color} p-3 rounded-xl`}>
-                <stat.icon className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </div>
-        ))}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-800">Quản lý Đề xuất</h2>
+        <p className="text-gray-500 mt-1">Theo dõi toàn bộ đề xuất nghiên cứu</p>
       </div>
 
       {/* Filters */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <div className="flex items-center gap-4">
-          <Filter className="w-5 h-5 text-gray-400" />
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          >
+        <div className="flex flex-wrap gap-4 items-center justify-between">
+          <div className="flex-1 min-w-[280px] relative">
+            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && load()}
+              placeholder="Tìm theo tên đề tài... (Enter)"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="all">Tất cả trạng thái</option>
-            <option value="Submitted">Submitted</option>
-            <option value="Under Review">Under Review</option>
-            <option value="Approved">Approved</option>
-            <option value="Rejected">Rejected</option>
-            <option value="Revision Required">Revision Required</option>
+            {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
-
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          >
-            <option value="all">Tất cả danh mục</option>
-            <option value="AI & ML">AI & ML</option>
-            <option value="IoT">IoT</option>
-            <option value="Blockchain">Blockchain</option>
-            <option value="Cloud">Cloud</option>
-            <option value="Cybersecurity">Cybersecurity</option>
+          <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="all">Tất cả loại</option>
+            <option value="Applied">Applied</option>
+            <option value="Basic">Basic</option>
           </select>
+        </div>
+      </div>
 
-          <div className="ml-auto text-sm text-gray-600">
-            Hiển thị <span className="font-semibold">{filteredProposals.length}</span> / {proposals.length} đề xuất
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <p className="text-sm text-gray-500">Tổng đề xuất</p>
+          <p className="text-2xl font-bold text-gray-800 mt-1">{proposals.length}</p>
+        </div>
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <p className="text-sm text-gray-500">Đã nộp</p>
+          <p className="text-2xl font-bold text-yellow-600 mt-1">{proposals.filter((p) => p.status === 'Submitted').length}</p>
+        </div>
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <p className="text-sm text-gray-500">Đã duyệt</p>
+          <p className="text-2xl font-bold text-green-600 mt-1">{proposals.filter((p) => p.status === 'Approved').length}</p>
+        </div>
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <p className="text-sm text-gray-500">Tổng kinh phí đề xuất</p>
+          <p className="text-lg font-bold text-blue-600 mt-1">{formatVnd(proposals.reduce((s, p) => s + p.totalBudget, 0))}</p>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {loading ? (
+          <div className="p-12 text-center text-gray-400">Đang tải dữ liệu...</div>
+        ) : proposals.length === 0 ? (
+          <div className="p-12 text-center text-gray-400">
+            <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            Không có đề xuất nào khớp bộ lọc.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Đề tài</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Chủ nhiệm</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Track</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Loại</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Kinh phí</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Trạng thái</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Hành động</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {proposals.map((p) => (
+                  <tr key={p.id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4 max-w-xs">
+                      <p className="font-medium text-gray-800 truncate">{p.titleVI}</p>
+                      <p className="text-sm text-gray-500">Tạo: {new Date(p.createdAt).toLocaleDateString('vi-VN')}</p>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{p.principalInvestigatorName}</td>
+                    <td className="px-6 py-4 text-gray-600">{p.trackName || '—'}</td>
+                    <td className="px-6 py-4"><span className="px-2 py-0.5 bg-gray-100 rounded text-sm">{p.researchType}</span></td>
+                    <td className="px-6 py-4 text-gray-600">{formatVnd(p.totalBudget)}</td>
+                    <td className="px-6 py-4"><span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(p.status)}`}>{p.status}</span></td>
+                    <td className="px-6 py-4">
+                      <button onClick={() => openDetail(p.id)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="Xem chi tiết">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Detail modal */}
+      {(detail || loadingDetail) && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 bg-white">
+              <h3 className="text-xl font-bold text-gray-800">Chi tiết đề xuất</h3>
+              <button onClick={() => setDetail(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+            </div>
+            {loadingDetail ? (
+              <div className="p-12 text-center text-gray-400">Đang tải...</div>
+            ) : detail ? (
+              <div className="p-6 space-y-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800">{detail.titleVI}</h4>
+                  <p className="text-sm text-gray-500">{detail.titleEN}</p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(detail.status)}`}>{detail.status}</span>
+                    <span className="px-3 py-1 rounded-full text-sm bg-gray-100">{detail.researchType}</span>
+                    <span className="px-3 py-1 rounded-full text-sm bg-gray-100">{detail.durationMonths} tháng</span>
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                  <Field label="Chủ nhiệm" value={detail.principalInvestigatorName} />
+                  <Field label="Đợt" value={detail.cycleName} />
+                  <Field label="Track" value={detail.trackName} />
+                  <Field label="Tổng kinh phí" value={formatVnd(detail.totalBudget)} />
+                </div>
+                {detail.objectives && <Block label="Mục tiêu" value={detail.objectives} />}
+                {detail.methodology && <Block label="Phương pháp" value={detail.methodology} />}
+                {detail.expectedOutput && <Block label="Sản phẩm dự kiến" value={detail.expectedOutput} />}
+
+                <div>
+                  <h5 className="flex items-center gap-2 font-semibold text-gray-800 mb-2"><Users className="w-4 h-4" /> Thành viên ({detail.members.length})</h5>
+                  <div className="border border-gray-200 rounded-lg divide-y">
+                    {detail.members.map((m) => (
+                      <div key={m.id} className="px-4 py-2 text-sm flex justify-between">
+                        <span className="text-gray-800">{m.fullName} <span className="text-gray-400">· {m.role}</span></span>
+                        <span className="text-gray-500">{m.workMonths} tháng</span>
+                      </div>
+                    ))}
+                    {detail.members.length === 0 && <div className="px-4 py-2 text-sm text-gray-400">Không có</div>}
+                  </div>
+                </div>
+
+                <div>
+                  <h5 className="flex items-center gap-2 font-semibold text-gray-800 mb-2"><Wallet className="w-4 h-4" /> Kinh phí ({detail.budgetItems.length})</h5>
+                  <div className="border border-gray-200 rounded-lg divide-y">
+                    {detail.budgetItems.map((b) => (
+                      <div key={b.id} className="px-4 py-2 text-sm flex justify-between">
+                        <span className="text-gray-800">{b.category}</span>
+                        <span className="text-gray-600">{formatVnd(b.amount)}</span>
+                      </div>
+                    ))}
+                    {detail.budgetItems.length === 0 && <div className="px-4 py-2 text-sm text-gray-400">Không có</div>}
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-5">
+                  <ProposalDocuments proposalId={detail.id} />
+                </div>
+
+                <AiSummaryPanel proposalId={detail.id} />
+
+                <div className="border-t border-gray-200 pt-5">
+                  <ReviewRoundsPanel proposalId={detail.id} />
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
-      </div>
-
-      {/* Proposals Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Đề xuất</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Danh mục</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Ngân sách</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Trạng thái</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Điểm</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Ưu tiên</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Hành động</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredProposals.map(proposal => (
-              <tr key={proposal.id} className="hover:bg-gray-50 transition">
-                <td className="px-6 py-4">
-                  <div>
-                    <p className="font-medium text-gray-800">{proposal.title}</p>
-                    <p className="text-sm text-gray-500">PI: {proposal.pi}</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      Nộp: {new Date(proposal.submittedDate).toLocaleDateString('vi-VN')}
-                    </p>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
-                    {proposal.category}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-gray-700 font-medium">
-                  {parseInt(proposal.budget).toLocaleString('vi-VN')} ₫
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(proposal.status)}`}>
-                    {proposal.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  {proposal.score ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                        <span className="text-white font-bold">{proposal.score}</span>
-                      </div>
-                      <span className="text-xs text-gray-500">/ 10</span>
-                    </div>
-                  ) : (
-                    <span className="text-gray-400 text-sm">Chưa chấm</span>
-                  )}
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`font-semibold ${getPriorityColor(proposal.priority)}`}>
-                    {proposal.priority}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition relative">
-                      <MessageSquare className="w-4 h-4" />
-                      {proposal.reviewers > 0 && (
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                          {proposal.reviewers}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Workflow Diagram */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 className="font-semibold text-gray-800 mb-4">Review Workflow</h3>
-        <div className="flex items-center justify-between">
-          {['Submitted', 'Under Review', 'Committee Meeting', 'Final Decision'].map((step, idx, arr) => (
-            <div key={step} className="flex items-center flex-1">
-              <div className="flex flex-col items-center flex-1">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold ${
-                  idx === 0 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
-                }`}>
-                  {idx + 1}
-                </div>
-                <p className="text-sm font-medium text-gray-700 mt-2 text-center">{step}</p>
-              </div>
-              {idx < arr.length - 1 && (
-                <div className="h-1 flex-1 bg-gray-200 mx-2" />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
-  );
+  )
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-gray-500">{label}</p>
+      <p className="font-medium text-gray-800">{value || '—'}</p>
+    </div>
+  )
+}
+
+function Block({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-sm text-gray-500 mb-1">{label}</p>
+      <p className="text-sm text-gray-800 whitespace-pre-wrap">{value}</p>
+    </div>
+  )
 }
