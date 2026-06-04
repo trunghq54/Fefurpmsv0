@@ -1,13 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import {
   LayoutDashboard, Users, FileText, UserCheck, Calendar, BarChart3,
   LogOut, Bell, Search, ChevronRight, MessageSquare, Activity, FileDown,
-  CalendarRange
+  CalendarRange, FileEdit
 } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import UserManagement from './UserManagement';
 import CycleManagement from './CycleManagement';
+import ChangeRequestQueue from './ChangeRequestQueue';
+import NotificationBell from './NotificationBell';
+import { analyticsService } from '../../services/analyticsService';
+import type { AnalyticsOverview, TrackStats, FunnelStage } from '../../types/analytics';
 import ProposalManagement from './ProposalManagement';
 import Notifications from './Notifications';
 import BudgetTracker from './BudgetTracker';
@@ -64,12 +68,33 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
 
+  const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
+  const [byTrack, setByTrack] = useState<TrackStats[]>([]);
+  const [funnel, setFunnel] = useState<FunnelStage[]>([]);
+
+  useEffect(() => {
+    analyticsService.getOverview().then((r) => { if (r.success && r.data) setOverview(r.data); });
+    analyticsService.getByTrack().then((r) => { if (r.success && r.data) setByTrack(r.data); });
+    analyticsService.getFunnel().then((r) => { if (r.success && r.data) setFunnel(r.data); });
+  }, []);
+
+  const liveStats = [
+    { label: 'Tổng đề xuất', value: String(overview?.totalProposals ?? '—'), icon: FileText, color: 'bg-blue-500' },
+    { label: 'Giảng viên (PI)', value: String(overview?.totalPIs ?? '—'), icon: Users, color: 'bg-green-500' },
+    { label: 'Phản biện', value: String(overview?.totalReviewers ?? '—'), icon: UserCheck, color: 'bg-purple-500' },
+    { label: 'Đã duyệt', value: String(overview?.totalByStatus?.['Approved'] ?? 0), icon: Calendar, color: 'bg-orange-500' },
+  ];
+  const trackChart = byTrack.map((t) => ({ name: t.trackName, total: t.total, passed: t.passed }));
+  const funnelColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+  const funnelChart = funnel.map((f, i) => ({ name: f.stage, value: f.count, color: funnelColors[i % funnelColors.length] }));
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'search', label: 'Advanced Search', icon: Search },
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'cycles', label: 'Cycles & Tracks', icon: CalendarRange },
     { id: 'proposals', label: 'Proposals', icon: FileText },
+    { id: 'change-requests', label: 'Change Requests', icon: FileEdit },
     { id: 'documents', label: 'Documents', icon: FileText },
     { id: 'discussions', label: 'Discussions', icon: MessageSquare },
     { id: 'timeline', label: 'Timeline', icon: Calendar },
@@ -148,13 +173,7 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
-              <button
-                onClick={() => setShowNotifications(true)}
-                className="relative p-2 hover:bg-gray-100 rounded-lg transition"
-              >
-                <Bell className="w-6 h-6 text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
+              <NotificationBell />
             </div>
           </div>
         </div>
@@ -165,6 +184,7 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
           {activeMenu === 'users' && <UserManagement />}
           {activeMenu === 'cycles' && <CycleManagement />}
           {activeMenu === 'proposals' && <ProposalManagement />}
+          {activeMenu === 'change-requests' && <ChangeRequestQueue />}
           {activeMenu === 'documents' && <DocumentRepository />}
           {activeMenu === 'discussions' && <DiscussionThread />}
           {activeMenu === 'timeline' && <TimelineTracker />}
@@ -177,7 +197,7 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
           <>
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            {stats.map((stat, index) => (
+            {liveStats.map((stat, index) => (
               <div key={index} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
                 <div className="flex items-center justify-between">
                   <div>
@@ -196,37 +216,38 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
           <div className="grid lg:grid-cols-2 gap-6 mb-6">
             {/* Bar Chart */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Proposal Submission Rates</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Đề xuất theo Track</h3>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={submissionData}>
+                <BarChart data={trackChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
+                  <XAxis dataKey="name" />
+                  <YAxis allowDecimals={false} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="submissions" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="total" name="Tổng" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="passed" name="Đã duyệt" fill="#10b981" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
             {/* Pie Chart */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Budget Allocation by Category</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Phễu xét duyệt (Funnel)</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={budgetData}
+                    data={funnelChart}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, value }) => `${name}: ${value}`}
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"
                   >
-                    {budgetData.map((entry, index) => (
-                      <Cell key={`budget-${entry.name}`} fill={entry.color} />
+                    {funnelChart.map((entry) => (
+                      <Cell key={`funnel-${entry.name}`} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip />
