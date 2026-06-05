@@ -9,6 +9,7 @@ import { proposalService } from '../../services/proposalService'
 import { changeRequestService } from '../../services/changeRequestService'
 import { CHANGE_TYPE } from '../../types/changeRequest'
 import ProposalDocuments from './ProposalDocuments'
+import RoleSwitcher from './RoleSwitcher'
 import type { CycleDto } from '../../types/cycle'
 import type {
   ProposalSummaryDto, CreateMemberRequest, CreateBudgetItemRequest,
@@ -21,6 +22,7 @@ interface User {
 
 interface ProposalSubmissionProps {
   user: User
+  onLogout: () => void
 }
 
 const formatVnd = (n: number) => n.toLocaleString('vi-VN') + ' ₫'
@@ -42,7 +44,7 @@ const statusColor = (status: string) => {
   return map[status] || 'bg-gray-100 text-gray-800'
 }
 
-export default function ProposalSubmission({ user }: ProposalSubmissionProps) {
+export default function ProposalSubmission({ user, onLogout }: ProposalSubmissionProps) {
   const navigate = useNavigate()
   const [showSubmissions, setShowSubmissions] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
@@ -214,14 +216,13 @@ export default function ProposalSubmission({ user }: ProposalSubmissionProps) {
                 {showSubmissions ? <Home className="w-4 h-4" /> : <List className="w-4 h-4" />}
                 {showSubmissions ? 'Tạo đề xuất mới' : 'Đề xuất của tôi'}
               </button>
+              <RoleSwitcher />
               <div className="border-l border-gray-300 pl-4">
                 <p className="font-medium text-gray-800">{user.name}</p>
                 <p className="text-sm text-gray-500">Chủ nhiệm đề tài</p>
               </div>
               <button
-                onClick={() => {
-                  if (window.confirm('Bạn có chắc muốn đăng xuất?')) { navigate('/'); window.location.reload() }
-                }}
+                onClick={() => { if (window.confirm('Bạn có chắc muốn đăng xuất?')) onLogout() }}
                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
               >
                 <LogOut className="w-5 h-5" />

@@ -3,11 +3,14 @@ export interface LoginRequest {
   password: string
 }
 
+export type RoleName = 'Administrator' | 'Staff' | 'Faculty' | 'ReviewCommittee'
+
 export interface UserInfo {
   id: string
   email: string
   fullName: string
-  accountType: 'Administrator' | 'Staff' | 'Faculty' | 'ReviewCommittee'
+  accountType: RoleName // primary/default role
+  roles: RoleName[]
   mustChangePassword: boolean
 }
 

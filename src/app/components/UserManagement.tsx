@@ -2,13 +2,9 @@ import { useState, useEffect } from 'react'
 import { Plus, Search, Edit, X, Mail, Phone, ToggleLeft, ToggleRight } from 'lucide-react'
 import { userService } from '../../services/userService'
 import type { UserDto } from '../../types/user'
+import { ROLE_VALUE, ROLE_LABEL } from '../../types/user'
 
-const ACCOUNT_TYPES = [
-  { label: 'Administrator', value: 0 },
-  { label: 'Staff', value: 1 },
-  { label: 'Faculty', value: 2 },
-  { label: 'ReviewCommittee', value: 3 },
-]
+const ALL_ROLES = ['Administrator', 'Staff', 'Faculty', 'ReviewCommittee'] as const
 
 const departments = [
   'Software Engineering',
@@ -23,7 +19,7 @@ interface FormState {
   email: string
   phoneNumber: string
   department: string
-  accountType: number
+  roles: number[]
   temporaryPassword: string
 }
 
@@ -32,9 +28,21 @@ const defaultForm: FormState = {
   email: '',
   phoneNumber: '',
   department: '',
-  accountType: 2,
+  roles: [ROLE_VALUE.Faculty],
   temporaryPassword: '',
 }
+
+const roleBadge = (role: string) => {
+  const colors: Record<string, string> = {
+    Administrator: 'bg-purple-100 text-purple-800',
+    Faculty: 'bg-blue-100 text-blue-800',
+    ReviewCommittee: 'bg-green-100 text-green-800',
+    Staff: 'bg-yellow-100 text-yellow-800',
+  }
+  return colors[role] || 'bg-gray-100 text-gray-800'
+}
+
+const rolesOf = (u: UserDto): string[] => (u.roles?.length ? u.roles : [u.accountType])
 
 export default function UserManagement() {
   const [users, setUsers] = useState<UserDto[]>([])
@@ -58,20 +66,22 @@ export default function UserManagement() {
     const matchesSearch =
       u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       u.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesType = filterType === 'all' || u.accountType === filterType
+    const matchesType = filterType === 'all' || rolesOf(u).includes(filterType)
     return matchesSearch && matchesType
   })
 
   const handleOpenModal = (user?: UserDto) => {
     if (user) {
       setEditingUser(user)
-      const typeValue = ACCOUNT_TYPES.find((t) => t.label === user.accountType)?.value ?? 2
+      const roleValues = rolesOf(user)
+        .map((r) => ROLE_VALUE[r as keyof typeof ROLE_VALUE])
+        .filter(Boolean)
       setFormData({
         fullName: user.fullName,
         email: user.email,
         phoneNumber: user.phoneNumber || '',
         department: user.department || '',
-        accountType: typeValue,
+        roles: roleValues.length ? roleValues : [ROLE_VALUE.Faculty],
         temporaryPassword: '',
       })
     } else {
@@ -82,7 +92,18 @@ export default function UserManagement() {
     setShowModal(true)
   }
 
+  const toggleRole = (value: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      roles: prev.roles.includes(value) ? prev.roles.filter((v) => v !== value) : [...prev.roles, value],
+    }))
+  }
+
   const handleSave = async () => {
+    if (formData.roles.length === 0) {
+      setFormError('Chọn ít nhất 1 vai trò')
+      return
+    }
     setSaving(true)
     setFormError('')
     try {
@@ -91,7 +112,7 @@ export default function UserManagement() {
           fullName: formData.fullName,
           phoneNumber: formData.phoneNumber || undefined,
           department: formData.department || undefined,
-          accountType: formData.accountType,
+          roles: formData.roles,
         })
         if (res.success && res.data) {
           setUsers((prev) => prev.map((u) => (u.id === editingUser.id ? res.data! : u)))
@@ -105,7 +126,7 @@ export default function UserManagement() {
           fullName: formData.fullName,
           phoneNumber: formData.phoneNumber || undefined,
           department: formData.department || undefined,
-          accountType: formData.accountType,
+          roles: formData.roles,
           temporaryPassword: formData.temporaryPassword,
         })
         if (res.success && res.data) {
@@ -133,21 +154,11 @@ export default function UserManagement() {
     }
   }
 
-  const getRoleBadge = (accountType: string) => {
-    const colors: Record<string, string> = {
-      Administrator: 'bg-purple-100 text-purple-800',
-      Faculty: 'bg-blue-100 text-blue-800',
-      ReviewCommittee: 'bg-green-100 text-green-800',
-      Staff: 'bg-yellow-100 text-yellow-800',
-    }
-    return colors[accountType] || 'bg-gray-100 text-gray-800'
-  }
-
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
-        <p className="text-gray-500 mt-1">Manage system users and permissions</p>
+        <p className="text-gray-500 mt-1">Quản lý người dùng & vai trò (1 tài khoản có thể nhiều vai trò)</p>
       </div>
 
       {/* Filters & Actions */}
@@ -172,10 +183,8 @@ export default function UserManagement() {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           >
             <option value="all">Tất cả vai trò</option>
-            {ACCOUNT_TYPES.map((t) => (
-              <option key={t.label} value={t.label}>
-                {t.label}
-              </option>
+            {ALL_ROLES.map((r) => (
+              <option key={r} value={r}>{ROLE_LABEL[r]} ({r})</option>
             ))}
           </select>
 
@@ -198,13 +207,13 @@ export default function UserManagement() {
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Giảng viên</p>
           <p className="text-2xl font-bold text-blue-600 mt-1">
-            {users.filter((u) => u.accountType === 'Faculty').length}
+            {users.filter((u) => rolesOf(u).includes('Faculty')).length}
           </p>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Phản biện</p>
           <p className="text-2xl font-bold text-green-600 mt-1">
-            {users.filter((u) => u.accountType === 'ReviewCommittee').length}
+            {users.filter((u) => rolesOf(u).includes('ReviewCommittee')).length}
           </p>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
@@ -224,24 +233,12 @@ export default function UserManagement() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Người dùng
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Liên hệ
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Vai trò
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Khoa
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Hành động
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Người dùng</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Liên hệ</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Vai trò</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Khoa</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Trạng thái</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Hành động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -275,11 +272,13 @@ export default function UserManagement() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleBadge(user.accountType)}`}
-                      >
-                        {user.accountType}
-                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {rolesOf(user).map((r) => (
+                          <span key={r} className={`px-2 py-0.5 rounded-full text-xs font-medium ${roleBadge(r)}`}>
+                            {ROLE_LABEL[r] || r}
+                          </span>
+                        ))}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-gray-600">{user.department || '—'}</td>
                     <td className="px-6 py-4">
@@ -303,17 +302,11 @@ export default function UserManagement() {
                         <button
                           onClick={() => handleToggle(user.id)}
                           className={`p-2 rounded-lg transition ${
-                            user.isActive
-                              ? 'text-orange-600 hover:bg-orange-50'
-                              : 'text-green-600 hover:bg-green-50'
+                            user.isActive ? 'text-orange-600 hover:bg-orange-50' : 'text-green-600 hover:bg-green-50'
                           }`}
                           title={user.isActive ? 'Khóa tài khoản' : 'Mở tài khoản'}
                         >
-                          {user.isActive ? (
-                            <ToggleRight className="w-4 h-4" />
-                          ) : (
-                            <ToggleLeft className="w-4 h-4" />
-                          )}
+                          {user.isActive ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                         </button>
                       </div>
                     </td>
@@ -371,43 +364,43 @@ export default function UserManagement() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Vai trò *</label>
-                  <select
-                    value={formData.accountType}
-                    onChange={(e) => setFormData({ ...formData, accountType: Number(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  >
-                    {ACCOUNT_TYPES.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Vai trò * (chọn nhiều được)</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {ALL_ROLES.map((r) => {
+                    const value = ROLE_VALUE[r]
+                    const checked = formData.roles.includes(value)
+                    return (
+                      <label
+                        key={r}
+                        className={`flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer ${checked ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+                      >
+                        <input type="checkbox" checked={checked} onChange={() => toggleRole(value)} className="accent-blue-600" />
+                        <span className="text-sm text-gray-800">{ROLE_LABEL[r]} <span className="text-gray-400">({r})</span></span>
+                      </label>
+                    )
+                  })}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Khoa</label>
-                  <select
-                    value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  >
-                    <option value="">Chọn khoa</option>
-                    {departments.map((dept) => (
-                      <option key={dept} value={dept}>
-                        {dept}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <p className="text-xs text-gray-400 mt-1">Vai trò đầu tiên được dùng làm trang mặc định khi đăng nhập.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Khoa</label>
+                <select
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                >
+                  <option value="">Chọn khoa</option>
+                  {departments.map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
               </div>
 
               {!editingUser && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mật khẩu tạm thời *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu tạm thời *</label>
                   <input
                     type="password"
                     value={formData.temporaryPassword}
@@ -419,9 +412,7 @@ export default function UserManagement() {
               )}
 
               {formError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  {formError}
-                </div>
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{formError}</div>
               )}
             </div>
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import {
   LayoutDashboard, Users, FileText, UserCheck, Calendar, BarChart3,
   LogOut, Bell, Search, ChevronRight, MessageSquare, Activity, FileDown,
@@ -10,6 +10,7 @@ import UserManagement from './UserManagement';
 import CycleManagement from './CycleManagement';
 import ChangeRequestQueue from './ChangeRequestQueue';
 import NotificationBell from './NotificationBell';
+import RoleSwitcher from './RoleSwitcher';
 import { analyticsService } from '../../services/analyticsService';
 import type { AnalyticsOverview, TrackStats, FunnelStage } from '../../types/analytics';
 import ProposalManagement from './ProposalManagement';
@@ -30,6 +31,7 @@ interface User {
 
 interface AdminDashboardProps {
   user: User;
+  onLogout: () => void;
 }
 
 const submissionData = [
@@ -63,8 +65,10 @@ const stats = [
   { label: 'Họp sắp tới', value: '12', icon: Calendar, color: 'bg-orange-500' },
 ];
 
-export default function AdminDashboard({ user }: AdminDashboardProps) {
-  const [activeMenu, setActiveMenu] = useState('dashboard');
+export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeMenu = searchParams.get('tab') || 'dashboard';
+  const setActiveMenu = (id: string) => setSearchParams({ tab: id });
   const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
 
@@ -141,12 +145,7 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
             </div>
           </div>
           <button
-            onClick={() => {
-              if (window.confirm('Bạn có chắc muốn đăng xuất?')) {
-                navigate('/');
-                window.location.reload();
-              }
-            }}
+            onClick={() => { if (window.confirm('Bạn có chắc muốn đăng xuất?')) onLogout(); }}
             className="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition"
           >
             <LogOut className="w-4 h-4" />
@@ -173,6 +172,7 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
+              <RoleSwitcher />
               <NotificationBell />
             </div>
           </div>

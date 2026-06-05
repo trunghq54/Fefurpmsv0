@@ -38,7 +38,7 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
   useEffect(() => {
     loadRounds()
     userService.getAll().then((res) => {
-      if (res.success && res.data) setReviewers(res.data.filter((u) => u.accountType === 'ReviewCommittee'))
+      if (res.success && res.data) setReviewers(res.data.filter((u) => u.roles?.includes('ReviewCommittee') || u.accountType === 'ReviewCommittee'))
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proposalId])

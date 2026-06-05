@@ -6,11 +6,12 @@ import {
 import { roundService } from '../../services/roundService'
 import { scoringService } from '../../services/scoringService'
 import { aiService } from '../../services/aiService'
+import RoleSwitcher from './RoleSwitcher'
 import type { MyAssignmentDto } from '../../types/review'
 import { RUBRIC_CRITERIA, VOTE_RESULT } from '../../types/review'
 
 interface User { role: string; name: string }
-interface ReviewerInterfaceProps { user: User }
+interface ReviewerInterfaceProps { user: User; onLogout: () => void }
 
 const ROUND_LABEL: Record<string, string> = {
   ProposalReview: 'Xét duyệt', ProgressCheck: 'Kiểm tra tiến độ', Acceptance: 'Nghiệm thu',
@@ -20,7 +21,7 @@ const STATUS_COLOR: Record<string, string> = {
   Pending: 'bg-yellow-100 text-yellow-800', Accepted: 'bg-green-100 text-green-800', Declined: 'bg-red-100 text-red-800',
 }
 
-export default function ReviewerInterface({ user }: ReviewerInterfaceProps) {
+export default function ReviewerInterface({ user, onLogout }: ReviewerInterfaceProps) {
   const navigate = useNavigate()
   const [assignments, setAssignments] = useState<MyAssignmentDto[]>([])
   const [loading, setLoading] = useState(true)
@@ -51,11 +52,12 @@ export default function ReviewerInterface({ user }: ReviewerInterfaceProps) {
             <p className="text-sm text-gray-500">Reviewer Portal</p>
           </div>
           <div className="flex items-center gap-4">
+            <RoleSwitcher />
             <div className="border-l border-gray-300 pl-4">
               <p className="font-medium text-gray-800">{user.name}</p>
               <p className="text-sm text-gray-500">Hội đồng phản biện</p>
             </div>
-            <button onClick={() => { if (window.confirm('Đăng xuất?')) { navigate('/'); window.location.reload() } }}
+            <button onClick={() => { if (window.confirm('Đăng xuất?')) onLogout() }}
               className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><LogOut className="w-5 h-5" /></button>
           </div>
         </div>

@@ -1,74 +1,56 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router'
-import { AuthProvider, useAuth } from '../contexts/AuthContext'
+import { AuthProvider, useAuth, roleToPath } from '../contexts/AuthContext'
 import AdminDashboard from './components/AdminDashboard'
 import StaffDashboard from './components/StaffDashboard'
 import ProposalSubmission from './components/ProposalSubmission'
 import ReviewerInterface from './components/ReviewerInterface'
 import MeetingScheduler from './components/MeetingScheduler'
 import Login from './components/Login'
+import SelectRole from './components/SelectRole'
+import ChangePassword from './components/ChangePassword'
 import ProtectedRoute from './components/ProtectedRoute'
 
-const accountTypeToRole: Record<string, string> = {
-  Administrator: 'admin',
-  Staff: 'staff',
-  Faculty: 'faculty',
-  ReviewCommittee: 'reviewer',
-}
-
 function AppRoutes() {
-  const { user, logout, isAuthenticated } = useAuth()
-  const legacyUser = user
-    ? { role: accountTypeToRole[user.accountType] || 'admin', name: user.fullName }
-    : null
+  const { user, logout, isAuthenticated, activeRole, roles } = useAuth()
+  const legacyUser = user ? { role: activeRole || user.accountType, name: user.fullName } : null
+
+  const loggedInTarget = () => {
+    if (!user) return '/login'
+    if (user.mustChangePassword) return '/change-password'
+    if (activeRole) return roleToPath[activeRole]
+    if (roles.length > 1) return '/select-role'
+    return roleToPath[roles[0]] || '/admin'
+  }
 
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route
         path="/login"
-        element={isAuthenticated ? <Navigate to={`/${accountTypeToRole[user?.accountType || ''] || 'admin'}`} replace /> : <Login />}
+        element={isAuthenticated ? <Navigate to={loggedInTarget()} replace /> : <Login />}
       />
+      <Route path="/select-role" element={<ProtectedRoute><SelectRole /></ProtectedRoute>} />
+      <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
       <Route
         path="/admin"
-        element={
-          <ProtectedRoute roles={['Administrator']}>
-            <AdminDashboard user={legacyUser} onLogout={logout} />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute roles={['Administrator']}><AdminDashboard user={legacyUser} onLogout={logout} /></ProtectedRoute>}
       />
       <Route
         path="/staff"
-        element={
-          <ProtectedRoute roles={['Staff']}>
-            <StaffDashboard user={legacyUser} onLogout={logout} />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute roles={['Staff']}><StaffDashboard user={legacyUser} onLogout={logout} /></ProtectedRoute>}
       />
       <Route
         path="/faculty"
-        element={
-          <ProtectedRoute roles={['Faculty']}>
-            <ProposalSubmission user={legacyUser} onLogout={logout} />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute roles={['Faculty']}><ProposalSubmission user={legacyUser} onLogout={logout} /></ProtectedRoute>}
       />
       <Route
         path="/reviewer"
-        element={
-          <ProtectedRoute roles={['ReviewCommittee']}>
-            <ReviewerInterface user={legacyUser} onLogout={logout} />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute roles={['ReviewCommittee']}><ReviewerInterface user={legacyUser} onLogout={logout} /></ProtectedRoute>}
       />
       <Route
         path="/meetings"
-        element={
-          <ProtectedRoute roles={['Administrator']}>
-            <MeetingScheduler user={legacyUser} />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute roles={['Administrator']}><MeetingScheduler user={legacyUser} /></ProtectedRoute>}
       />
-      <Route path="/change-password" element={<ProtectedRoute><div className="p-8 text-center text-gray-600">Trang đổi mật khẩu (coming soon)</div></ProtectedRoute>} />
     </Routes>
   )
 }
