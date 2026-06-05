@@ -55,11 +55,15 @@ export default function UserManagement() {
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
 
+  const loadUsers = async () => {
+    const res = await userService.getAll()
+    if (res.success && res.data) setUsers(res.data)
+    setLoading(false)
+  }
+
   useEffect(() => {
-    userService.getAll().then((res) => {
-      if (res.success && res.data) setUsers(res.data)
-      setLoading(false)
-    })
+    loadUsers()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const filteredUsers = users.filter((u) => {
@@ -115,7 +119,7 @@ export default function UserManagement() {
           roles: formData.roles,
         })
         if (res.success && res.data) {
-          setUsers((prev) => prev.map((u) => (u.id === editingUser.id ? res.data! : u)))
+          await loadUsers()
           setShowModal(false)
         } else {
           setFormError(res.message || 'Cập nhật thất bại')
@@ -130,7 +134,10 @@ export default function UserManagement() {
           temporaryPassword: formData.temporaryPassword,
         })
         if (res.success && res.data) {
-          setUsers((prev) => [...prev, res.data!])
+          // reset bộ lọc để user mới chắc chắn hiện, rồi refetch từ server (đúng roles/accountType)
+          setSearchTerm('')
+          setFilterType('all')
+          await loadUsers()
           setShowModal(false)
         } else {
           setFormError(res.message || 'Tạo người dùng thất bại')

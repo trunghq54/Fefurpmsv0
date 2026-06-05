@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import {
   CheckCircle, AlertCircle, ArrowLeft, ArrowRight, Home, List, LogOut,
@@ -29,6 +29,9 @@ const formatVnd = (n: number) => n.toLocaleString('vi-VN') + ' ₫'
 
 const emptyMember: CreateMemberRequest = { fullName: '', email: '', department: '', role: '', workMonths: 0 }
 const emptyBudget: CreateBudgetItemRequest = { category: '', amount: 0, note: '' }
+
+// Key lưu nháp form đề tài trên trình duyệt (chống mất chữ khi F5 / load lại)
+const DRAFT_KEY = 'furpms_proposal_draft'
 
 const statusColor = (status: string) => {
   const map: Record<string, string> = {
@@ -65,6 +68,9 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  const [draftRestored, setDraftRestored] = useState(false)
+  const hydratedRef = useRef(false)
 
   const [myProposals, setMyProposals] = useState<ProposalSummaryDto[]>([])
   const [loadingList, setLoadingList] = useState(false)
@@ -103,6 +109,51 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
       setLoadingCycle(false)
     })
   }, [])
+
+  // Khôi phục bản nháp 1 lần khi mở form
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY)
+      if (raw) {
+        const d = JSON.parse(raw)
+        if (d.titleVI) setTitleVI(d.titleVI)
+        if (d.titleEN) setTitleEN(d.titleEN)
+        if (d.trackId) setTrackId(d.trackId)
+        if (d.researchType) setResearchType(d.researchType)
+        if (d.durationMonths) setDurationMonths(d.durationMonths)
+        if (d.objectives) setObjectives(d.objectives)
+        if (d.methodology) setMethodology(d.methodology)
+        if (d.expectedOutput) setExpectedOutput(d.expectedOutput)
+        if (Array.isArray(d.members) && d.members.length) setMembers(d.members)
+        if (Array.isArray(d.budgetItems) && d.budgetItems.length) setBudgetItems(d.budgetItems)
+        if (d.currentStep) setCurrentStep(d.currentStep)
+        setDraftRestored(true)
+      }
+    } catch { /* nháp hỏng -> bỏ qua */ }
+    hydratedRef.current = true
+  }, [])
+
+  // Tự lưu nháp khi gõ (sau khi đã hydrate, chỉ ở chế độ tạo mới, bỏ qua nháp rỗng)
+  useEffect(() => {
+    if (!hydratedRef.current || showSubmissions) return
+    const isEmpty =
+      !titleVI && !titleEN && !trackId && !objectives && !methodology && !expectedOutput &&
+      members.every((m) => !m.fullName?.trim()) && budgetItems.every((b) => !b.category?.trim())
+    if (isEmpty) return
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        titleVI, titleEN, trackId, researchType, durationMonths,
+        objectives, methodology, expectedOutput, members, budgetItems, currentStep,
+      }))
+    } catch { /* hết quota -> bỏ qua */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [titleVI, titleEN, trackId, researchType, durationMonths, objectives, methodology, expectedOutput, members, budgetItems, currentStep, showSubmissions])
+
+  const discardDraft = () => {
+    localStorage.removeItem(DRAFT_KEY)
+    resetForm()
+    setDraftRestored(false)
+  }
 
   const loadMy = () => {
     setLoadingList(true)
@@ -159,6 +210,8 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
         budgetItems: budgetItems.filter((b) => b.category.trim()),
       })
       if (res.success) {
+        localStorage.removeItem(DRAFT_KEY)
+        setDraftRestored(false)
         resetForm()
         setShowSubmissions(true)
       } else {
@@ -258,6 +311,12 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-10">
+        {!showSubmissions && draftRestored && (
+          <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+            <p className="text-sm text-amber-800">Đã khôi phục bản nháp bạn đang nhập dở (lưu tự động trên máy này).</p>
+            <button onClick={discardDraft} className="text-sm font-medium text-amber-700 hover:text-amber-900 underline">Xoá nháp</button>
+          </div>
+        )}
         {showSubmissions ? (
           <MySubmissions
             proposals={myProposals}

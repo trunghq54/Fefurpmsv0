@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 import {
   LayoutDashboard, Users, Calendar, DollarSign, FileText, TrendingUp, AlertTriangle,
-  LogOut, CheckCircle, Clock, XCircle, BarChart3, UserPlus, Video, Bell
+  LogOut, CheckCircle, Clock, BarChart3, UserPlus, Video, Bell
 } from 'lucide-react';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import MeetingScheduler from './MeetingScheduler';
 import BudgetTracker from './BudgetTracker';
 import ActivityLog from './ActivityLog';
+import ProposalManagement from './ProposalManagement';
+import RoleSwitcher from './RoleSwitcher';
 
 interface User {
   role: string;
@@ -45,13 +47,6 @@ const upcomingMeetings = [
   { id: 3, title: 'Blockchain Final Review', date: '22/05/2026', time: '15:00', attendees: 6 },
 ];
 
-const reviewerWorkload = [
-  { name: 'Dr. Trần Thị B', assigned: 8, completed: 5, pending: 3 },
-  { name: 'Dr. Lê Văn C', assigned: 12, completed: 10, pending: 2 },
-  { name: 'Dr. Phạm Văn D', assigned: 6, completed: 3, pending: 3 },
-  { name: 'Dr. Hoàng Thị E', assigned: 10, completed: 8, pending: 2 },
-];
-
 const aiModerationQueue = [
   { id: 1, proposal: 'Machine Learning for Student Performance', reviewer: 'Dr. Lê Văn C', type: 'AI Summary', status: 'Pending Review' },
   { id: 2, proposal: 'Cloud-Based Learning Platform', reviewer: 'Dr. Trần Thị B', type: 'AI Comments', status: 'Approved' },
@@ -59,12 +54,14 @@ const aiModerationQueue = [
 ];
 
 export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) {
-  const [activeMenu, setActiveMenu] = useState('dashboard');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeMenu = searchParams.get('tab') || 'dashboard';
+  const setActiveMenu = (id: string) => setSearchParams({ tab: id });
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'meetings', label: 'Meeting Management', icon: Calendar },
-    { id: 'reviewers', label: 'Reviewer Assignment', icon: UserPlus },
+    { id: 'reviewers', label: 'Đề xuất & Phân công', icon: UserPlus },
     { id: 'budget', label: 'Budget Monitoring', icon: DollarSign },
     { id: 'ai-moderation', label: 'AI Moderation', icon: FileText },
     { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
@@ -80,69 +77,9 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
       case 'activity':
         return <ActivityLog />;
       case 'reviewers':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">Reviewer Assignment</h2>
-              <p className="text-gray-500 mt-1">Manage reviewer workload and assignments</p>
-            </div>
-
-            {/* Reviewer Workload Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800">Reviewer Workload</h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reviewer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pending</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completion Rate</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {reviewerWorkload.map((reviewer) => (
-                      <tr key={reviewer.name} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-medium text-gray-900">{reviewer.name}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-700">{reviewer.assigned}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-green-600 font-medium">{reviewer.completed}</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-yellow-600 font-medium">{reviewer.pending}</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
-                              <div
-                                className="bg-blue-600 h-2 rounded-full"
-                                style={{ width: `${(reviewer.completed / reviewer.assigned) * 100}%` }}
-                              />
-                            </div>
-                            <span className="text-sm text-gray-600">
-                              {Math.round((reviewer.completed / reviewer.assigned) * 100)}%
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                            Assign New
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        );
+        // Luồng phân công thật: list đề xuất → View → tạo round + chọn reviewer (ReviewRoundsPanel).
+        // BE đã cho phép Staff tạo round/assign nên dùng lại y hệt Admin.
+        return <ProposalManagement />;
       case 'ai-moderation':
         return (
           <div className="space-y-6">
@@ -418,6 +355,7 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
         </nav>
 
         <div className="p-4 border-t border-gray-200">
+          <div className="mb-4"><RoleSwitcher /></div>
           <div className="bg-gray-50 rounded-lg p-4 mb-4">
             <p className="text-sm font-medium text-gray-800">{user.name}</p>
             <p className="text-xs text-gray-500 mt-1">Staff</p>
