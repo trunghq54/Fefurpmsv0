@@ -16,7 +16,7 @@ import type { AnalyticsOverview, TrackStats, FunnelStage } from '../../types/ana
 import ProposalManagement from './ProposalManagement';
 import Notifications from './Notifications';
 import BudgetTracker from './BudgetTracker';
-import MeetingScheduler from './MeetingScheduler';
+import MeetingsOverview from './MeetingsOverview';
 import DocumentRepository from './DocumentRepository';
 import DiscussionThread from './DiscussionThread';
 import TimelineTracker from './TimelineTracker';
@@ -189,7 +189,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
           {activeMenu === 'discussions' && <DiscussionThread />}
           {activeMenu === 'timeline' && <TimelineTracker />}
           {activeMenu === 'analytics' && <BudgetTracker />}
-          {activeMenu === 'meetings' && <MeetingScheduler user={user} showNavigation={false} />}
+          {activeMenu === 'meetings' && <MeetingsOverview />}
           {activeMenu === 'reports' && <ReportsExport />}
           {activeMenu === 'activity' && <ActivityLog />}
 

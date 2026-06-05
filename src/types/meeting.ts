@@ -9,6 +9,11 @@ export interface MeetingDto {
   agenda?: string
   notes?: string
   createdAt: string
+  // chỉ có ở list tổng GET /api/meetings
+  proposalId?: string
+  proposalTitle?: string
+  roundType?: string
+  roundNumber?: number
 }
 
 export interface CreateMeetingRequest {

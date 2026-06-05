@@ -4,10 +4,10 @@ import {
   LogOut, CheckCircle, Clock, BarChart3, UserPlus, Video, Bell
 } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import MeetingScheduler from './MeetingScheduler';
 import BudgetTracker from './BudgetTracker';
 import ActivityLog from './ActivityLog';
 import ProposalManagement from './ProposalManagement';
+import MeetingsOverview from './MeetingsOverview';
 import RoleSwitcher from './RoleSwitcher';
 
 interface User {
@@ -71,7 +71,7 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
   const renderContent = () => {
     switch (activeMenu) {
       case 'meetings':
-        return <MeetingScheduler user={user} />;
+        return <MeetingsOverview />;
       case 'budget':
         return <BudgetTracker />;
       case 'activity':
