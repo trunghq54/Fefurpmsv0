@@ -14,7 +14,6 @@ import RoleSwitcher from './RoleSwitcher';
 import { analyticsService } from '../../services/analyticsService';
 import type { AnalyticsOverview, TrackStats, FunnelStage } from '../../types/analytics';
 import ProposalManagement from './ProposalManagement';
-import Notifications from './Notifications';
 import BudgetTracker from './BudgetTracker';
 import MeetingsOverview from './MeetingsOverview';
 import DocumentRepository from './DocumentRepository';
@@ -69,7 +68,6 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
   const [searchParams, setSearchParams] = useSearchParams();
   const activeMenu = searchParams.get('tab') || 'dashboard';
   const setActiveMenu = (id: string) => setSearchParams({ tab: id });
-  const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
 
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
@@ -300,8 +298,6 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
           )}
         </div>
       </div>
-
-      {showNotifications && <Notifications onClose={() => setShowNotifications(false)} />}
     </div>
   );
 }
