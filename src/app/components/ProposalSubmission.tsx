@@ -2,13 +2,16 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import {
   CheckCircle, AlertCircle, ArrowLeft, ArrowRight, Home, List, LogOut,
-  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X,
+  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3,
 } from 'lucide-react'
 import { cycleService } from '../../services/cycleService'
 import { proposalService } from '../../services/proposalService'
 import { changeRequestService } from '../../services/changeRequestService'
+import { roundService } from '../../services/roundService'
 import { CHANGE_TYPE } from '../../types/changeRequest'
+import type { ReviewRoundDto } from '../../types/review'
 import ProposalDocuments from './ProposalDocuments'
+import RoundResultsPanel from './RoundResultsPanel'
 import RoleSwitcher from './RoleSwitcher'
 import type { CycleDto } from '../../types/cycle'
 import type {
@@ -86,6 +89,24 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
 
   // documents modal
   const [docProposal, setDocProposal] = useState<ProposalSummaryDto | null>(null)
+
+  // kết quả phản biện modal (PI xem điểm/phiếu các vòng của đề tài mình)
+  const [resultsProposal, setResultsProposal] = useState<ProposalSummaryDto | null>(null)
+  const [resultsRounds, setResultsRounds] = useState<ReviewRoundDto[]>([])
+  const [resultsLoading, setResultsLoading] = useState(false)
+
+  useEffect(() => {
+    if (!resultsProposal) return
+    setResultsLoading(true)
+    roundService.getRounds(resultsProposal.id).then((res) => {
+      if (res.success && res.data) setResultsRounds(res.data)
+      setResultsLoading(false)
+    })
+  }, [resultsProposal])
+
+  const ROUND_LABEL: Record<string, string> = {
+    ProposalReview: 'Xét duyệt', ProgressCheck: 'Kiểm tra tiến độ', Acceptance: 'Nghiệm thu',
+  }
 
   const submitCr = async () => {
     if (!crProposal || !crDesc.trim()) { setCrMsg('Nhập mô tả'); return }
@@ -326,6 +347,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
             onWithdraw={handleWithdraw}
             onChangeRequest={(p) => { setCrProposal(p); setCrType(CHANGE_TYPE.ExtendTime); setCrDesc(''); setCrNewValue(''); setCrMsg('') }}
             onDocuments={(p) => setDocProposal(p)}
+            onResults={(p) => { setResultsProposal(p); setResultsRounds([]) }}
           />
         ) : !activeCycle && !loadingCycle ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
@@ -562,6 +584,40 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
         </div>
       )}
 
+      {/* Kết quả phản biện modal (PI) */}
+      {resultsProposal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 bg-white">
+              <h3 className="text-xl font-bold text-gray-800">Kết quả phản biện — {resultsProposal.titleVI}</h3>
+              <button onClick={() => setResultsProposal(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              {resultsLoading ? (
+                <p className="text-sm text-gray-400">Đang tải...</p>
+              ) : resultsRounds.length === 0 ? (
+                <p className="text-sm text-gray-400">Đề tài chưa có vòng phản biện nào.</p>
+              ) : (
+                resultsRounds.map((r) => (
+                  <div key={r.id} className="border border-gray-200 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-800">{ROUND_LABEL[r.roundType] || r.roundType} · Vòng {r.roundNumber}</span>
+                      <div className="flex items-center gap-2">
+                        {r.status === 'Completed' && r.outcome && (
+                          <span className={`px-2 py-0.5 rounded-full text-xs ${r.outcome === 'Pass' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{r.outcome}</span>
+                        )}
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">{r.status}</span>
+                      </div>
+                    </div>
+                    <RoundResultsPanel roundId={r.id} />
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Change request modal */}
       {crProposal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -628,9 +684,10 @@ interface MySubmissionsProps {
   onWithdraw: (id: string) => void
   onChangeRequest: (p: ProposalSummaryDto) => void
   onDocuments: (p: ProposalSummaryDto) => void
+  onResults: (p: ProposalSummaryDto) => void
 }
 
-function MySubmissions({ proposals, loading, rowBusy, onSubmit, onWithdraw, onChangeRequest, onDocuments }: MySubmissionsProps) {
+function MySubmissions({ proposals, loading, rowBusy, onSubmit, onWithdraw, onChangeRequest, onDocuments, onResults }: MySubmissionsProps) {
   return (
     <div className="space-y-6">
       <div>
@@ -678,6 +735,12 @@ function MySubmissions({ proposals, loading, rowBusy, onSubmit, onWithdraw, onCh
                     className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
                     <FileText className="w-4 h-4" /> Tài liệu
                   </button>
+                  {p.status !== 'Draft' && (
+                    <button onClick={() => onResults(p)}
+                      className="flex items-center gap-1 px-3 py-1.5 text-sm border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50">
+                      <BarChart3 className="w-4 h-4" /> Kết quả
+                    </button>
+                  )}
                   {p.status !== 'Draft' && (
                     <button onClick={() => onChangeRequest(p)}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50">

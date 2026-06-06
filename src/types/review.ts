@@ -61,6 +61,25 @@ export interface AcceptanceVoteDto {
   submittedAt: string
 }
 
+export interface RoundResultRowDto {
+  assignmentId: string
+  reviewerName: string
+  role: string
+  status: string
+  rubric?: RubricScoreDto
+  vote?: AcceptanceVoteDto
+}
+
+export interface RoundResultsDto {
+  roundId: string
+  roundType: string
+  roundNumber: number
+  status: string
+  outcome?: string
+  rows: RoundResultRowDto[]
+  averageTotal?: number
+}
+
 export const ROUND_TYPE = { ProposalReview: 1, ProgressCheck: 2, Acceptance: 3 } as const
 export const ASSIGNMENT_ROLE = { Member: 1, Chair: 2, Opponent: 3 } as const
 export const VOTE_RESULT = { Pass: 1, Fail: 2, PassExcellent: 3 } as const

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, UserCheck, AlertTriangle, Gavel } from 'lucide-react'
+import { Plus, Trash2, UserCheck, AlertTriangle, Gavel, BarChart3 } from 'lucide-react'
 import { roundService } from '../../services/roundService'
 import { scoringService } from '../../services/scoringService'
 import { userService } from '../../services/userService'
 import RoundMeetings from './RoundMeetings'
+import RoundResultsPanel from './RoundResultsPanel'
 import type { ReviewRoundDto } from '../../types/review'
 import { ROUND_TYPE, ASSIGNMENT_ROLE } from '../../types/review'
 import type { UserDto } from '../../types/user'
@@ -27,6 +28,7 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
   const [assignSel, setAssignSel] = useState<Record<string, { reviewerId: string; role: number }>>({})
   const [assignError, setAssignError] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
+  const [showResults, setShowResults] = useState<Record<string, boolean>>({})
 
   const loadRounds = () => {
     roundService.getRounds(proposalId).then((res) => {
@@ -126,6 +128,11 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
                   {ROUND_LABEL[round.roundType]} · Vòng {round.roundNumber}
                 </span>
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowResults((s) => ({ ...s, [round.id]: !s[round.id] }))}
+                    className="flex items-center gap-1 px-2 py-0.5 text-xs text-blue-600 hover:bg-blue-50 rounded-lg border border-blue-200">
+                    <BarChart3 className="w-3.5 h-3.5" /> {showResults[round.id] ? 'Ẩn kết quả' : 'Xem kết quả'}
+                  </button>
                   {round.status === 'Completed' && round.outcome && (
                     <span className={`px-2 py-0.5 rounded-full text-xs ${round.outcome === 'Pass' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {round.outcome}
@@ -181,13 +188,20 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
                 </div>
               )}
 
-              {round.status !== 'Completed' && (
-                <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
-                  <span className="text-sm text-gray-500">Chốt kết quả:</span>
+              {showResults[round.id] && <RoundResultsPanel roundId={round.id} />}
+
+              {round.status !== 'Completed' ? (
+                <div className="mt-3 pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2">
+                  <span className="text-sm text-gray-500">Kết thúc vòng & công bố:</span>
                   <button onClick={() => handleFinalize(round.id, 'Pass')} disabled={busy}
-                    className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60">Pass</button>
+                    className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60">Đạt (Pass)</button>
                   <button onClick={() => handleFinalize(round.id, 'Fail')} disabled={busy}
-                    className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60">Fail</button>
+                    className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60">Không đạt (Fail)</button>
+                  <span className="text-xs text-gray-400">— công bố ngay, cập nhật trạng thái đề tài (để test cả luồng).</span>
+                </div>
+              ) : (
+                <div className="mt-3 pt-3 border-t border-gray-100 text-sm text-gray-500">
+                  Vòng đã kết thúc — kết quả: <b className={round.outcome === 'Pass' ? 'text-green-700' : 'text-red-700'}>{round.outcome}</b>.
                 </div>
               )}
 

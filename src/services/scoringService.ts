@@ -1,6 +1,6 @@
 import api from '../lib/api'
 import type { ApiResponse } from '../types/auth'
-import type { RubricScoreDto, AcceptanceVoteDto, ReviewRoundDto } from '../types/review'
+import type { RubricScoreDto, AcceptanceVoteDto, ReviewRoundDto, RoundResultsDto } from '../types/review'
 
 export interface SubmitRubricRequest {
   criterion1: number
@@ -39,6 +39,10 @@ export const scoringService = {
   },
   finalize: async (roundId: string, data: { outcome: string; notes?: string }) => {
     const res = await api.post<ApiResponse<ReviewRoundDto>>(`/api/rounds/${roundId}/finalize`, data)
+    return res.data
+  },
+  getResults: async (roundId: string) => {
+    const res = await api.get<ApiResponse<RoundResultsDto>>(`/api/rounds/${roundId}/results`)
     return res.data
   },
 }
