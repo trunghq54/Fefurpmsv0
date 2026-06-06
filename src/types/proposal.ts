@@ -20,6 +20,10 @@ export interface ProposalDocumentDto {
   documentType: string
   fileSizeBytes: number
   uploadedAt: string
+  // chỉ có ở list tổng GET /api/documents
+  proposalId?: string
+  proposalTitle?: string
+  principalInvestigatorName?: string
 }
 
 export interface ProposalDto {

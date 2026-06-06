@@ -52,6 +52,12 @@ export const proposalService = {
     return res.data
   },
 
+  // Kho tài liệu toàn cục (Admin/Staff) — kèm context đề tài/PI
+  getAllDocuments: async () => {
+    const res = await api.get<ApiResponse<ProposalDocumentDto[]>>(`/api/documents`)
+    return res.data
+  },
+
   uploadDocument: async (proposalId: string, file: File, documentType: string) => {
     const form = new FormData()
     form.append('file', file)
