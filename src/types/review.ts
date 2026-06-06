@@ -35,18 +35,30 @@ export interface MyAssignmentDto {
   proposalStatus: string
 }
 
+export interface RubricScoreItemDto {
+  criterionId: string
+  name: string
+  maxScore: number
+  score: number
+}
+
 export interface RubricScoreDto {
   id: string
   assignmentId: string
-  criterion1: number
-  criterion2: number
-  criterion3: number
-  criterion4: number
-  criterion5: number
+  items: RubricScoreItemDto[]
   totalScore: number
   comments?: string
   aiFeedbackDraft?: string
   submittedAt: string
+}
+
+export interface RubricCriterionDto {
+  id: string
+  roundType: 'ProposalReview' | 'ProgressCheck' | 'Acceptance'
+  orderIndex: number
+  name: string
+  maxScore: number
+  isActive: boolean
 }
 
 export interface AcceptanceVoteDto {
@@ -84,10 +96,6 @@ export const ROUND_TYPE = { ProposalReview: 1, ProgressCheck: 2, Acceptance: 3 }
 export const ASSIGNMENT_ROLE = { Member: 1, Chair: 2, Opponent: 3 } as const
 export const VOTE_RESULT = { Pass: 1, Fail: 2, PassExcellent: 3 } as const
 
-export const RUBRIC_CRITERIA = [
-  { key: 'criterion1', name: 'Mục đích & ý nghĩa', max: 10 },
-  { key: 'criterion2', name: 'Phương pháp nghiên cứu', max: 20 },
-  { key: 'criterion3', name: 'Nội dung & kết quả', max: 40 },
-  { key: 'criterion4', name: 'Năng lực nhóm', max: 20 },
-  { key: 'criterion5', name: 'Hợp lý kinh phí', max: 10 },
-] as const
+export const ROUND_TYPE_LABEL: Record<string, string> = {
+  ProposalReview: 'Xét duyệt', ProgressCheck: 'Kiểm tra tiến độ', Acceptance: 'Nghiệm thu',
+}

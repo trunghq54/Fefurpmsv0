@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BarChart3, UserCheck } from 'lucide-react'
 import { scoringService } from '../../services/scoringService'
-import { RUBRIC_CRITERIA } from '../../types/review'
 import type { RoundResultsDto } from '../../types/review'
 
 const ROLE_LABEL: Record<string, string> = { Member: 'Thành viên', Chair: 'Chủ tịch', Opponent: 'Phản biện' }
@@ -60,14 +59,14 @@ export default function RoundResultsPanel({ roundId }: { roundId: string }) {
                 )}
               </div>
 
-              {/* Rubric breakdown */}
-              {r.rubric && (
-                <div className="mt-2 grid grid-cols-2 md:grid-cols-5 gap-2">
-                  {RUBRIC_CRITERIA.map((c) => (
-                    <div key={c.key} className="text-center bg-gray-50 rounded px-2 py-1">
-                      <p className="text-[11px] text-gray-500 truncate" title={c.name}>{c.name}</p>
+              {/* Rubric breakdown (tiêu chí cấu hình được) */}
+              {r.rubric && r.rubric.items.length > 0 && (
+                <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {r.rubric.items.map((it) => (
+                    <div key={it.criterionId} className="text-center bg-gray-50 rounded px-2 py-1">
+                      <p className="text-[11px] text-gray-500 truncate" title={it.name}>{it.name}</p>
                       <p className="text-sm font-semibold text-gray-800">
-                        {(r.rubric as any)[c.key]}<span className="text-gray-400 text-xs">/{c.max}</span>
+                        {it.score}<span className="text-gray-400 text-xs">/{it.maxScore}</span>
                       </p>
                     </div>
                   ))}

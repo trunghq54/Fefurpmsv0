@@ -8,7 +8,9 @@ import { scoringService } from '../../services/scoringService'
 import { aiService } from '../../services/aiService'
 import RoleSwitcher from './RoleSwitcher'
 import type { MyAssignmentDto } from '../../types/review'
-import { RUBRIC_CRITERIA, VOTE_RESULT } from '../../types/review'
+import { VOTE_RESULT } from '../../types/review'
+import type { RubricCriterionDto } from '../../types/review'
+import { rubricService } from '../../services/rubricService'
 
 interface User { role: string; name: string }
 interface ReviewerInterfaceProps { user: User; onLogout: () => void }
@@ -144,8 +146,10 @@ function ScoringPanel({ assignment, onBack }: { assignment: MyAssignmentDto; onB
 }
 
 function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDone: () => void }) {
-  const [scores, setScores] = useState<Record<string, number>>({ criterion1: 0, criterion2: 0, criterion3: 0, criterion4: 0, criterion5: 0 })
+  const [criteria, setCriteria] = useState<RubricCriterionDto[]>([])
+  const [scores, setScores] = useState<Record<string, number>>({})
   const [comments, setComments] = useState('')
+  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -164,24 +168,32 @@ function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDon
   }
 
   useEffect(() => {
-    scoringService.getRubric(assignment.assignmentId).then((res) => {
-      if (res.success && res.data) {
-        const d = res.data
-        setScores({ criterion1: d.criterion1, criterion2: d.criterion2, criterion3: d.criterion3, criterion4: d.criterion4, criterion5: d.criterion5 })
-        setComments(d.comments || '')
-      }
+    // Tải tiêu chí theo loại vòng (cấu hình được), rồi nạp điểm đã chấm (nếu có)
+    rubricService.getCriteria(assignment.roundType).then((res) => {
+      const crit = res.success && res.data ? res.data : []
+      setCriteria(crit)
+      const init: Record<string, number> = {}
+      crit.forEach((c) => { init[c.id] = 0 })
+      scoringService.getRubric(assignment.assignmentId).then((r) => {
+        if (r.success && r.data) {
+          r.data.items.forEach((it) => { init[it.criterionId] = it.score })
+          setComments(r.data.comments || '')
+        }
+        setScores(init)
+        setLoading(false)
+      })
     })
-  }, [assignment.assignmentId])
+  }, [assignment.assignmentId, assignment.roundType])
 
-  const total = RUBRIC_CRITERIA.reduce((s, c) => s + (scores[c.key] || 0), 0)
-  const maxTotal = RUBRIC_CRITERIA.reduce((s, c) => s + c.max, 0)
+  const total = criteria.reduce((s, c) => s + (scores[c.id] || 0), 0)
+  const maxTotal = criteria.reduce((s, c) => s + c.maxScore, 0)
 
   const submit = async () => {
     setSaving(true); setError(''); setSaved(false)
     try {
       const res = await scoringService.submitRubric(assignment.assignmentId, {
-        criterion1: scores.criterion1, criterion2: scores.criterion2, criterion3: scores.criterion3,
-        criterion4: scores.criterion4, criterion5: scores.criterion5, comments: comments || undefined,
+        items: criteria.map((c) => ({ criterionId: c.id, score: scores[c.id] || 0 })),
+        comments: comments || undefined,
       })
       if (res.success) setSaved(true)
       else setError(res.message || 'Lỗi')
@@ -190,23 +202,31 @@ function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDon
     } finally { setSaving(false) }
   }
 
+  if (loading) return <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-gray-400">Đang tải tiêu chí chấm...</div>
+  if (criteria.length === 0) return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-gray-500">
+      Chưa cấu hình tiêu chí chấm cho loại vòng này. Vui lòng nhờ Admin thêm ở mục "Tiêu chí chấm".
+      <button onClick={onDone} className="ml-3 text-blue-600 hover:underline">Quay lại</button>
+    </div>
+  )
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-5">
-      <h3 className="text-lg font-semibold text-gray-800">Phiếu chấm điểm (thang 100)</h3>
-      {RUBRIC_CRITERIA.map((c, idx) => (
-        <div key={c.key}>
+      <h3 className="text-lg font-semibold text-gray-800">Phiếu chấm điểm (tổng {maxTotal} điểm)</h3>
+      {criteria.map((c, idx) => (
+        <div key={c.id}>
           <div className="flex justify-between items-center mb-1">
-            <label className="text-sm font-medium text-gray-700">{c.name}</label>
+            <label className="text-sm font-medium text-gray-700">{idx + 1}. {c.name}</label>
             <div className="flex items-center gap-2">
               <button type="button" onClick={() => getAi(idx)} disabled={aiBusy === idx}
                 className="flex items-center gap-1 px-2 py-0.5 text-xs border border-purple-200 text-purple-700 rounded hover:bg-purple-50 disabled:opacity-60">
                 ✨ {aiBusy === idx ? '...' : 'AI gợi ý'}
               </button>
-              <span className="text-sm text-gray-500">{scores[c.key]} / {c.max}</span>
+              <span className="text-sm font-semibold text-gray-700 w-16 text-right">{scores[c.id] || 0} / {c.maxScore}</span>
             </div>
           </div>
-          <input type="range" min={0} max={c.max} value={scores[c.key]}
-            onChange={(e) => setScores({ ...scores, [c.key]: Number(e.target.value) })}
+          <input type="range" min={0} max={c.maxScore} value={scores[c.id] || 0}
+            onChange={(e) => setScores({ ...scores, [c.id]: Number(e.target.value) })}
             className="w-full accent-blue-600" />
           {aiSug[idx] && (
             <div className="mt-1 text-xs bg-purple-50 border border-purple-200 rounded-lg px-3 py-2 text-gray-700">

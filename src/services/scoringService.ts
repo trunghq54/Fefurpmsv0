@@ -3,11 +3,7 @@ import type { ApiResponse } from '../types/auth'
 import type { RubricScoreDto, AcceptanceVoteDto, ReviewRoundDto, RoundResultsDto } from '../types/review'
 
 export interface SubmitRubricRequest {
-  criterion1: number
-  criterion2: number
-  criterion3: number
-  criterion4: number
-  criterion5: number
+  items: { criterionId: string; score: number }[]
   comments?: string
 }
 
