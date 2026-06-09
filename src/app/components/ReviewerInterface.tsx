@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import {
-  FileText, ThumbsUp, ThumbsDown, LogOut, ClipboardCheck, CheckCircle, ArrowLeft, Send,
+  FileText, ThumbsUp, ThumbsDown, LogOut, ClipboardCheck, CheckCircle, ArrowLeft, Send, BookOpen,
 } from 'lucide-react'
 import { roundService } from '../../services/roundService'
 import { scoringService } from '../../services/scoringService'
 import { aiService } from '../../services/aiService'
+import { proposalService } from '../../services/proposalService'
 import RoleSwitcher from './RoleSwitcher'
 import type { MyAssignmentDto } from '../../types/review'
 import { VOTE_RESULT } from '../../types/review'
 import type { RubricCriterionDto } from '../../types/review'
 import { rubricService } from '../../services/rubricService'
+import ProposalDetailView from './ProposalDetailView'
+import type { ProposalDto } from '../../types/proposal'
 
 interface User { role: string; name: string }
 interface ReviewerInterfaceProps { user: User; onLogout: () => void }
@@ -54,6 +57,10 @@ export default function ReviewerInterface({ user, onLogout }: ReviewerInterfaceP
             <p className="text-sm text-gray-500">Reviewer Portal</p>
           </div>
           <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/guide')}
+              className="flex items-center gap-1.5 px-3 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 text-sm">
+              <BookOpen className="w-4 h-4" /> Hướng dẫn
+            </button>
             <RoleSwitcher />
             <div className="border-l border-gray-300 pl-4">
               <p className="font-medium text-gray-800">{user.name}</p>
@@ -129,6 +136,17 @@ export default function ReviewerInterface({ user, onLogout }: ReviewerInterfaceP
 
 function ScoringPanel({ assignment, onBack }: { assignment: MyAssignmentDto; onBack: () => void }) {
   const isAcceptance = assignment.roundType === 'Acceptance'
+  const [proposal, setProposal] = useState<ProposalDto | null>(null)
+  const [proposalLoading, setProposalLoading] = useState(true)
+
+  useEffect(() => {
+    if (!assignment.proposalId) { setProposalLoading(false); return }
+    proposalService.getById(assignment.proposalId).then((res) => {
+      if (res.success && res.data) setProposal(res.data)
+      setProposalLoading(false)
+    })
+  }, [assignment.proposalId])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -138,6 +156,19 @@ function ScoringPanel({ assignment, onBack }: { assignment: MyAssignmentDto; onB
           <p className="text-gray-500 mt-1">{ROUND_LABEL[assignment.roundType]} · {ROLE_LABEL[assignment.role]}</p>
         </div>
       </div>
+
+      {/* Proposal detail block — reviewer needs to see what they're scoring */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 className="text-base font-semibold text-gray-700 mb-4 border-b border-gray-100 pb-2">Thông tin đề xuất</h3>
+        {proposalLoading ? (
+          <p className="text-sm text-gray-400">Đang tải thông tin đề xuất...</p>
+        ) : proposal ? (
+          <ProposalDetailView proposal={proposal} />
+        ) : (
+          <p className="text-sm text-red-500">Không thể tải thông tin đề xuất.</p>
+        )}
+      </div>
+
       {isAcceptance
         ? <VoteForm assignment={assignment} onDone={onBack} />
         : <RubricForm assignment={assignment} onDone={onBack} />}
@@ -156,10 +187,10 @@ function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDon
   const [aiSug, setAiSug] = useState<Record<number, string>>({})
   const [aiBusy, setAiBusy] = useState<number | null>(null)
 
-  const getAi = async (idx: number) => {
+  const getAi = async (idx: number, criterion: RubricCriterionDto) => {
     setAiBusy(idx)
     try {
-      const res = await aiService.aiFeedback(assignment.assignmentId, idx + 1)
+      const res = await aiService.aiFeedback(assignment.assignmentId, criterion.name, criterion.maxScore)
       if (res.success && res.data) setAiSug((p) => ({ ...p, [idx]: res.data!.feedbackDraft }))
       else setAiSug((p) => ({ ...p, [idx]: res.message || 'Lỗi' }))
     } catch (e: any) {
@@ -218,7 +249,8 @@ function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDon
           <div className="flex justify-between items-center mb-1">
             <label className="text-sm font-medium text-gray-700">{idx + 1}. {c.name}</label>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => getAi(idx)} disabled={aiBusy === idx}
+              <button type="button" onClick={() => getAi(idx, c)} disabled={aiBusy === idx}
+                title="AI gợi ý nhận xét cho tiêu chí này"
                 className="flex items-center gap-1 px-2 py-0.5 text-xs border border-purple-200 text-purple-700 rounded hover:bg-purple-50 disabled:opacity-60">
                 ✨ {aiBusy === idx ? '...' : 'AI gợi ý'}
               </button>

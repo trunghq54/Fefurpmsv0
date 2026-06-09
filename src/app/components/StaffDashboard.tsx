@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router'
-import { LayoutDashboard, Calendar, UserPlus, LogOut, FileText, Users, UserCheck, CheckCircle } from 'lucide-react'
+import { useSearchParams, useNavigate } from 'react-router'
+import { LayoutDashboard, Calendar, UserPlus, LogOut, FileText, Users, UserCheck, CheckCircle, BookOpen } from 'lucide-react'
 import { analyticsService } from '../../services/analyticsService'
 import type { AnalyticsOverview } from '../../types/analytics'
 import ProposalManagement from './ProposalManagement'
@@ -18,6 +18,7 @@ interface StaffDashboardProps {
 }
 
 export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) {
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const activeMenu = searchParams.get('tab') || 'dashboard'
   const setActiveMenu = (id: string) => setSearchParams({ tab: id })
@@ -113,6 +114,10 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
         </nav>
 
         <div className="p-4 border-t border-gray-200">
+          <button onClick={() => navigate('/guide')}
+            className="w-full flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition mb-2">
+            <BookOpen className="w-4 h-4" /><span>Hướng dẫn</span>
+          </button>
           <div className="mb-4"><RoleSwitcher /></div>
           <div className="bg-gray-50 rounded-lg p-4 mb-4">
             <p className="text-sm font-medium text-gray-800">{user.name}</p>

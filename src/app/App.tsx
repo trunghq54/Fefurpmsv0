@@ -5,6 +5,7 @@ import StaffDashboard from './components/StaffDashboard'
 import ProposalSubmission from './components/ProposalSubmission'
 import ReviewerInterface from './components/ReviewerInterface'
 import MeetingsOverview from './components/MeetingsOverview'
+import UserGuide from './components/UserGuide'
 import Login from './components/Login'
 import SelectRole from './components/SelectRole'
 import ChangePassword from './components/ChangePassword'
@@ -51,6 +52,7 @@ function AppRoutes() {
         path="/meetings"
         element={<ProtectedRoute roles={['Administrator']}><MeetingsOverview /></ProtectedRoute>}
       />
+      <Route path="/guide" element={<ProtectedRoute><UserGuide /></ProtectedRoute>} />
     </Routes>
   )
 }

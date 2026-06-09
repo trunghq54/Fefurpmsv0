@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import {
   CheckCircle, AlertCircle, ArrowLeft, ArrowRight, Home, List, LogOut,
-  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3,
+  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3, Upload, Paperclip, BookOpen,
 } from 'lucide-react'
 import { cycleService } from '../../services/cycleService'
 import { proposalService } from '../../services/proposalService'
@@ -68,6 +68,10 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   const [expectedOutput, setExpectedOutput] = useState('')
   const [members, setMembers] = useState<CreateMemberRequest[]>([{ ...emptyMember, role: 'Chủ nhiệm' }])
   const [budgetItems, setBudgetItems] = useState<CreateBudgetItemRequest[]>([{ ...emptyBudget }])
+
+  const [pendingDocs, setPendingDocs] = useState<{ file: File; documentType: string }[]>([])
+  const docFileRef = useRef<HTMLInputElement>(null)
+  const [pendingDocType, setPendingDocType] = useState('Proposal')
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -197,6 +201,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     setTitleVI(''); setTitleEN(''); setTrackId(''); setResearchType(1); setDurationMonths(12)
     setObjectives(''); setMethodology(''); setExpectedOutput('')
     setMembers([{ ...emptyMember, role: 'Chủ nhiệm' }]); setBudgetItems([{ ...emptyBudget }])
+    setPendingDocs([])
     setCurrentStep(1); setError('')
   }
 
@@ -214,7 +219,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     const err = validateStep(currentStep)
     if (err) { setError(err); return }
     setError('')
-    if (currentStep < 4) setCurrentStep(currentStep + 1)
+    if (currentStep < 5) setCurrentStep(currentStep + 1)
   }
 
   const handleSaveDraft = async () => {
@@ -230,11 +235,27 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
         members: members.filter((m) => m.fullName.trim()),
         budgetItems: budgetItems.filter((b) => b.category.trim()),
       })
-      if (res.success) {
+      if (res.success && res.data) {
+        const newId = res.data.id
+        // Upload collected files sequentially
+        const uploadErrors: string[] = []
+        for (const { file, documentType } of pendingDocs) {
+          try {
+            const up = await proposalService.uploadDocument(newId, file, documentType)
+            if (!up.success) uploadErrors.push(`${file.name}: ${up.message || 'Lỗi tải lên'}`)
+          } catch (e: any) {
+            uploadErrors.push(`${file.name}: ${e.response?.data?.message || 'Lỗi tải lên'}`)
+          }
+        }
         localStorage.removeItem(DRAFT_KEY)
         setDraftRestored(false)
         resetForm()
-        setShowSubmissions(true)
+        if (uploadErrors.length) {
+          setError(`Đề xuất đã lưu, nhưng một số tài liệu chưa tải lên:\n${uploadErrors.join('\n')}`)
+          setShowSubmissions(true)
+        } else {
+          setShowSubmissions(true)
+        }
       } else {
         setError(res.message || 'Tạo đề xuất thất bại')
       }
@@ -269,7 +290,8 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     { number: 1, title: 'Thông tin', icon: FileText },
     { number: 2, title: 'Thành viên', icon: Users },
     { number: 3, title: 'Kinh phí', icon: Wallet },
-    { number: 4, title: 'Xem lại', icon: CheckCircle },
+    { number: 4, title: 'Tài liệu', icon: Paperclip },
+    { number: 5, title: 'Xem lại', icon: CheckCircle },
   ]
 
   return (
@@ -283,6 +305,12 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
               <p className="text-sm text-gray-500">Faculty Portal</p>
             </div>
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/guide')}
+                className="flex items-center gap-2 px-3 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition"
+              >
+                <BookOpen className="w-4 h-4" /> Hướng dẫn
+              </button>
               <button
                 onClick={() => setShowSubmissions(!showSubmissions)}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
@@ -521,8 +549,60 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                 </div>
               )}
 
-              {/* Step 4 — Review */}
+              {/* Step 4 — Documents */}
               {currentStep === 4 && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-800">Đính kèm tài liệu</h2>
+                      <p className="text-sm text-gray-500 mt-0.5">Tài liệu sẽ được tải lên ngay sau khi lưu đề xuất. Có thể thêm sau ở mục "Đề xuất của tôi".</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <select value={pendingDocType} onChange={(e) => setPendingDocType(e.target.value)}
+                        className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Proposal">Thuyết minh</option>
+                        <option value="CV">Lý lịch khoa học</option>
+                        <option value="Other">Khác</option>
+                      </select>
+                      <button type="button" onClick={() => docFileRef.current?.click()}
+                        className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <Upload className="w-4 h-4" /> Chọn file
+                      </button>
+                      <input ref={docFileRef} type="file" className="hidden"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) setPendingDocs((prev) => [...prev, { file, documentType: pendingDocType }])
+                          if (docFileRef.current) docFileRef.current.value = ''
+                        }} />
+                    </div>
+                  </div>
+                  {pendingDocs.length === 0 ? (
+                    <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center text-sm text-gray-400">
+                      Chưa có tài liệu. Có thể bỏ qua và tải lên sau.
+                    </div>
+                  ) : (
+                    <div className="border border-gray-200 rounded-lg divide-y">
+                      {pendingDocs.map((d, i) => (
+                        <div key={i} className="px-4 py-2.5 flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-gray-400" />
+                            <span className="text-gray-800">{d.file.name}</span>
+                            <span className="text-gray-400">· {d.documentType} · {(d.file.size / 1024).toFixed(0)} KB</span>
+                          </div>
+                          <button onClick={() => setPendingDocs((prev) => prev.filter((_, j) => j !== i))}
+                            className="p-1 text-red-500 hover:bg-red-50 rounded">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Step 5 — Review */}
+              {currentStep === 5 && (
                 <div className="space-y-5">
                   <h2 className="text-xl font-semibold text-gray-800">Xem lại & lưu</h2>
                   <div className="bg-gray-50 rounded-lg p-6 space-y-3 text-sm">
@@ -533,6 +613,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                     <Row label="Thời gian" value={`${durationMonths} tháng`} />
                     <Row label="Số thành viên" value={String(members.filter((m) => m.fullName.trim()).length)} />
                     <Row label="Tổng kinh phí" value={`${formatVnd(totalBudget)} / hạn mức ${formatVnd(fundingCap)}`} />
+                    <Row label="Tài liệu đính kèm" value={pendingDocs.length ? `${pendingDocs.length} file` : 'Không có'} />
                   </div>
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
@@ -552,7 +633,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                   className="flex items-center gap-2 px-6 py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                   <ArrowLeft className="w-4 h-4" /> Trước
                 </button>
-                {currentStep < 4 ? (
+                {currentStep < 5 ? (
                   <button onClick={handleNext}
                     className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
                     Tiếp <ArrowRight className="w-4 h-4" />

@@ -16,8 +16,8 @@ export const aiService = {
     const res = await api.patch<ApiResponse<AiSummaryDto>>(`/api/proposals/${proposalId}/summary`, { editedText })
     return res.data
   },
-  aiFeedback: async (assignmentId: string, criterionIndex: number) => {
-    const res = await api.post<ApiResponse<{ feedbackDraft: string }>>(`/api/assignments/${assignmentId}/ai-feedback`, { criterionIndex })
+  aiFeedback: async (assignmentId: string, criterionName: string, maxScore: number) => {
+    const res = await api.post<ApiResponse<{ feedbackDraft: string }>>(`/api/assignments/${assignmentId}/ai-feedback`, { criterionName, maxScore })
     return res.data
   },
   search: async (q: string) => {
