@@ -10,6 +10,7 @@ import Login from './components/Login'
 import SelectRole from './components/SelectRole'
 import ChangePassword from './components/ChangePassword'
 import ProtectedRoute from './components/ProtectedRoute'
+import ContractManagement from './components/ContractManagement'
 
 function AppRoutes() {
   const { user, logout, isAuthenticated, activeRole, roles } = useAuth()
@@ -53,6 +54,10 @@ function AppRoutes() {
         element={<ProtectedRoute roles={['Administrator']}><MeetingsOverview /></ProtectedRoute>}
       />
       <Route path="/guide" element={<ProtectedRoute><UserGuide /></ProtectedRoute>} />
+      <Route
+        path="/contracts"
+        element={<ProtectedRoute roles={['Staff', 'Administrator', 'Faculty']}><ContractManagement /></ProtectedRoute>}
+      />
     </Routes>
   )
 }

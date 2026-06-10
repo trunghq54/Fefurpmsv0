@@ -36,4 +36,14 @@ export const roundService = {
     const res = await api.patch<ApiResponse<ReviewAssignmentDto>>(`/api/assignments/${assignmentId}/respond`, { accept })
     return res.data
   },
+
+  openRound: async (roundId: string) => {
+    const res = await api.post<ApiResponse<ReviewRoundDto>>(`/api/rounds/${roundId}/open`)
+    return res.data
+  },
+
+  closeRound: async (roundId: string, result: string) => {
+    const res = await api.post<ApiResponse<ReviewRoundDto>>(`/api/rounds/${roundId}/close`, { result })
+    return res.data
+  },
 }
