@@ -5,4 +5,7 @@ export interface AiSummaryDto {
   isEditedByHuman: boolean
   editedText?: string
   generatedAt: string
+  // "pdf" | "unreadableFile" | "textFields"
+  source?: string
+  sourceFileName?: string
 }

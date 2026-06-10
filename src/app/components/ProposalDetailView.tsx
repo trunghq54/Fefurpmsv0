@@ -36,7 +36,7 @@ function Block({ label, value }: { label: string; value: string }) {
   )
 }
 
-export default function ProposalDetailView({ proposal }: { proposal: ProposalDto }) {
+export default function ProposalDetailView({ proposal, assignmentId }: { proposal: ProposalDto; assignmentId?: string }) {
   return (
     <div className="space-y-5">
       <div>
@@ -96,7 +96,7 @@ export default function ProposalDetailView({ proposal }: { proposal: ProposalDto
       <ProposalDocuments proposalId={proposal.id} canEdit={false} />
 
       <div className="pt-2">
-        <AiSummaryPanel proposalId={proposal.id} />
+        <AiSummaryPanel proposalId={proposal.id} assignmentId={assignmentId} />
       </div>
     </div>
   )

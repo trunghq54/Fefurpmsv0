@@ -163,7 +163,7 @@ function ScoringPanel({ assignment, onBack }: { assignment: MyAssignmentDto; onB
         {proposalLoading ? (
           <p className="text-sm text-gray-400">Đang tải thông tin đề xuất...</p>
         ) : proposal ? (
-          <ProposalDetailView proposal={proposal} />
+          <ProposalDetailView proposal={proposal} assignmentId={assignment.assignmentId} />
         ) : (
           <p className="text-sm text-red-500">Không thể tải thông tin đề xuất.</p>
         )}

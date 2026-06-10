@@ -20,6 +20,10 @@ export const aiService = {
     const res = await api.post<ApiResponse<{ feedbackDraft: string }>>(`/api/assignments/${assignmentId}/ai-feedback`, { criterionName, maxScore })
     return res.data
   },
+  aiRubricAssessment: async (assignmentId: string) => {
+    const res = await api.post<ApiResponse<{ assessment: string }>>(`/api/assignments/${assignmentId}/ai-rubric-assessment`)
+    return res.data
+  },
   search: async (q: string) => {
     const res = await api.get<ApiResponse<ProposalSummaryDto[]>>('/api/search', { params: { q } })
     return res.data
