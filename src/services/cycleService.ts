@@ -8,9 +8,11 @@ export const cycleService = {
     return res.data
   },
 
+  // Returns first OPEN cycle from the list (no dedicated BE endpoint for "active")
   getActive: async () => {
-    const res = await api.get<ApiResponse<CycleDto>>('/api/cycles/active')
-    return res.data
+    const res = await api.get<ApiResponse<CycleDto[]>>('/api/cycles')
+    const open = res.data.data?.find(c => c.status === 'Open' || c.status === 'OPEN')
+    return { ...res.data, data: open ?? null }
   },
 
   getById: async (id: string) => {
@@ -23,38 +25,24 @@ export const cycleService = {
     return res.data
   },
 
-  update: async (id: string, data: CreateCycleRequest) => {
-    const res = await api.put<ApiResponse<CycleDto>>(`/api/cycles/${id}`, data)
+  open: async (id: string) => {
+    const res = await api.post<ApiResponse<CycleDto>>(`/api/cycles/${id}/open`)
     return res.data
   },
 
-  toggleStatus: async (id: string) => {
-    const res = await api.patch<ApiResponse<CycleDto>>(`/api/cycles/${id}/toggle-status`)
+  close: async (id: string) => {
+    const res = await api.post<ApiResponse<CycleDto>>(`/api/cycles/${id}/close`)
     return res.data
   },
 
-  // Tracks
-  getTracks: async (cycleId: string) => {
-    const res = await api.get<ApiResponse<TrackDto[]>>(`/api/cycles/${cycleId}/tracks`)
+  // Tracks — global, not per-cycle
+  getTracks: async () => {
+    const res = await api.get<ApiResponse<TrackDto[]>>('/api/cycles/tracks')
     return res.data
   },
 
-  createTrack: async (cycleId: string, data: CreateTrackRequest) => {
-    const res = await api.post<ApiResponse<TrackDto>>(`/api/cycles/${cycleId}/tracks`, data)
+  createTrack: async (data: CreateTrackRequest) => {
+    const res = await api.post<ApiResponse<TrackDto>>('/api/cycles/tracks', data)
     return res.data
-  },
-
-  updateTrack: async (cycleId: string, trackId: string, data: CreateTrackRequest) => {
-    const res = await api.put<ApiResponse<TrackDto>>(`/api/cycles/${cycleId}/tracks/${trackId}`, data)
-    return res.data
-  },
-
-  assignOwner: async (cycleId: string, trackId: string, ownerId: string | null) => {
-    const res = await api.patch<ApiResponse<TrackDto>>(`/api/cycles/${cycleId}/tracks/${trackId}/assign-owner`, { ownerId })
-    return res.data
-  },
-
-  deactivateTrack: async (cycleId: string, trackId: string) => {
-    await api.delete(`/api/cycles/${cycleId}/tracks/${trackId}`)
   },
 }

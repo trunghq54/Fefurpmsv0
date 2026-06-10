@@ -3,20 +3,23 @@ import type { ApiResponse } from '../types/auth'
 import type { MeetingDto, CreateMeetingRequest } from '../types/meeting'
 
 export const meetingService = {
-  getAll: async () => {
-    const res = await api.get<ApiResponse<MeetingDto[]>>(`/api/meetings`)
+  getByCouncil: async (councilId: string) => {
+    const res = await api.get<ApiResponse<MeetingDto[]>>(`/api/councils/${councilId}/meetings`)
     return res.data
   },
-  getByRound: async (roundId: string) => {
-    const res = await api.get<ApiResponse<MeetingDto[]>>(`/api/rounds/${roundId}/meetings`)
+
+  schedule: async (councilId: string, data: CreateMeetingRequest) => {
+    const res = await api.post<ApiResponse<MeetingDto>>(`/api/councils/${councilId}/meetings`, data)
     return res.data
   },
-  create: async (roundId: string, data: CreateMeetingRequest) => {
-    const res = await api.post<ApiResponse<MeetingDto>>(`/api/rounds/${roundId}/meetings`, data)
+
+  start: async (meetingId: string) => {
+    const res = await api.post<ApiResponse<MeetingDto>>(`/api/meetings/${meetingId}/start`)
     return res.data
   },
-  update: async (meetingId: string, data: CreateMeetingRequest) => {
-    const res = await api.put<ApiResponse<MeetingDto>>(`/api/meetings/${meetingId}`, data)
+
+  end: async (meetingId: string) => {
+    const res = await api.post<ApiResponse<MeetingDto>>(`/api/meetings/${meetingId}/end`)
     return res.data
   },
 }

@@ -37,7 +37,7 @@ export const proposalService = {
   },
 
   submit: async (id: string) => {
-    const res = await api.patch<ApiResponse<ProposalDto>>(`/api/proposals/${id}/submit`)
+    const res = await api.post<ApiResponse<ProposalDto>>(`/api/proposals/${id}/submit`)
     return res.data
   },
 
