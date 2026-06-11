@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import {
   CheckCircle, AlertCircle, ArrowLeft, ArrowRight, Home, List, LogOut,
-  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3, Upload, Paperclip, BookOpen, ClipboardList,
+  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3, Upload, Paperclip, BookOpen, ClipboardList, GraduationCap,
 } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
+import MyAcademicProfile from './MyAcademicProfile'
 import { cycleService } from '../../services/cycleService'
 import { proposalService } from '../../services/proposalService'
 import { changeRequestService } from '../../services/changeRequestService'
@@ -52,7 +54,9 @@ const statusColor = (status: string) => {
 
 export default function ProposalSubmission({ user, onLogout }: ProposalSubmissionProps) {
   const navigate = useNavigate()
+  const { user: authUser } = useAuth()
   const [showSubmissions, setShowSubmissions] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
 
   const [activeCycle, setActiveCycle] = useState<CycleDto | null>(null)
@@ -313,11 +317,17 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                 <BookOpen className="w-4 h-4" /> Hướng dẫn
               </button>
               <button
-                onClick={() => setShowSubmissions(!showSubmissions)}
+                onClick={() => { setShowSubmissions(!showSubmissions); setShowProfile(false) }}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
                 {showSubmissions ? <Home className="w-4 h-4" /> : <List className="w-4 h-4" />}
                 {showSubmissions ? 'Tạo đề xuất mới' : 'Đề xuất của tôi'}
+              </button>
+              <button
+                onClick={() => { setShowProfile(!showProfile); setShowSubmissions(false) }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${showProfile ? 'bg-purple-600 text-white hover:bg-purple-700' : 'border border-purple-300 text-purple-700 hover:bg-purple-50'}`}
+              >
+                <GraduationCap className="w-4 h-4" /> Hồ sơ KH
               </button>
               <RoleSwitcher />
               <div className="border-l border-gray-300 pl-4">
@@ -361,6 +371,10 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-10">
+        {showProfile && authUser ? (
+          <MyAcademicProfile userId={authUser.id} />
+        ) : (
+          <>
         {!showSubmissions && draftRestored && (
           <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
             <p className="text-sm text-amber-800">Đã khôi phục bản nháp bạn đang nhập dở (lưu tự động trên máy này).</p>
@@ -647,6 +661,8 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                 )}
               </div>
             </div>
+          </>
+        )}
           </>
         )}
       </div>

@@ -253,7 +253,7 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
                 </div>
               )}
 
-              {showResults[round.id] && <RoundResultsPanel roundId={round.id} councilId={round.councilId} />}
+              {showResults[round.id] && <RoundResultsPanel roundId={round.id} councilId={round.councilId} showFeedback />}
 
               {!isCompleted(round) ? (
                 <div className="mt-3 pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2">
