@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import {
   CheckCircle, AlertCircle, ArrowLeft, ArrowRight, Home, List, LogOut,
-  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3, Upload, Paperclip, BookOpen,
+  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3, Upload, Paperclip, BookOpen, ClipboardList,
 } from 'lucide-react'
 import { cycleService } from '../../services/cycleService'
 import { proposalService } from '../../services/proposalService'
@@ -769,11 +769,20 @@ interface MySubmissionsProps {
 }
 
 function MySubmissions({ proposals, loading, rowBusy, onSubmit, onWithdraw, onChangeRequest, onDocuments, onResults }: MySubmissionsProps) {
+  const navigate = useNavigate()
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800">Đề xuất của tôi</h2>
-        <p className="text-gray-500 mt-1">Theo dõi và gửi duyệt các đề xuất nghiên cứu</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Đề xuất của tôi</h2>
+          <p className="text-gray-500 mt-1">Theo dõi và gửi duyệt các đề xuất nghiên cứu</p>
+        </div>
+        <button
+          onClick={() => navigate('/contracts')}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
+        >
+          <ClipboardList className="w-4 h-4" /> Hợp đồng & Báo cáo
+        </button>
       </div>
 
       {loading ? (

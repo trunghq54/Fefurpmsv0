@@ -25,6 +25,11 @@ export const cycleService = {
     return res.data
   },
 
+  update: async (id: string, data: CreateCycleRequest) => {
+    const res = await api.put<ApiResponse<CycleDto>>(`/api/cycles/${id}`, data)
+    return res.data
+  },
+
   open: async (id: string) => {
     const res = await api.post<ApiResponse<CycleDto>>(`/api/cycles/${id}/open`)
     return res.data

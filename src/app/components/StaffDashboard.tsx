@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router'
-import { LayoutDashboard, Calendar, UserPlus, LogOut, FileText, Users, UserCheck, CheckCircle, BookOpen } from 'lucide-react'
+import { LayoutDashboard, Calendar, UserPlus, LogOut, FileText, Users, UserCheck, CheckCircle, BookOpen, ClipboardList } from 'lucide-react'
 import { analyticsService } from '../../services/analyticsService'
 import type { AnalyticsOverview } from '../../types/analytics'
 import ProposalManagement from './ProposalManagement'
 import MeetingsOverview from './MeetingsOverview'
+import ContractManagement from './ContractManagement'
 import RoleSwitcher from './RoleSwitcher'
 
 interface User {
@@ -33,6 +34,7 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
     { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard },
     { id: 'reviewers', label: 'Đề xuất & Phân công', icon: UserPlus },
     { id: 'meetings', label: 'Quản lý lịch họp', icon: Calendar },
+    { id: 'contracts', label: 'Hợp đồng', icon: ClipboardList },
   ]
 
   const cards = [
@@ -45,10 +47,11 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
   const renderContent = () => {
     switch (activeMenu) {
       case 'reviewers':
-        // Luồng phân công thật: list đề xuất → View → tạo round + chọn reviewer (ReviewRoundsPanel).
         return <ProposalManagement />
       case 'meetings':
         return <MeetingsOverview />
+      case 'contracts':
+        return <ContractManagement />
       default:
         return (
           <div className="space-y-6">
@@ -80,6 +83,11 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
                 className="text-left bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-400 transition">
                 <div className="flex items-center gap-3 mb-2"><Calendar className="w-5 h-5 text-blue-600" /><h3 className="font-semibold text-gray-800">Quản lý lịch họp</h3></div>
                 <p className="text-sm text-gray-500">Xem toàn bộ cuộc họp hội đồng của các vòng phản biện.</p>
+              </button>
+              <button onClick={() => setActiveMenu('contracts')}
+                className="text-left bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-400 transition">
+                <div className="flex items-center gap-3 mb-2"><ClipboardList className="w-5 h-5 text-blue-600" /><h3 className="font-semibold text-gray-800">Hợp đồng</h3></div>
+                <p className="text-sm text-gray-500">Tạo, ký kết, giải ngân và thanh lý hợp đồng nghiên cứu.</p>
               </button>
             </div>
           </div>

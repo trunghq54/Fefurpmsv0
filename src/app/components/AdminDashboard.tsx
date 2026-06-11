@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router'
 import {
   LayoutDashboard, Users, FileText, UserCheck, Calendar,
-  LogOut, Search, CalendarRange, FileEdit, Paperclip, SlidersHorizontal, BookOpen,
+  LogOut, Search, CalendarRange, FileEdit, Paperclip, SlidersHorizontal, BookOpen, ClipboardList,
 } from 'lucide-react'
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import UserManagement from './UserManagement'
@@ -17,6 +17,7 @@ import MeetingsOverview from './MeetingsOverview'
 import DocumentRepository from './DocumentRepository'
 import AdvancedSearch from './AdvancedSearch'
 import RubricSettings from './RubricSettings'
+import ContractManagement from './ContractManagement'
 
 interface User {
   role: string
@@ -64,6 +65,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     { id: 'documents', label: 'Tài liệu', icon: Paperclip },
     { id: 'meetings', label: 'Lịch họp', icon: Calendar },
     { id: 'rubric', label: 'Tiêu chí chấm', icon: SlidersHorizontal },
+    { id: 'contracts', label: 'Hợp đồng', icon: ClipboardList },
   ]
 
   return (
@@ -138,6 +140,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
           {activeMenu === 'documents' && <DocumentRepository />}
           {activeMenu === 'meetings' && <MeetingsOverview />}
           {activeMenu === 'rubric' && <RubricSettings />}
+          {activeMenu === 'contracts' && <ContractManagement />}
 
           {activeMenu === 'dashboard' && (
             <>

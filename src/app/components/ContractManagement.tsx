@@ -4,6 +4,12 @@ import { contractService } from '../../services/contractService'
 import { disbursementService } from '../../services/disbursementService'
 import { deliverableService } from '../../services/deliverableService'
 import { amendmentService } from '../../services/amendmentService'
+import { progressReportService } from '../../services/progressReportService'
+import type { ProgressReportSummaryDto, ProgressReportDto, CreateProgressReportRequest, EvaluateProgressReportRequest } from '../../services/progressReportService'
+import { finalReportService } from '../../services/finalReportService'
+import type { FinalReportDto, SubmitFinalReportRequest } from '../../services/finalReportService'
+import { settlementService } from '../../services/settlementService'
+import type { SettlementDto, CreateSettlementRequest } from '../../services/settlementService'
 import type {
   ContractListResponse,
   ContractDetailResponse,
@@ -554,6 +560,574 @@ function AmendmentsTab({
   )
 }
 
+// ── Progress Reports Tab ─────────────────────────────────────────────────────
+
+function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string; isStaff: boolean; isPi: boolean }) {
+  const [reports, setReports] = useState<ProgressReportSummaryDto[]>([])
+  const [loading, setLoading] = useState(true)
+  const [detail, setDetail] = useState<ProgressReportDto | null>(null)
+  const [showCreate, setShowCreate] = useState(false)
+  const [evalTarget, setEvalTarget] = useState<string | null>(null)
+  const [evalForm, setEvalForm] = useState<EvaluateProgressReportRequest>({ evaluationResult: 'SATISFACTORY' })
+  const [createForm, setCreateForm] = useState<CreateProgressReportRequest>({
+    reportingPeriodStart: '', reportingPeriodEnd: '', completedContent: '',
+    overallCompletionPct: 0, expenditureToDate: 0, items: [],
+  })
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const r = await progressReportService.getByContract(contractId)
+      if (r.success && r.data) setReports(r.data)
+    } finally { setLoading(false) }
+  }, [contractId])
+
+  useEffect(() => { load() }, [load])
+
+  const openDetail = async (id: string) => {
+    const r = await progressReportService.getById(id)
+    if (r.success && r.data) setDetail(r.data)
+  }
+
+  const handleSubmit = async (id: string) => {
+    await progressReportService.submit(id)
+    load()
+    if (detail?.id === id) {
+      const r = await progressReportService.getById(id)
+      if (r.success && r.data) setDetail(r.data)
+    }
+  }
+
+  const handleEvaluate = async () => {
+    if (!evalTarget) return
+    await progressReportService.evaluate(evalTarget, evalForm)
+    setEvalTarget(null)
+    load()
+    if (detail?.id === evalTarget) {
+      const r = await progressReportService.getById(evalTarget)
+      if (r.success && r.data) setDetail(r.data)
+    }
+  }
+
+  const handleCreate = async () => {
+    await progressReportService.create(contractId, createForm)
+    setShowCreate(false)
+    load()
+  }
+
+  const EVAL_LABEL: Record<string, string> = {
+    SATISFACTORY: 'Đạt yêu cầu', UNSATISFACTORY: 'Không đạt', NEEDS_IMPROVEMENT: 'Cần cải thiện',
+  }
+  const evalColor: Record<string, string> = {
+    SATISFACTORY: 'bg-green-100 text-green-700', UNSATISFACTORY: 'bg-red-100 text-red-700',
+    NEEDS_IMPROVEMENT: 'bg-yellow-100 text-yellow-700',
+  }
+
+  if (loading) return <p className="text-gray-400 py-4">Đang tải...</p>
+
+  if (detail) return (
+    <div className="space-y-4">
+      <button onClick={() => setDetail(null)} className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
+        <ChevronLeft size={14} /> Danh sách
+      </button>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+        <div><p className="text-gray-500">Kỳ báo cáo</p><p className="font-medium">{fmtDate(detail.reportingPeriodStart)} – {fmtDate(detail.reportingPeriodEnd)}</p></div>
+        <div><p className="text-gray-500">Hoàn thành</p><p className="font-bold text-blue-600">{detail.overallCompletionPct}%</p></div>
+        <div><p className="text-gray-500">Chi tiêu đến nay</p><p className="font-medium">{fmtMoney(detail.expenditureToDate)}</p></div>
+        <div><p className="text-gray-500">Trạng thái</p><StatusBadge status={detail.status} /></div>
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-3">
+        <div><p className="font-medium text-gray-700 mb-1">Nội dung đã hoàn thành</p><p className="text-gray-600 whitespace-pre-wrap">{detail.completedContent}</p></div>
+        {detail.pendingContent && <div><p className="font-medium text-gray-700 mb-1">Nội dung chưa hoàn thành</p><p className="text-gray-600 whitespace-pre-wrap">{detail.pendingContent}</p></div>}
+        {detail.nextPeriodPlan && <div><p className="font-medium text-gray-700 mb-1">Kế hoạch kỳ tiếp</p><p className="text-gray-600 whitespace-pre-wrap">{detail.nextPeriodPlan}</p></div>}
+      </div>
+      {detail.evaluationResult && (
+        <div className="border rounded-lg p-4 text-sm">
+          <p className="font-medium text-gray-700 mb-2">Kết quả đánh giá</p>
+          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${evalColor[detail.evaluationResult] ?? 'bg-gray-100 text-gray-700'}`}>{EVAL_LABEL[detail.evaluationResult] ?? detail.evaluationResult}</span>
+          {detail.evaluationComments && <p className="text-gray-600 mt-2">{detail.evaluationComments}</p>}
+        </div>
+      )}
+      <div className="flex gap-2">
+        {isPi && detail.status === 'DRAFT' && (
+          <button onClick={() => handleSubmit(detail.id)} className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Nộp báo cáo</button>
+        )}
+        {isStaff && detail.status === 'SUBMITTED' && (
+          <button onClick={() => { setEvalTarget(detail.id); setEvalForm({ evaluationResult: 'SATISFACTORY' }) }} className="text-sm px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Đánh giá</button>
+        )}
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="space-y-4">
+      {isPi && (
+        <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+          <Plus size={14} /> Tạo báo cáo tiến độ
+        </button>
+      )}
+      {reports.length === 0 ? (
+        <p className="text-gray-400 text-sm">Chưa có báo cáo tiến độ nào.</p>
+      ) : (
+        <div className="space-y-2">
+          {reports.map((r) => (
+            <div key={r.id} className="border rounded-lg p-4 flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-800">Kỳ {r.reportRound}: {fmtDate(r.reportingPeriodStart)} – {fmtDate(r.reportingPeriodEnd)}</p>
+                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                  <span>Hoàn thành: <b>{r.overallCompletionPct}%</b></span>
+                  <StatusBadge status={r.status} />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => openDetail(r.id)} className="text-xs px-2 py-1 border rounded hover:bg-gray-50">Chi tiết</button>
+                {isPi && r.status === 'DRAFT' && (
+                  <button onClick={() => handleSubmit(r.id)} className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Nộp</button>
+                )}
+                {isStaff && r.status === 'SUBMITTED' && (
+                  <button onClick={() => { setEvalTarget(r.id); setEvalForm({ evaluationResult: 'SATISFACTORY' }) }} className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700">Đánh giá</button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showCreate && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4">Tạo báo cáo tiến độ</h3>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Từ ngày</label>
+                  <input type="date" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    value={createForm.reportingPeriodStart}
+                    onChange={(e) => setCreateForm({ ...createForm, reportingPeriodStart: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Đến ngày</label>
+                  <input type="date" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    value={createForm.reportingPeriodEnd}
+                    onChange={(e) => setCreateForm({ ...createForm, reportingPeriodEnd: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Nội dung đã hoàn thành *</label>
+                <textarea rows={3} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  value={createForm.completedContent}
+                  onChange={(e) => setCreateForm({ ...createForm, completedContent: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Nội dung chưa hoàn thành</label>
+                <textarea rows={2} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  value={createForm.pendingContent ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, pendingContent: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Kế hoạch kỳ tiếp</label>
+                <textarea rows={2} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  value={createForm.nextPeriodPlan ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, nextPeriodPlan: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Tiến độ tổng thể (%)</label>
+                  <input type="number" min={0} max={100} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    value={createForm.overallCompletionPct}
+                    onChange={(e) => setCreateForm({ ...createForm, overallCompletionPct: Number(e.target.value) })} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Chi tiêu đến nay (₫)</label>
+                  <input type="number" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    value={createForm.expenditureToDate}
+                    onChange={(e) => setCreateForm({ ...createForm, expenditureToDate: Number(e.target.value) })} />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4 justify-end">
+              <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
+              <button onClick={handleCreate} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Tạo báo cáo</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {evalTarget && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Đánh giá báo cáo tiến độ</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Kết quả đánh giá</label>
+                <select className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  value={evalForm.evaluationResult}
+                  onChange={(e) => setEvalForm({ ...evalForm, evaluationResult: e.target.value as EvaluateProgressReportRequest['evaluationResult'] })}>
+                  <option value="SATISFACTORY">Đạt yêu cầu</option>
+                  <option value="UNSATISFACTORY">Không đạt</option>
+                  <option value="NEEDS_IMPROVEMENT">Cần cải thiện</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Nhận xét</label>
+                <textarea rows={3} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  value={evalForm.evaluationComments ?? ''}
+                  onChange={(e) => setEvalForm({ ...evalForm, evaluationComments: e.target.value })} />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4 justify-end">
+              <button onClick={() => setEvalTarget(null)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
+              <button onClick={handleEvaluate} className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700">Lưu đánh giá</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Final Report Tab ──────────────────────────────────────────────────────────
+
+function FinalReportTab({ contractId, isStaff, isPi }: { contractId: string; isStaff: boolean; isPi: boolean }) {
+  const [report, setReport] = useState<FinalReportDto | null | undefined>(undefined)
+  const [loading, setLoading] = useState(true)
+  const [showSubmit, setShowSubmit] = useState(false)
+  const [submitForm, setSubmitForm] = useState<SubmitFinalReportRequest>({ reportFileUrl: '', language: 'vi' })
+  const [revisionNotes, setRevisionNotes] = useState('')
+  const [showRevision, setShowRevision] = useState(false)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const r = await finalReportService.getByContract(contractId)
+      setReport(r.success ? r.data : null)
+    } finally { setLoading(false) }
+  }, [contractId])
+
+  useEffect(() => { load() }, [load])
+
+  const handleSubmit = async () => {
+    await finalReportService.submit(contractId, submitForm)
+    setShowSubmit(false)
+    load()
+  }
+
+  const handleAccept = async () => {
+    if (!report) return
+    await finalReportService.accept(report.id)
+    load()
+  }
+
+  const handleRevision = async () => {
+    if (!report) return
+    await finalReportService.requestRevision(report.id, { revisionNotes })
+    setShowRevision(false)
+    load()
+  }
+
+  const handleArchive = async () => {
+    if (!report) return
+    await finalReportService.archive(report.id)
+    load()
+  }
+
+  if (loading) return <p className="text-gray-400 py-4">Đang tải...</p>
+
+  const STATUS_LABEL: Record<string, string> = {
+    NOT_SUBMITTED: 'Chưa nộp', SUBMITTED: 'Đã nộp', UNDER_REVIEW: 'Đang xét',
+    ACCEPTED: 'Chấp nhận', REVISION_REQUIRED: 'Yêu cầu chỉnh sửa', ARCHIVED: 'Đã lưu trữ',
+  }
+
+  return (
+    <div className="space-y-4">
+      {!report ? (
+        <div className="text-center py-8 text-gray-400">
+          <FileText size={36} className="mx-auto mb-2 opacity-30" />
+          <p className="text-sm">Chưa có báo cáo tổng kết.</p>
+          {isPi && (
+            <button onClick={() => setShowSubmit(true)} className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+              Nộp báo cáo tổng kết
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+            <div><p className="text-gray-500">Trạng thái</p><StatusBadge status={report.status} /></div>
+            <div><p className="text-gray-500">Ngôn ngữ</p><p className="font-medium">{report.language === 'vi' ? 'Tiếng Việt' : 'English'}</p></div>
+            {report.submittedAt && <div><p className="text-gray-500">Ngày nộp</p><p className="font-medium">{fmtDate(report.submittedAt)}</p></div>}
+            {report.deadline && <div><p className="text-gray-500">Hạn nộp</p><p className="font-medium">{fmtDate(report.deadline)}</p></div>}
+            {report.archivedAt && <div><p className="text-gray-500">Lưu trữ</p><p className="font-medium">{fmtDate(report.archivedAt)}</p></div>}
+          </div>
+          {report.reportFileUrl && (
+            <div className="border rounded-lg p-3 text-sm">
+              <p className="text-gray-500 mb-1">File báo cáo</p>
+              <a href={report.reportFileUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all">{report.reportFileUrl}</a>
+            </div>
+          )}
+          {report.revisionNotes && (
+            <div className="border border-yellow-200 bg-yellow-50 rounded-lg p-3 text-sm">
+              <p className="font-medium text-yellow-800 mb-1">Yêu cầu chỉnh sửa</p>
+              <p className="text-yellow-700">{report.revisionNotes}</p>
+            </div>
+          )}
+          <div className="flex gap-2 flex-wrap">
+            {isPi && (report.status === 'NOT_SUBMITTED' || report.status === 'REVISION_REQUIRED') && (
+              <button onClick={() => setShowSubmit(true)} className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                {report.status === 'REVISION_REQUIRED' ? 'Nộp lại' : 'Nộp báo cáo'}
+              </button>
+            )}
+            {isStaff && report.status === 'SUBMITTED' && (
+              <>
+                <button onClick={handleAccept} className="text-sm px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700">Chấp nhận</button>
+                <button onClick={() => setShowRevision(true)} className="text-sm px-3 py-1.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">Yêu cầu chỉnh sửa</button>
+              </>
+            )}
+            {isStaff && report.status === 'ACCEPTED' && !report.archivedAt && (
+              <button onClick={handleArchive} className="text-sm px-3 py-1.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Lưu trữ</button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showSubmit && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Nộp báo cáo tổng kết</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700">URL file báo cáo *</label>
+                <input type="text" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  value={submitForm.reportFileUrl} placeholder="https://..."
+                  onChange={(e) => setSubmitForm({ ...submitForm, reportFileUrl: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">URL tóm tắt (tùy chọn)</label>
+                <input type="text" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  value={submitForm.summaryFileUrl ?? ''} placeholder="https://..."
+                  onChange={(e) => setSubmitForm({ ...submitForm, summaryFileUrl: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Ngôn ngữ báo cáo</label>
+                <select className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  value={submitForm.language}
+                  onChange={(e) => setSubmitForm({ ...submitForm, language: e.target.value })}>
+                  <option value="vi">Tiếng Việt</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4 justify-end">
+              <button onClick={() => setShowSubmit(false)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
+              <button onClick={handleSubmit} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Nộp</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRevision && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Yêu cầu chỉnh sửa</h3>
+            <div>
+              <label className="text-sm font-medium text-gray-700">Nội dung yêu cầu</label>
+              <textarea rows={4} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                value={revisionNotes}
+                onChange={(e) => setRevisionNotes(e.target.value)} />
+            </div>
+            <div className="flex gap-2 mt-4 justify-end">
+              <button onClick={() => setShowRevision(false)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
+              <button onClick={handleRevision} className="px-4 py-2 text-sm bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">Gửi yêu cầu</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Settlement Tab ────────────────────────────────────────────────────────────
+
+function SettlementTab({ contractId, isStaff }: { contractId: string; isStaff: boolean }) {
+  const [settlement, setSettlement] = useState<SettlementDto | null | undefined>(undefined)
+  const [loading, setLoading] = useState(true)
+  const [showCreate, setShowCreate] = useState(false)
+  const [createForm, setCreateForm] = useState<CreateSettlementRequest>({
+    totalContractedAmount: 0, totalDisbursedAmount: 0, totalReturnedAmount: 0,
+  })
+  const [signeeId, setSigneeId] = useState('')
+  const [clearedDate, setClearedDate] = useState('')
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const r = await settlementService.getByContract(contractId)
+      setSettlement(r.success ? r.data : null)
+    } finally { setLoading(false) }
+  }, [contractId])
+
+  useEffect(() => { load() }, [load])
+
+  const handleCreate = async () => {
+    await settlementService.create(contractId, createForm)
+    setShowCreate(false)
+    load()
+  }
+
+  const handleSign = async () => {
+    if (!settlement || !signeeId) return
+    await settlementService.sign(settlement.id, { sideASigneeId: signeeId })
+    load()
+  }
+
+  const handleAccountingCleared = async () => {
+    if (!settlement || !clearedDate) return
+    await settlementService.markAccountingCleared(settlement.id, { clearedDate })
+    load()
+  }
+
+  const handleAssetsCleared = async () => {
+    if (!settlement || !clearedDate) return
+    await settlementService.markAssetsCleared(settlement.id, { clearedDate })
+    load()
+  }
+
+  if (loading) return <p className="text-gray-400 py-4">Đang tải...</p>
+
+  return (
+    <div className="space-y-4">
+      {!settlement ? (
+        <div className="text-center py-8 text-gray-400">
+          <FileText size={36} className="mx-auto mb-2 opacity-30" />
+          <p className="text-sm">Chưa có hồ sơ thanh lý.</p>
+          {isStaff && (
+            <button onClick={() => setShowCreate(true)} className="mt-3 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 mx-auto">
+              <Plus size={14} /> Tạo hồ sơ thanh lý
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+            <div><p className="text-gray-500">Tổng HĐ</p><p className="font-semibold">{fmtMoney(settlement.totalContractedAmount)}</p></div>
+            <div><p className="text-gray-500">Đã giải ngân</p><p className="font-semibold">{fmtMoney(settlement.totalDisbursedAmount)}</p></div>
+            <div><p className="text-gray-500">Hoàn trả</p><p className="font-semibold text-orange-600">{fmtMoney(settlement.totalReturnedAmount)}</p></div>
+            {settlement.settlementDeadline && <div><p className="text-gray-500">Hạn thanh lý</p><p className="font-medium">{fmtDate(settlement.settlementDeadline)}</p></div>}
+            {settlement.sideASigneeName && <div><p className="text-gray-500">Người ký Bên A</p><p className="font-medium">{settlement.sideASigneeName}</p></div>}
+          </div>
+
+          {settlement.productsSubmittedSummary && (
+            <div className="border rounded-lg p-3 text-sm">
+              <p className="font-medium text-gray-700 mb-1">Tóm tắt sản phẩm đã nộp</p>
+              <p className="text-gray-600">{settlement.productsSubmittedSummary}</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-3 gap-3 text-sm">
+            <div className={`border rounded-lg p-3 ${settlement.settlementSignedAt ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}>
+              <p className="text-gray-500 text-xs">Ký thanh lý</p>
+              <p className="font-medium mt-1">{settlement.settlementSignedAt ? fmtDate(settlement.settlementSignedAt) : '—'}</p>
+            </div>
+            <div className={`border rounded-lg p-3 ${settlement.accountingClearedAt ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}>
+              <p className="text-gray-500 text-xs">Kế toán xác nhận</p>
+              <p className="font-medium mt-1">{settlement.accountingClearedAt ? fmtDate(settlement.accountingClearedAt) : '—'}</p>
+            </div>
+            <div className={`border rounded-lg p-3 ${settlement.assetsClearedAt ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}>
+              <p className="text-gray-500 text-xs">Tài sản xác nhận</p>
+              <p className="font-medium mt-1">{settlement.assetsClearedAt ? fmtDate(settlement.assetsClearedAt) : '—'}</p>
+            </div>
+          </div>
+
+          {isStaff && (
+            <div className="border rounded-lg p-4 space-y-3">
+              <p className="text-sm font-medium text-gray-700">Hành động</p>
+              {!settlement.settlementSignedAt && (
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <label className="text-xs text-gray-500">ID người ký Bên A (GUID)</label>
+                    <input type="text" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-mono"
+                      value={signeeId} placeholder="xxxxxxxx-xxxx-..."
+                      onChange={(e) => setSigneeId(e.target.value)} />
+                  </div>
+                  <button onClick={handleSign} className="px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap">Ký thanh lý</button>
+                </div>
+              )}
+              {(!settlement.accountingClearedAt || !settlement.assetsClearedAt) && (
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <label className="text-xs text-gray-500">Ngày xác nhận</label>
+                    <input type="date" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+                      value={clearedDate}
+                      onChange={(e) => setClearedDate(e.target.value)} />
+                  </div>
+                  {!settlement.accountingClearedAt && (
+                    <button onClick={handleAccountingCleared} className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">Kế toán ✓</button>
+                  )}
+                  {!settlement.assetsClearedAt && (
+                    <button onClick={handleAssetsCleared} className="px-3 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 whitespace-nowrap">Tài sản ✓</button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {showCreate && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg">
+            <h3 className="text-lg font-semibold mb-4">Tạo hồ sơ thanh lý</h3>
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Tổng HĐ (₫)</label>
+                  <input type="number" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    value={createForm.totalContractedAmount}
+                    onChange={(e) => setCreateForm({ ...createForm, totalContractedAmount: Number(e.target.value) })} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Đã giải ngân (₫)</label>
+                  <input type="number" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    value={createForm.totalDisbursedAmount}
+                    onChange={(e) => setCreateForm({ ...createForm, totalDisbursedAmount: Number(e.target.value) })} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Hoàn trả (₫)</label>
+                  <input type="number" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    value={createForm.totalReturnedAmount}
+                    onChange={(e) => setCreateForm({ ...createForm, totalReturnedAmount: Number(e.target.value) })} />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Tóm tắt sản phẩm đã nộp</label>
+                <textarea rows={2} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  value={createForm.productsSubmittedSummary ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, productsSubmittedSummary: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Hạn thanh lý</label>
+                <input type="date" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  value={createForm.settlementDeadline ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, settlementDeadline: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Ghi chú</label>
+                <textarea rows={2} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  value={createForm.notes ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })} />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4 justify-end">
+              <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
+              <button onClick={handleCreate} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Tạo hồ sơ</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Contract Detail ──────────────────────────────────────────────────────────
 
 function ContractDetail({
@@ -567,12 +1141,15 @@ function ContractDetail({
   isStaff: boolean
   isPi: boolean
 }) {
-  const [tab, setTab] = useState<'disbursements' | 'deliverables' | 'amendments'>('disbursements')
+  const [tab, setTab] = useState<'disbursements' | 'deliverables' | 'amendments' | 'progress' | 'final' | 'settlement'>('disbursements')
 
   const tabs = [
     { id: 'disbursements' as const, label: 'Giải ngân' },
     { id: 'deliverables' as const, label: 'Sản phẩm' },
     { id: 'amendments' as const, label: 'Điều chỉnh' },
+    { id: 'progress' as const, label: 'Báo cáo tiến độ' },
+    { id: 'final' as const, label: 'Báo cáo tổng kết' },
+    { id: 'settlement' as const, label: 'Thanh lý' },
   ]
 
   return (
@@ -632,6 +1209,15 @@ function ContractDetail({
           )}
           {tab === 'amendments' && (
             <AmendmentsTab contractId={contract.id} isStaff={isStaff} isPi={isPi} />
+          )}
+          {tab === 'progress' && (
+            <ProgressReportsTab contractId={contract.id} isStaff={isStaff} isPi={isPi} />
+          )}
+          {tab === 'final' && (
+            <FinalReportTab contractId={contract.id} isStaff={isStaff} isPi={isPi} />
+          )}
+          {tab === 'settlement' && (
+            <SettlementTab contractId={contract.id} isStaff={isStaff} />
           )}
         </div>
       </div>

@@ -114,11 +114,13 @@ export default function CycleManagement() {
     }
   }
 
-  const handleToggle = async (id: string) => {
+  const handleToggle = async (cycle: CycleDto) => {
     try {
-      const res = await cycleService.toggleStatus(id)
+      const res = cycle.status === 'Open'
+        ? await cycleService.close(cycle.id)
+        : await cycleService.open(cycle.id)
       if (res.success && res.data) {
-        setCycles((prev) => prev.map((c) => (c.id === id ? res.data! : c)))
+        setCycles((prev) => prev.map((c) => (c.id === cycle.id ? res.data! : c)))
       }
     } catch (err) {
       console.error('Toggle status failed:', err)
@@ -243,7 +245,7 @@ export default function CycleManagement() {
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleToggle(cycle.id)}
+                          onClick={() => handleToggle(cycle)}
                           className={`p-2 rounded-lg transition ${
                             cycle.status === 'Open'
                               ? 'text-orange-600 hover:bg-orange-50'
