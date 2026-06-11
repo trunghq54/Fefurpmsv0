@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router'
 import {
   LayoutDashboard, Users, FileText, UserCheck, Calendar,
   LogOut, Search, CalendarRange, FileEdit, Paperclip, SlidersHorizontal, BookOpen, ClipboardList,
+  Building2, Tag, ShoppingBag,
 } from 'lucide-react'
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import UserManagement from './UserManagement'
@@ -18,6 +19,9 @@ import DocumentRepository from './DocumentRepository'
 import AdvancedSearch from './AdvancedSearch'
 import RubricSettings from './RubricSettings'
 import ContractManagement from './ContractManagement'
+import OrgUnitManagement from './OrgUnitManagement'
+import ProductCategoryManagement from './ProductCategoryManagement'
+import ResearchOrderManagement from './ResearchOrderManagement'
 
 interface User {
   role: string
@@ -49,7 +53,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     { label: 'Tổng đề xuất', value: String(overview?.totalProposals ?? '—'), icon: FileText, color: 'bg-blue-500' },
     { label: 'Giảng viên (PI)', value: String(overview?.totalPIs ?? '—'), icon: Users, color: 'bg-green-500' },
     { label: 'Phản biện', value: String(overview?.totalReviewers ?? '—'), icon: UserCheck, color: 'bg-purple-500' },
-    { label: 'Đã duyệt', value: String(overview?.totalByStatus?.['Approved'] ?? 0), icon: Calendar, color: 'bg-orange-500' },
+    { label: 'Đã duyệt', value: String(overview?.totalByStatus?.['APPROVED'] ?? overview?.totalByStatus?.['Approved'] ?? 0), icon: Calendar, color: 'bg-orange-500' },
   ]
   const trackChart = byTrack.map((t) => ({ name: t.trackName, total: t.total, passed: t.passed }))
   const funnelColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
@@ -66,6 +70,9 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     { id: 'meetings', label: 'Lịch họp', icon: Calendar },
     { id: 'rubric', label: 'Tiêu chí chấm', icon: SlidersHorizontal },
     { id: 'contracts', label: 'Hợp đồng', icon: ClipboardList },
+    { id: 'orgunits', label: 'Đơn vị tổ chức', icon: Building2 },
+    { id: 'product-categories', label: 'Danh mục SP', icon: Tag },
+    { id: 'research-orders', label: 'Đặt hàng NC', icon: ShoppingBag },
   ]
 
   return (
@@ -141,6 +148,9 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
           {activeMenu === 'meetings' && <MeetingsOverview />}
           {activeMenu === 'rubric' && <RubricSettings />}
           {activeMenu === 'contracts' && <ContractManagement />}
+          {activeMenu === 'orgunits' && <OrgUnitManagement />}
+          {activeMenu === 'product-categories' && <ProductCategoryManagement />}
+          {activeMenu === 'research-orders' && <ResearchOrderManagement />}
 
           {activeMenu === 'dashboard' && (
             <>

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import {
-  FileText, ThumbsUp, ThumbsDown, LogOut, ClipboardCheck, CheckCircle, ArrowLeft, Send, BookOpen,
+  FileText, ThumbsUp, ThumbsDown, LogOut, ClipboardCheck, CheckCircle, ArrowLeft, Send, BookOpen, MessageSquare,
 } from 'lucide-react'
+import { reviewerFeedbackService } from '../../services/reviewerFeedbackService'
 import { roundService } from '../../services/roundService'
 import { scoringService } from '../../services/scoringService'
 import type { SubmitScoreRequest, RubricTemplateDto } from '../../services/scoringService'
@@ -196,6 +197,8 @@ function ScoringPanel({ assignment, onBack }: { assignment: MyAssignmentDto; onB
       {isAcceptance
         ? <VoteForm assignment={assignment} onDone={onBack} />
         : <RubricForm assignment={assignment} onDone={onBack} />}
+
+      <FeedbackPanel councilId={assignment.councilId} />
     </div>
   )
 }
@@ -425,6 +428,86 @@ function VoteForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDone:
         {saved && <span className="flex items-center gap-1 text-green-600 text-sm"><CheckCircle className="w-4 h-4" /> Đã lưu</span>}
         <button onClick={onDone} className="px-5 py-2.5 border border-gray-300 rounded-lg font-medium hover:bg-gray-50">Xong</button>
       </div>
+    </div>
+  )
+}
+
+function FeedbackPanel({ councilId }: { councilId: string }) {
+  const [open, setOpen] = useState(false)
+  const [form, setForm] = useState({
+    urgencyScore: 3, scientificContributionScore: 3,
+    practicalSignificanceScore: 3, actualVsExpectedScore: 3,
+    otherComments: '', overallAssessment: '',
+  })
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+
+  const submit = async () => {
+    setSaving(true); setError(''); setSaved(false)
+    try {
+      const res = await reviewerFeedbackService.submit(councilId, form)
+      if (res.success) { setSaved(true); setOpen(false) }
+      else setError(res.message || 'Lỗi')
+    } catch (e: any) {
+      setError(e.response?.data?.message || 'Có lỗi xảy ra')
+    } finally { setSaving(false) }
+  }
+
+  if (saved) return (
+    <div className="flex items-center gap-2 text-green-600 text-sm bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+      <CheckCircle className="w-4 h-4" /> Đã gửi phản hồi về đề xuất.
+    </div>
+  )
+
+  const ScoreSlider = ({ label, field }: { label: string; field: keyof typeof form }) => (
+    <div>
+      <div className="flex justify-between text-sm mb-1">
+        <span className="text-gray-700">{label}</span>
+        <span className="font-semibold text-blue-600">{form[field] as number}/5</span>
+      </div>
+      <input type="range" min={1} max={5} value={form[field] as number}
+        onChange={(e) => setForm({ ...form, [field]: Number(e.target.value) })}
+        className="w-full accent-blue-600" />
+    </div>
+  )
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <button onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50">
+        <span className="flex items-center gap-2 font-semibold text-gray-700">
+          <MessageSquare className="w-5 h-5 text-indigo-500" /> Phản hồi về đề xuất (tùy chọn)
+        </span>
+        <span className="text-gray-400 text-sm">{open ? '▲ Thu gọn' : '▼ Mở rộng'}</span>
+      </button>
+
+      {open && (
+        <div className="px-6 pb-6 space-y-4 border-t border-gray-100 pt-4">
+          <p className="text-sm text-gray-500">Đánh giá định tính về đề xuất (thang điểm 1–5). Không bắt buộc.</p>
+          <ScoreSlider label="Tính cấp bách / nhu cầu thực tiễn" field="urgencyScore" />
+          <ScoreSlider label="Đóng góp khoa học" field="scientificContributionScore" />
+          <ScoreSlider label="Ý nghĩa thực tiễn" field="practicalSignificanceScore" />
+          <ScoreSlider label="Kết quả thực tế so với kỳ vọng" field="actualVsExpectedScore" />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nhận xét khác</label>
+            <textarea rows={2} value={form.otherComments}
+              onChange={(e) => setForm({ ...form, otherComments: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Kết luận tổng thể</label>
+            <textarea rows={2} value={form.overallAssessment}
+              onChange={(e) => setForm({ ...form, overallAssessment: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+          </div>
+          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
+          <button onClick={submit} disabled={saving}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 disabled:opacity-60">
+            <Send className="w-4 h-4" /> {saving ? 'Đang gửi...' : 'Gửi phản hồi'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

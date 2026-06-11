@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router'
-import { LayoutDashboard, Calendar, UserPlus, LogOut, FileText, Users, UserCheck, CheckCircle, BookOpen, ClipboardList } from 'lucide-react'
+import { LayoutDashboard, Calendar, UserPlus, LogOut, FileText, Users, UserCheck, CheckCircle, BookOpen, ClipboardList, ShoppingBag } from 'lucide-react'
 import { analyticsService } from '../../services/analyticsService'
 import type { AnalyticsOverview } from '../../types/analytics'
 import ProposalManagement from './ProposalManagement'
 import MeetingsOverview from './MeetingsOverview'
 import ContractManagement from './ContractManagement'
+import ResearchOrderManagement from './ResearchOrderManagement'
 import RoleSwitcher from './RoleSwitcher'
 
 interface User {
@@ -35,13 +36,14 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
     { id: 'reviewers', label: 'Đề xuất & Phân công', icon: UserPlus },
     { id: 'meetings', label: 'Quản lý lịch họp', icon: Calendar },
     { id: 'contracts', label: 'Hợp đồng', icon: ClipboardList },
+    { id: 'research-orders', label: 'Đặt hàng NC', icon: ShoppingBag },
   ]
 
   const cards = [
     { label: 'Tổng đề xuất', value: overview?.totalProposals ?? '—', icon: FileText, color: 'bg-blue-100 text-blue-600' },
     { label: 'Giảng viên (PI)', value: overview?.totalPIs ?? '—', icon: Users, color: 'bg-green-100 text-green-600' },
     { label: 'Phản biện', value: overview?.totalReviewers ?? '—', icon: UserCheck, color: 'bg-purple-100 text-purple-600' },
-    { label: 'Đã duyệt', value: overview?.totalByStatus?.['Approved'] ?? 0, icon: CheckCircle, color: 'bg-orange-100 text-orange-600' },
+    { label: 'Đã duyệt', value: overview?.totalByStatus?.['APPROVED'] ?? overview?.totalByStatus?.['Approved'] ?? 0, icon: CheckCircle, color: 'bg-orange-100 text-orange-600' },
   ]
 
   const renderContent = () => {
@@ -52,6 +54,8 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
         return <MeetingsOverview />
       case 'contracts':
         return <ContractManagement />
+      case 'research-orders':
+        return <ResearchOrderManagement />
       default:
         return (
           <div className="space-y-6">
