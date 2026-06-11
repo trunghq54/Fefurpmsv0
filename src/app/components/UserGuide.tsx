@@ -283,7 +283,7 @@ export default function UserGuide() {
             return (
               <button
                 key={role}
-                onClick={() => setSelectedRole(role)}
+                onClick={() => setSelectedRole(role as any)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium text-sm transition ${
                   active ? `${g.color} border-current` : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}

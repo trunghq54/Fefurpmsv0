@@ -13,7 +13,7 @@ export interface CycleDto {
   id: string
   name: string
   academicYear: string
-  status: 'Open' | 'Closed'
+  status: string
   submissionStartDate: string
   submissionEndDateApplied: string
   submissionEndDateBasic: string

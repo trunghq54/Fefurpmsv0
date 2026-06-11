@@ -111,4 +111,42 @@ export const scoringService = {
     const res = await api.get<ApiResponse<CouncilDecisionDto | null>>(`/api/review-scoring/councils/${councilId}/decision`)
     return res.data
   },
+
+  // Aliases used by ReviewerInterface — maps councilId-based scoring
+  getRubric: async (councilId: string) => {
+    const res = await api.get<ApiResponse<ReviewScoreDto | null>>(`/api/review-scoring/councils/${councilId}/scores/my`)
+    return res.data
+  },
+
+  submitRubric: async (councilId: string, data: SubmitScoreRequest) => {
+    const res = await api.post<ApiResponse<ReviewScoreDto>>(`/api/review-scoring/councils/${councilId}/scores`, data)
+    return res.data
+  },
+
+  getVote: async (councilId: string) => {
+    const res = await api.get<ApiResponse<ReviewScoreDto | null>>(`/api/review-scoring/councils/${councilId}/scores/my`)
+    return res.data
+  },
+
+  submitVote: async (councilId: string, data: SubmitScoreRequest) => {
+    const res = await api.post<ApiResponse<ReviewScoreDto>>(`/api/review-scoring/councils/${councilId}/scores`, data)
+    return res.data
+  },
+
+  // Used by ReviewRoundsPanel — close the round with a result
+  finalize: async (roundId: string, data: { outcome: string }) => {
+    const resultMap: Record<string, string> = {
+      Pass: 'APPROVED',
+      Fail: 'REJECTED',
+      APPROVED: 'APPROVED',
+      REJECTED: 'REJECTED',
+      REVISION_REQUIRED: 'REVISION_REQUIRED',
+    }
+    const result = resultMap[data.outcome] ?? 'APPROVED'
+    const res = await api.post<ApiResponse<{ id: string; status: string; result: string }>>(`/api/rounds/${roundId}/close`, { result })
+    if (res.data.success && res.data.data) {
+      return { ...res.data, data: { status: res.data.data.status, outcome: data.outcome } }
+    }
+    return res.data as any
+  },
 }

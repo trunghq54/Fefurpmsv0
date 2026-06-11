@@ -1,15 +1,15 @@
 export interface MeetingDto {
   id: string
-  reviewRoundId: string
-  title: string
-  platform: 'GoogleMeet' | 'Teams'
+  councilId: string
+  title?: string
+  platform: string
   scheduledAt: string
   durationMinutes: number
   meetingLink?: string
   agenda?: string
-  notes?: string
+  status: string
   createdAt: string
-  // chỉ có ở list tổng GET /api/meetings
+  // only on GET /api/meetings list
   proposalId?: string
   proposalTitle?: string
   roundType?: string
@@ -17,13 +17,16 @@ export interface MeetingDto {
 }
 
 export interface CreateMeetingRequest {
-  title: string
-  platform: number // 1 = GoogleMeet, 2 = Teams
+  title?: string
+  platform: string   // string: "GOOGLE_MEET" | "TEAMS" | "IN_PERSON"
   scheduledAt: string
   durationMinutes: number
   meetingLink?: string
   agenda?: string
-  notes?: string
 }
 
-export const MEETING_PLATFORM = { GoogleMeet: 1, Teams: 2 } as const
+export const MEETING_PLATFORM = {
+  GoogleMeet: 'GOOGLE_MEET',
+  Teams: 'TEAMS',
+  InPerson: 'IN_PERSON',
+} as const

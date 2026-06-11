@@ -109,6 +109,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   }, [resultsProposal])
 
   const ROUND_LABEL: Record<string, string> = {
+    SCREENING: 'Sàng lọc', REVIEW: 'Xét duyệt', ACCEPTANCE: 'Nghiệm thu',
     ProposalReview: 'Xét duyệt', ProgressCheck: 'Kiểm tra tiến độ', Acceptance: 'Nghiệm thu',
   }
 
@@ -684,8 +685,10 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-gray-800">{ROUND_LABEL[r.roundType] || r.roundType} · Vòng {r.roundNumber}</span>
                       <div className="flex items-center gap-2">
-                        {r.status === 'Completed' && r.outcome && (
-                          <span className={`px-2 py-0.5 rounded-full text-xs ${r.outcome === 'Pass' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{r.outcome}</span>
+                        {(r.status === 'PASSED' || r.status === 'FAILED') && r.result && (
+                          <span className={`px-2 py-0.5 rounded-full text-xs ${r.result === 'APPROVED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            {r.result === 'APPROVED' ? 'Đạt' : r.result === 'REJECTED' ? 'Từ chối' : r.result}
+                          </span>
                         )}
                         <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">{r.status}</span>
                       </div>

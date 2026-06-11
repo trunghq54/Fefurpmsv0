@@ -2,13 +2,15 @@ import api from '../lib/api'
 import type { ApiResponse } from '../types/auth'
 import type { CycleDto, TrackDto, CreateCycleRequest, CreateTrackRequest } from '../types/cycle'
 
+interface UpdateTrackRequest { name?: string; description?: string }
+interface AssignOwnerRequest { ownerId: string | null }
+
 export const cycleService = {
   getAll: async () => {
     const res = await api.get<ApiResponse<CycleDto[]>>('/api/cycles')
     return res.data
   },
 
-  // Returns first OPEN cycle from the list (no dedicated BE endpoint for "active")
   getActive: async () => {
     const res = await api.get<ApiResponse<CycleDto[]>>('/api/cycles')
     const open = res.data.data?.find(c => c.status === 'Open' || c.status === 'OPEN')
@@ -40,14 +42,30 @@ export const cycleService = {
     return res.data
   },
 
-  // Tracks — global, not per-cycle
-  getTracks: async () => {
+  getTracks: async (_cycleId?: string) => {
     const res = await api.get<ApiResponse<TrackDto[]>>('/api/cycles/tracks')
     return res.data
   },
 
-  createTrack: async (data: CreateTrackRequest) => {
-    const res = await api.post<ApiResponse<TrackDto>>('/api/cycles/tracks', data)
+  createTrack: async (_cycleIdOrData: string | CreateTrackRequest, data?: CreateTrackRequest) => {
+    const body = data ?? (_cycleIdOrData as CreateTrackRequest)
+    const res = await api.post<ApiResponse<TrackDto>>('/api/cycles/tracks', body)
+    return res.data
+  },
+
+  updateTrack: async (_cycleId: string, id: string, data: UpdateTrackRequest) => {
+    const res = await api.put<ApiResponse<TrackDto>>(`/api/cycles/tracks/${id}`, data)
+    return res.data
+  },
+
+  assignOwner: async (_cycleId: string, trackId: string, userId: string | null) => {
+    const body: AssignOwnerRequest = { ownerId: userId }
+    const res = await api.patch<ApiResponse<TrackDto>>(`/api/cycles/tracks/${trackId}/owner`, body)
+    return res.data
+  },
+
+  deactivateTrack: async (_cycleId: string, id: string) => {
+    const res = await api.patch<ApiResponse<TrackDto>>(`/api/cycles/tracks/${id}/deactivate`)
     return res.data
   },
 }

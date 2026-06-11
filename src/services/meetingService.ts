@@ -3,12 +3,27 @@ import type { ApiResponse } from '../types/auth'
 import type { MeetingDto, CreateMeetingRequest } from '../types/meeting'
 
 export const meetingService = {
+  getAll: async () => {
+    const res = await api.get<ApiResponse<MeetingDto[]>>('/api/meetings')
+    return res.data
+  },
+
   getByCouncil: async (councilId: string) => {
     const res = await api.get<ApiResponse<MeetingDto[]>>(`/api/councils/${councilId}/meetings`)
     return res.data
   },
 
+  getByRound: async (councilId: string) => {
+    const res = await api.get<ApiResponse<MeetingDto[]>>(`/api/councils/${councilId}/meetings`)
+    return res.data
+  },
+
   schedule: async (councilId: string, data: CreateMeetingRequest) => {
+    const res = await api.post<ApiResponse<MeetingDto>>(`/api/councils/${councilId}/meetings`, data)
+    return res.data
+  },
+
+  create: async (councilId: string, data: CreateMeetingRequest) => {
     const res = await api.post<ApiResponse<MeetingDto>>(`/api/councils/${councilId}/meetings`, data)
     return res.data
   },

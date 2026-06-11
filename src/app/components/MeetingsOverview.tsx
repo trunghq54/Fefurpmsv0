@@ -4,6 +4,7 @@ import { meetingService } from '../../services/meetingService'
 import type { MeetingDto } from '../../types/meeting'
 
 const ROUND_LABEL: Record<string, string> = {
+  SCREENING: 'Sàng lọc', REVIEW: 'Xét duyệt', ACCEPTANCE: 'Nghiệm thu',
   ProposalReview: 'Xét duyệt', ProgressCheck: 'Kiểm tra tiến độ', Acceptance: 'Nghiệm thu',
 }
 

@@ -5,25 +5,23 @@ import {
 } from 'lucide-react'
 import { roundService } from '../../services/roundService'
 import { scoringService } from '../../services/scoringService'
+import type { SubmitScoreRequest, RubricTemplateDto } from '../../services/scoringService'
 import { aiService } from '../../services/aiService'
 import { proposalService } from '../../services/proposalService'
 import RoleSwitcher from './RoleSwitcher'
 import type { MyAssignmentDto } from '../../types/review'
-import { VOTE_RESULT } from '../../types/review'
-import type { RubricCriterionDto } from '../../types/review'
-import { rubricService } from '../../services/rubricService'
+import { VOTE_RESULT, ROUND_TYPE_LABEL } from '../../types/review'
 import ProposalDetailView from './ProposalDetailView'
 import type { ProposalDto } from '../../types/proposal'
 
 interface User { role: string; name: string }
 interface ReviewerInterfaceProps { user: User; onLogout: () => void }
 
-const ROUND_LABEL: Record<string, string> = {
-  ProposalReview: 'Xét duyệt', ProgressCheck: 'Kiểm tra tiến độ', Acceptance: 'Nghiệm thu',
-}
 const ROLE_LABEL: Record<string, string> = { Member: 'Thành viên', Chair: 'Chủ tịch', Opponent: 'Phản biện' }
 const STATUS_COLOR: Record<string, string> = {
-  Pending: 'bg-yellow-100 text-yellow-800', Accepted: 'bg-green-100 text-green-800', Declined: 'bg-red-100 text-red-800',
+  Pending: 'bg-yellow-100 text-yellow-800',
+  Accepted: 'bg-green-100 text-green-800',
+  Declined: 'bg-red-100 text-red-800',
 }
 
 export default function ReviewerInterface({ user, onLogout }: ReviewerInterfaceProps) {
@@ -44,7 +42,11 @@ export default function ReviewerInterface({ user, onLogout }: ReviewerInterfaceP
   const respond = async (a: MyAssignmentDto, accept: boolean) => {
     const res = await roundService.respond(a.assignmentId, accept)
     if (res.success && res.data) {
-      setAssignments((prev) => prev.map((x) => (x.assignmentId === a.assignmentId ? { ...x, status: res.data!.status } : x)))
+      setAssignments((prev) =>
+        prev.map((x) =>
+          x.assignmentId === a.assignmentId ? { ...x, status: accept ? 'Accepted' : 'Declined' } : x,
+        ),
+      )
     }
   }
 
@@ -57,8 +59,10 @@ export default function ReviewerInterface({ user, onLogout }: ReviewerInterfaceP
             <p className="text-sm text-gray-500">Reviewer Portal</p>
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/guide')}
-              className="flex items-center gap-1.5 px-3 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 text-sm">
+            <button
+              onClick={() => navigate('/guide')}
+              className="flex items-center gap-1.5 px-3 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 text-sm"
+            >
               <BookOpen className="w-4 h-4" /> Hướng dẫn
             </button>
             <RoleSwitcher />
@@ -66,8 +70,12 @@ export default function ReviewerInterface({ user, onLogout }: ReviewerInterfaceP
               <p className="font-medium text-gray-800">{user.name}</p>
               <p className="text-sm text-gray-500">Hội đồng phản biện</p>
             </div>
-            <button onClick={() => { if (window.confirm('Đăng xuất?')) onLogout() }}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><LogOut className="w-5 h-5" /></button>
+            <button
+              onClick={() => { if (window.confirm('Đăng xuất?')) onLogout() }}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>
@@ -99,25 +107,38 @@ export default function ReviewerInterface({ user, onLogout }: ReviewerInterfaceP
                           <FileText className="w-5 h-5 text-blue-500" /> {a.proposalTitleVI}
                         </h3>
                         <div className="flex flex-wrap items-center gap-2 mt-2 text-sm text-gray-600">
-                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded">{ROUND_LABEL[a.roundType]}</span>
-                          <span className="px-2 py-0.5 bg-gray-100 rounded">{ROLE_LABEL[a.role]}</span>
-                          <span className={`px-2 py-0.5 rounded-full text-xs ${STATUS_COLOR[a.status]}`}>{a.status}</span>
+                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded">
+                            {ROUND_TYPE_LABEL[a.roundType] ?? a.roundType}
+                          </span>
+                          <span className="px-2 py-0.5 bg-gray-100 rounded">{ROLE_LABEL[a.role] ?? a.role}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs ${STATUS_COLOR[a.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                            {a.status}
+                          </span>
                           <span className="text-gray-400">· Đề xuất: {a.proposalStatus}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {a.status === 'Pending' && (
                           <>
-                            <button onClick={() => respond(a, true)} className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            <button
+                              onClick={() => respond(a, true)}
+                              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+                            >
                               <ThumbsUp className="w-4 h-4" /> Nhận
                             </button>
-                            <button onClick={() => respond(a, false)} className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <button
+                              onClick={() => respond(a, false)}
+                              className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
                               <ThumbsDown className="w-4 h-4" /> Từ chối
                             </button>
                           </>
                         )}
                         {a.status === 'Accepted' && (
-                          <button onClick={() => setActive(a)} className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                          <button
+                            onClick={() => setActive(a)}
+                            className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          >
                             <ClipboardCheck className="w-4 h-4" /> Chấm điểm
                           </button>
                         )}
@@ -135,7 +156,7 @@ export default function ReviewerInterface({ user, onLogout }: ReviewerInterfaceP
 }
 
 function ScoringPanel({ assignment, onBack }: { assignment: MyAssignmentDto; onBack: () => void }) {
-  const isAcceptance = assignment.roundType === 'Acceptance'
+  const isAcceptance = assignment.roundType === 'ACCEPTANCE'
   const [proposal, setProposal] = useState<ProposalDto | null>(null)
   const [proposalLoading, setProposalLoading] = useState(true)
 
@@ -150,14 +171,17 @@ function ScoringPanel({ assignment, onBack }: { assignment: MyAssignmentDto; onB
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button>
+        <button onClick={onBack} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
         <div>
           <h2 className="text-2xl font-bold text-gray-800">{assignment.proposalTitleVI}</h2>
-          <p className="text-gray-500 mt-1">{ROUND_LABEL[assignment.roundType]} · {ROLE_LABEL[assignment.role]}</p>
+          <p className="text-gray-500 mt-1">
+            {ROUND_TYPE_LABEL[assignment.roundType] ?? assignment.roundType} · {ROLE_LABEL[assignment.role] ?? assignment.role}
+          </p>
         </div>
       </div>
 
-      {/* Proposal detail block — reviewer needs to see what they're scoring */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-base font-semibold text-gray-700 mb-4 border-b border-gray-100 pb-2">Thông tin đề xuất</h3>
         {proposalLoading ? (
@@ -177,8 +201,9 @@ function ScoringPanel({ assignment, onBack }: { assignment: MyAssignmentDto; onB
 }
 
 function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDone: () => void }) {
-  const [criteria, setCriteria] = useState<RubricCriterionDto[]>([])
-  const [scores, setScores] = useState<Record<string, number>>({})
+  const councilId = assignment.councilId
+  const [template, setTemplate] = useState<RubricTemplateDto | null>(null)
+  const [scores, setScores] = useState<Record<number, number>>({})
   const [comments, setComments] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -187,10 +212,10 @@ function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDon
   const [aiSug, setAiSug] = useState<Record<number, string>>({})
   const [aiBusy, setAiBusy] = useState<number | null>(null)
 
-  const getAi = async (idx: number, criterion: RubricCriterionDto) => {
+  const getAi = async (idx: number, criterionName: string, maxScore: number) => {
     setAiBusy(idx)
     try {
-      const res = await aiService.aiFeedback(assignment.assignmentId, criterion.name, criterion.maxScore)
+      const res = await aiService.aiFeedback(assignment.assignmentId, criterionName, maxScore)
       if (res.success && res.data) setAiSug((p) => ({ ...p, [idx]: res.data!.feedbackDraft }))
       else setAiSug((p) => ({ ...p, [idx]: res.message || 'Lỗi' }))
     } catch (e: any) {
@@ -199,33 +224,39 @@ function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDon
   }
 
   useEffect(() => {
-    // Tải tiêu chí theo loại vòng (cấu hình được), rồi nạp điểm đã chấm (nếu có)
-    rubricService.getCriteria(assignment.roundType).then((res) => {
-      const crit = res.success && res.data ? res.data : []
-      setCriteria(crit)
-      const init: Record<string, number> = {}
-      crit.forEach((c) => { init[c.id] = 0 })
-      scoringService.getRubric(assignment.assignmentId).then((r) => {
-        if (r.success && r.data) {
-          r.data.items.forEach((it) => { init[it.criterionId] = it.score })
-          setComments(r.data.comments || '')
+    Promise.all([
+      scoringService.getRubricTemplates(),
+      scoringService.getRubric(councilId),
+    ]).then(([tmplRes, scoreRes]) => {
+      const tmpl = tmplRes.data?.[0] ?? null
+      setTemplate(tmpl)
+      if (tmpl) {
+        const init: Record<number, number> = {}
+        tmpl.criteria.forEach((c) => { init[c.id] = 0 })
+        if (scoreRes.data) {
+          scoreRes.data.scoreDetails.forEach((d) => { init[d.criterionId] = d.givenScore })
+          setComments(scoreRes.data.generalComments || '')
         }
         setScores(init)
-        setLoading(false)
-      })
+      }
+      setLoading(false)
     })
-  }, [assignment.assignmentId, assignment.roundType])
+  }, [councilId])
 
+  const criteria = template?.criteria ?? []
   const total = criteria.reduce((s, c) => s + (scores[c.id] || 0), 0)
-  const maxTotal = criteria.reduce((s, c) => s + c.maxScore, 0)
+  const maxTotal = template?.maxTotalScore ?? 0
 
   const submit = async () => {
     setSaving(true); setError(''); setSaved(false)
     try {
-      const res = await scoringService.submitRubric(assignment.assignmentId, {
-        items: criteria.map((c) => ({ criterionId: c.id, score: scores[c.id] || 0 })),
-        comments: comments || undefined,
-      })
+      if (!template) throw new Error('No rubric template loaded')
+      const body: SubmitScoreRequest = {
+        templateId: template.id,
+        generalComments: comments || undefined,
+        scoreDetails: criteria.map((c) => ({ criterionId: c.id, givenScore: scores[c.id] || 0 })),
+      }
+      const res = await scoringService.submitRubric(councilId, body)
       if (res.success) setSaved(true)
       else setError(res.message || 'Lỗi')
     } catch (e: any) {
@@ -233,8 +264,10 @@ function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDon
     } finally { setSaving(false) }
   }
 
-  if (loading) return <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-gray-400">Đang tải tiêu chí chấm...</div>
-  if (criteria.length === 0) return (
+  if (loading) return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-gray-400">Đang tải tiêu chí chấm...</div>
+  )
+  if (!template || criteria.length === 0) return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-gray-500">
       Chưa cấu hình tiêu chí chấm cho loại vòng này. Vui lòng nhờ Admin thêm ở mục "Tiêu chí chấm".
       <button onClick={onDone} className="ml-3 text-blue-600 hover:underline">Quay lại</button>
@@ -247,24 +280,38 @@ function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDon
       {criteria.map((c, idx) => (
         <div key={c.id}>
           <div className="flex justify-between items-center mb-1">
-            <label className="text-sm font-medium text-gray-700">{idx + 1}. {c.name}</label>
+            <label className="text-sm font-medium text-gray-700">{idx + 1}. {c.criterionName}</label>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => getAi(idx, c)} disabled={aiBusy === idx}
+              <button
+                type="button"
+                onClick={() => getAi(idx, c.criterionName, c.maxScore)}
+                disabled={aiBusy === idx}
                 title="AI gợi ý nhận xét cho tiêu chí này"
-                className="flex items-center gap-1 px-2 py-0.5 text-xs border border-purple-200 text-purple-700 rounded hover:bg-purple-50 disabled:opacity-60">
+                className="flex items-center gap-1 px-2 py-0.5 text-xs border border-purple-200 text-purple-700 rounded hover:bg-purple-50 disabled:opacity-60"
+              >
                 ✨ {aiBusy === idx ? '...' : 'AI gợi ý'}
               </button>
               <span className="text-sm font-semibold text-gray-700 w-16 text-right">{scores[c.id] || 0} / {c.maxScore}</span>
             </div>
           </div>
-          <input type="range" min={0} max={c.maxScore} value={scores[c.id] || 0}
+          <input
+            type="range"
+            min={0}
+            max={c.maxScore}
+            value={scores[c.id] || 0}
             onChange={(e) => setScores({ ...scores, [c.id]: Number(e.target.value) })}
-            className="w-full accent-blue-600" />
+            className="w-full accent-blue-600"
+          />
           {aiSug[idx] && (
             <div className="mt-1 text-xs bg-purple-50 border border-purple-200 rounded-lg px-3 py-2 text-gray-700">
               {aiSug[idx]}
-              <button type="button" onClick={() => setComments((prev) => (prev ? prev + '\n' : '') + aiSug[idx])}
-                className="ml-2 text-purple-600 hover:underline">Áp dụng</button>
+              <button
+                type="button"
+                onClick={() => setComments((prev) => (prev ? prev + '\n' : '') + aiSug[idx])}
+                className="ml-2 text-purple-600 hover:underline"
+              >
+                Áp dụng
+              </button>
             </div>
           )}
         </div>
@@ -274,15 +321,22 @@ function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDon
         <span className="text-2xl font-bold text-blue-600">{total} / {maxTotal}</span>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Nhận xét</label>
-        <textarea value={comments} onChange={(e) => setComments(e.target.value)} rows={4}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-        <p className="mt-1 text-xs text-gray-400">Dùng nút "✨ AI gợi ý" ở từng tiêu chí để nhận gợi ý nhận xét (cần Gemini API key).</p>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Nhận xét chung</label>
+        <textarea
+          value={comments}
+          onChange={(e) => setComments(e.target.value)}
+          rows={4}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <p className="mt-1 text-xs text-gray-400">Dùng nút "✨ AI gợi ý" ở từng tiêu chí để nhận gợi ý nhận xét.</p>
       </div>
       {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
       <div className="flex items-center gap-3">
-        <button onClick={submit} disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60">
+        <button
+          onClick={submit}
+          disabled={saving}
+          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60"
+        >
           <Send className="w-4 h-4" /> {saving ? 'Đang lưu...' : 'Nộp điểm'}
         </button>
         {saved && <span className="flex items-center gap-1 text-green-600 text-sm"><CheckCircle className="w-4 h-4" /> Đã lưu</span>}
@@ -293,44 +347,40 @@ function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDon
 }
 
 function VoteForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDone: () => void }) {
+  const councilId = assignment.councilId
   const [vote, setVote] = useState<number>(VOTE_RESULT.Pass)
   const [writtenReview, setWrittenReview] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const isOpponent = assignment.role === 'Opponent'
-  const [opp, setOpp] = useState<Record<string, number>>({ necessityScore: 3, contributionScore: 3, practicalScore: 3, resultScore: 3 })
+  const [template, setTemplate] = useState<RubricTemplateDto | null>(null)
 
   useEffect(() => {
-    scoringService.getVote(assignment.assignmentId).then((res) => {
-      if (res.success && res.data) {
-        const d = res.data
-        setVote(d.vote === 'Pass' ? 1 : d.vote === 'Fail' ? 2 : 3)
-        setWrittenReview(d.writtenReview || '')
-        setOpp({
-          necessityScore: d.necessityScore ?? 3, contributionScore: d.contributionScore ?? 3,
-          practicalScore: d.practicalScore ?? 3, resultScore: d.resultScore ?? 3,
-        })
+    Promise.all([
+      scoringService.getRubricTemplates(),
+      scoringService.getVote(councilId),
+    ]).then(([tmplRes, voteRes]) => {
+      setTemplate(tmplRes.data?.[0] ?? null)
+      if (voteRes.data) {
+        setWrittenReview(voteRes.data.otherRecommendations || voteRes.data.generalComments || '')
       }
     })
-  }, [assignment.assignmentId])
+  }, [councilId])
 
   const submit = async () => {
     setSaving(true); setSaved(false)
     try {
-      const res = await scoringService.submitVote(assignment.assignmentId, {
-        vote, writtenReview: writtenReview || undefined,
-        ...(isOpponent ? opp : {}),
-      })
+      if (!template) return
+      const voteLabel = vote === VOTE_RESULT.Pass ? 'Đạt' : vote === VOTE_RESULT.Fail ? 'Không đạt' : 'Đạt xuất sắc'
+      const body: SubmitScoreRequest = {
+        templateId: template.id,
+        generalComments: `Kết luận: ${voteLabel}`,
+        otherRecommendations: writtenReview || undefined,
+        scoreDetails: [],
+      }
+      const res = await scoringService.submitVote(councilId, body)
       if (res.success) setSaved(true)
     } finally { setSaving(false) }
   }
-
-  const oppFields = [
-    { key: 'necessityScore', name: 'Tính cấp thiết' },
-    { key: 'contributionScore', name: 'Đóng góp' },
-    { key: 'practicalScore', name: 'Tính thực tiễn' },
-    { key: 'resultScore', name: 'Kết quả' },
-  ]
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-5">
@@ -338,36 +388,38 @@ function VoteForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDone:
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Kết luận</label>
         <div className="flex gap-3">
-          {[{ v: VOTE_RESULT.Pass, l: 'Đạt' }, { v: VOTE_RESULT.Fail, l: 'Không đạt' }, { v: VOTE_RESULT.PassExcellent, l: 'Đạt xuất sắc' }].map((o) => (
-            <button key={o.v} onClick={() => setVote(o.v)}
-              className={`px-4 py-2 rounded-lg border font-medium ${vote === o.v ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
+          {[
+            { v: VOTE_RESULT.Pass, l: 'Đạt' },
+            { v: VOTE_RESULT.Fail, l: 'Không đạt' },
+            { v: VOTE_RESULT.PassExcellent, l: 'Đạt xuất sắc' },
+          ].map((o) => (
+            <button
+              key={o.v}
+              onClick={() => setVote(o.v)}
+              className={`px-4 py-2 rounded-lg border font-medium ${
+                vote === o.v ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
               {o.l}
             </button>
           ))}
         </div>
       </div>
-      {isOpponent && (
-        <div className="grid grid-cols-2 gap-4">
-          {oppFields.map((f) => (
-            <div key={f.key}>
-              <div className="flex justify-between mb-1">
-                <label className="text-sm font-medium text-gray-700">{f.name}</label>
-                <span className="text-sm text-gray-500">{opp[f.key]} / 5</span>
-              </div>
-              <input type="range" min={1} max={5} value={opp[f.key]}
-                onChange={(e) => setOpp({ ...opp, [f.key]: Number(e.target.value) })} className="w-full accent-blue-600" />
-            </div>
-          ))}
-        </div>
-      )}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Nhận xét phản biện</label>
-        <textarea value={writtenReview} onChange={(e) => setWrittenReview(e.target.value)} rows={4}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+        <textarea
+          value={writtenReview}
+          onChange={(e) => setWrittenReview(e.target.value)}
+          rows={4}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
       <div className="flex items-center gap-3">
-        <button onClick={submit} disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60">
+        <button
+          onClick={submit}
+          disabled={saving || !template}
+          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60"
+        >
           <Send className="w-4 h-4" /> {saving ? 'Đang lưu...' : 'Nộp phiếu'}
         </button>
         {saved && <span className="flex items-center gap-1 text-green-600 text-sm"><CheckCircle className="w-4 h-4" /> Đã lưu</span>}

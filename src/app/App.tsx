@@ -14,7 +14,7 @@ import ContractManagement from './components/ContractManagement'
 
 function AppRoutes() {
   const { user, logout, isAuthenticated, activeRole, roles } = useAuth()
-  const legacyUser = user ? { role: activeRole || user.accountType, name: user.fullName } : null
+  const legacyUser = user ? { role: activeRole || user.accountType, name: user.fullName } : { role: '', name: '' }
 
   const loggedInTarget = () => {
     if (!user) return '/login'

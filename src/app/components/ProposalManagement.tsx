@@ -7,19 +7,27 @@ import AiSummaryPanel from './AiSummaryPanel'
 import ProposalDocuments from './ProposalDocuments'
 
 const STATUSES = [
-  'Draft', 'Submitted', 'UnderReview', 'Approved', 'ContractSigned', 'InProgress',
-  'AcceptancePending', 'Accepted', 'RejectedAtReview', 'RejectedAtAcceptance', 'Withdrawn', 'Suspended',
+  'DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'CONTRACT_SIGNED', 'IN_PROGRESS',
+  'ACCEPTANCE_PENDING', 'ACCEPTED', 'REJECTED', 'WITHDRAWN', 'SUSPENDED',
 ]
+
+const STATUS_LABEL: Record<string, string> = {
+  DRAFT: 'Bản nháp', SUBMITTED: 'Đã nộp', UNDER_REVIEW: 'Đang xét duyệt',
+  APPROVED: 'Đã duyệt', CONTRACT_SIGNED: 'Đã ký HĐ', IN_PROGRESS: 'Đang thực hiện',
+  ACCEPTANCE_PENDING: 'Chờ nghiệm thu', ACCEPTED: 'Đã nghiệm thu',
+  REJECTED: 'Từ chối', WITHDRAWN: 'Rút lại', SUSPENDED: 'Tạm dừng',
+}
 
 const statusColor = (status: string) => {
   const map: Record<string, string> = {
-    Draft: 'bg-gray-100 text-gray-800',
-    Submitted: 'bg-yellow-100 text-yellow-800',
-    UnderReview: 'bg-blue-100 text-blue-800',
-    Approved: 'bg-green-100 text-green-800',
-    Accepted: 'bg-green-100 text-green-800',
-    RejectedAtReview: 'bg-red-100 text-red-800',
-    RejectedAtAcceptance: 'bg-red-100 text-red-800',
+    DRAFT: 'bg-gray-100 text-gray-800',
+    SUBMITTED: 'bg-yellow-100 text-yellow-800',
+    UNDER_REVIEW: 'bg-blue-100 text-blue-800',
+    APPROVED: 'bg-green-100 text-green-800',
+    ACCEPTED: 'bg-green-100 text-green-800',
+    REJECTED: 'bg-red-100 text-red-800',
+    CONTRACT_SIGNED: 'bg-purple-100 text-purple-800',
+    IN_PROGRESS: 'bg-indigo-100 text-indigo-800',
   }
   return map[status] || 'bg-gray-100 text-gray-800'
 }
@@ -86,7 +94,7 @@ export default function ProposalManagement() {
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="all">Tất cả trạng thái</option>
-            {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+            {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s] ?? s}</option>)}
           </select>
           <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
@@ -105,11 +113,11 @@ export default function ProposalManagement() {
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Đã nộp</p>
-          <p className="text-2xl font-bold text-yellow-600 mt-1">{proposals.filter((p) => p.status === 'Submitted').length}</p>
+          <p className="text-2xl font-bold text-yellow-600 mt-1">{proposals.filter((p) => p.status === 'SUBMITTED').length}</p>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Đã duyệt</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">{proposals.filter((p) => p.status === 'Approved').length}</p>
+          <p className="text-2xl font-bold text-green-600 mt-1">{proposals.filter((p) => p.status === 'APPROVED').length}</p>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Tổng kinh phí đề xuất</p>
@@ -151,7 +159,7 @@ export default function ProposalManagement() {
                     <td className="px-6 py-4 text-gray-600">{p.trackName || '—'}</td>
                     <td className="px-6 py-4"><span className="px-2 py-0.5 bg-gray-100 rounded text-sm">{p.researchType}</span></td>
                     <td className="px-6 py-4 text-gray-600">{formatVnd(p.totalBudget)}</td>
-                    <td className="px-6 py-4"><span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(p.status)}`}>{p.status}</span></td>
+                    <td className="px-6 py-4"><span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(p.status)}`}>{STATUS_LABEL[p.status] ?? p.status}</span></td>
                     <td className="px-6 py-4">
                       <button onClick={() => openDetail(p.id)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="Xem chi tiết">
                         <Eye className="w-4 h-4" />
