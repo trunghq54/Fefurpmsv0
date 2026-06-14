@@ -40,18 +40,17 @@ const emptyBudget: CreateBudgetItemRequest = { category: '', amount: 0, note: ''
 // Key lưu nháp form đề tài trên trình duyệt (chống mất chữ khi F5 / load lại)
 const DRAFT_KEY = 'furpms_proposal_draft'
 
+// BE trả status CHỮ HOA (DRAFT, SUBMITTED, ...). Chuẩn hoá để khớp.
 const statusColor = (status: string) => {
   const map: Record<string, string> = {
-    Draft: 'bg-gray-100 text-gray-800',
-    Submitted: 'bg-yellow-100 text-yellow-800',
-    UnderReview: 'bg-blue-100 text-blue-800',
-    Approved: 'bg-green-100 text-green-800',
-    Accepted: 'bg-green-100 text-green-800',
-    RejectedAtReview: 'bg-red-100 text-red-800',
-    RejectedAtAcceptance: 'bg-red-100 text-red-800',
-    Withdrawn: 'bg-gray-100 text-gray-800',
+    DRAFT: 'bg-gray-100 text-gray-800',
+    SUBMITTED: 'bg-yellow-100 text-yellow-800',
+    UNDER_REVIEW: 'bg-blue-100 text-blue-800',
+    APPROVED: 'bg-green-100 text-green-800',
+    REJECTED: 'bg-red-100 text-red-800',
+    WITHDRAWN: 'bg-gray-100 text-gray-800',
   }
-  return map[status] || 'bg-gray-100 text-gray-800'
+  return map[(status || '').toUpperCase()] || 'bg-gray-100 text-gray-800'
 }
 
 export default function ProposalSubmission({ user, onLogout }: ProposalSubmissionProps) {
@@ -882,7 +881,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                       <b>Lý do từ chối:</b> {viewProposal.rejectionReason}
                     </div>
                   )}
-                  {viewProposal.status === 'Draft' && (
+                  {viewProposal.status === 'DRAFT' && (
                     <div className="pt-2 flex justify-end">
                       <button
                         onClick={() => { const p = viewProposal; setViewProposal(null); handleEdit({ id: p.id } as ProposalSummaryDto) }}
@@ -1066,19 +1065,19 @@ function MySubmissions({ proposals, loading, rowBusy, onSubmit, onWithdraw, onVi
                     className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-60">
                     <Eye className="w-4 h-4" /> Xem
                   </button>
-                  {p.status === 'Draft' && (
+                  {p.status === 'DRAFT' && (
                     <button onClick={() => onEdit(p)} disabled={rowBusy === p.id}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm border border-emerald-300 text-emerald-700 rounded-lg hover:bg-emerald-50 disabled:opacity-60">
                       <Pencil className="w-4 h-4" /> Sửa
                     </button>
                   )}
-                  {p.status === 'Draft' && (
+                  {p.status === 'DRAFT' && (
                     <button onClick={() => onSubmit(p.id)} disabled={rowBusy === p.id}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
                       <Send className="w-4 h-4" /> Gửi duyệt
                     </button>
                   )}
-                  {p.status === 'Submitted' && (
+                  {p.status === 'SUBMITTED' && (
                     <button onClick={() => onWithdraw(p.id)} disabled={rowBusy === p.id}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-60">
                       <Undo2 className="w-4 h-4" /> Rút lại
@@ -1088,13 +1087,13 @@ function MySubmissions({ proposals, loading, rowBusy, onSubmit, onWithdraw, onVi
                     className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
                     <FileText className="w-4 h-4" /> Tài liệu
                   </button>
-                  {p.status !== 'Draft' && (
+                  {p.status !== 'DRAFT' && (
                     <button onClick={() => onResults(p)}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50">
                       <BarChart3 className="w-4 h-4" /> Kết quả
                     </button>
                   )}
-                  {p.status !== 'Draft' && (
+                  {p.status !== 'DRAFT' && (
                     <button onClick={() => onChangeRequest(p)}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50">
                       <FileText className="w-4 h-4" /> Yêu cầu thay đổi
