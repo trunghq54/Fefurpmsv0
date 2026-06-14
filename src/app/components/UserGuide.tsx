@@ -10,7 +10,7 @@ interface Step { step: string; detail?: string }
 interface Section { title: string; steps: Step[] }
 
 const GUIDES: Record<string, { label: string; icon: React.ElementType; color: string; sections: Section[] }> = {
-  Administrator: {
+  Admin: {
     label: 'Quản trị viên',
     icon: Shield,
     color: 'text-red-600 bg-red-50 border-red-200',
@@ -252,7 +252,7 @@ function SectionBlock({ section, idx }: { section: Section; idx: number }) {
 export default function UserGuide() {
   const navigate = useNavigate()
   const { activeRole } = useAuth()
-  const defaultRole = activeRole && GUIDES[activeRole] ? activeRole : 'Administrator'
+  const defaultRole = activeRole && GUIDES[activeRole] ? activeRole : 'Admin'
   const [selectedRole, setSelectedRole] = useState(defaultRole)
 
   const guide = GUIDES[selectedRole]

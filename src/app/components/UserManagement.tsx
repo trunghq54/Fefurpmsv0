@@ -4,7 +4,7 @@ import { userService } from '../../services/userService'
 import type { UserDto } from '../../types/user'
 import { ROLE_VALUE, ROLE_LABEL } from '../../types/user'
 
-const ALL_ROLES = ['Administrator', 'Staff', 'Faculty', 'ReviewCommittee'] as const
+const ALL_ROLES = ['Admin', 'Staff', 'Faculty', 'ReviewCommittee'] as const
 
 const departments = [
   'Software Engineering',
@@ -34,7 +34,7 @@ const defaultForm: FormState = {
 
 const roleBadge = (role: string) => {
   const colors: Record<string, string> = {
-    Administrator: 'bg-purple-100 text-purple-800',
+    Admin: 'bg-purple-100 text-purple-800',
     Faculty: 'bg-blue-100 text-blue-800',
     ReviewCommittee: 'bg-green-100 text-green-800',
     Staff: 'bg-yellow-100 text-yellow-800',

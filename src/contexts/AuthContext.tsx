@@ -18,7 +18,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export const roleToPath: Record<RoleName, string> = {
-  Administrator: '/admin',
+  Admin: '/admin',
   Staff: '/staff',
   Faculty: '/faculty',
   ReviewCommittee: '/reviewer',

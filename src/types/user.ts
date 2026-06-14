@@ -19,7 +19,7 @@ export interface CreateUserRequest {
   phoneNumber?: string
   department?: string
   academicDegree?: number
-  roles: number[] // AccountType enum values: Administrator=1, Staff=2, Faculty=3, ReviewCommittee=4
+  roles: number[] // Role.Id values: Admin=1, Staff=2, Faculty=3, ReviewCommittee=4
   temporaryPassword: string
 }
 
@@ -31,8 +31,8 @@ export interface UpdateUserRequest {
   roles: number[]
 }
 
-// Backend enum values (NOT zero-based) — must match FURPMS.Domain.Enums.AccountType
-export const ROLE_VALUE = { Administrator: 1, Staff: 2, Faculty: 3, ReviewCommittee: 4 } as const
+// Backend Role.Id values (NOT zero-based) — must match seeded roles in DatabaseSeeder
+export const ROLE_VALUE = { Admin: 1, Staff: 2, Faculty: 3, ReviewCommittee: 4 } as const
 export const ROLE_LABEL: Record<string, string> = {
-  Administrator: 'Quản trị', Staff: 'Phòng QLKH', Faculty: 'Giảng viên', ReviewCommittee: 'Hội đồng',
+  Admin: 'Quản trị', Staff: 'Phòng QLKH', Faculty: 'Giảng viên', ReviewCommittee: 'Hội đồng',
 }

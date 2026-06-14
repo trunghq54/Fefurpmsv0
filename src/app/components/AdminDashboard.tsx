@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router'
 import {
   LayoutDashboard, Users, FileText, UserCheck, Calendar,
   LogOut, Search, CalendarRange, FileEdit, Paperclip, SlidersHorizontal, BookOpen, ClipboardList,
-  Building2, Tag, ShoppingBag,
+  Building2, Tag, ShoppingBag, Clock,
 } from 'lucide-react'
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import UserManagement from './UserManagement'
@@ -22,6 +22,7 @@ import ContractManagement from './ContractManagement'
 import OrgUnitManagement from './OrgUnitManagement'
 import ProductCategoryManagement from './ProductCategoryManagement'
 import ResearchOrderManagement from './ResearchOrderManagement'
+import SystemClockPanel from './SystemClockPanel'
 
 interface User {
   role: string
@@ -73,6 +74,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     { id: 'orgunits', label: 'Đơn vị tổ chức', icon: Building2 },
     { id: 'product-categories', label: 'Danh mục SP', icon: Tag },
     { id: 'research-orders', label: 'Đặt hàng NC', icon: ShoppingBag },
+    { id: 'devtools', label: 'Công cụ test', icon: Clock },
   ]
 
   return (
@@ -151,6 +153,15 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
           {activeMenu === 'orgunits' && <OrgUnitManagement />}
           {activeMenu === 'product-categories' && <ProductCategoryManagement />}
           {activeMenu === 'research-orders' && <ResearchOrderManagement />}
+          {activeMenu === 'devtools' && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">Công cụ test</h2>
+                <p className="text-gray-500 mt-1">Tiện ích hỗ trợ kiểm thử các luồng dài ngày mà không phải chờ thật.</p>
+              </div>
+              <SystemClockPanel />
+            </div>
+          )}
 
           {activeMenu === 'dashboard' && (
             <>

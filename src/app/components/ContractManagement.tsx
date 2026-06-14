@@ -1229,7 +1229,7 @@ function ContractDetail({
 
 export default function ContractManagement() {
   const { user, activeRole } = useAuth()
-  const isStaff = activeRole === 'Staff' || activeRole === 'Administrator'
+  const isStaff = activeRole === 'Staff' || activeRole === 'Admin'
   const isPi = activeRole === 'Faculty'
 
   const [contracts, setContracts] = useState<ContractListResponse[]>([])

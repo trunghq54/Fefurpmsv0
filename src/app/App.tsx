@@ -35,7 +35,7 @@ function AppRoutes() {
       <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
       <Route
         path="/admin"
-        element={<ProtectedRoute roles={['Administrator']}><AdminDashboard user={legacyUser} onLogout={logout} /></ProtectedRoute>}
+        element={<ProtectedRoute roles={['Admin']}><AdminDashboard user={legacyUser} onLogout={logout} /></ProtectedRoute>}
       />
       <Route
         path="/staff"
@@ -51,12 +51,12 @@ function AppRoutes() {
       />
       <Route
         path="/meetings"
-        element={<ProtectedRoute roles={['Administrator']}><MeetingsOverview /></ProtectedRoute>}
+        element={<ProtectedRoute roles={['Admin']}><MeetingsOverview /></ProtectedRoute>}
       />
       <Route path="/guide" element={<ProtectedRoute><UserGuide /></ProtectedRoute>} />
       <Route
         path="/contracts"
-        element={<ProtectedRoute roles={['Staff', 'Administrator', 'Faculty']}><ContractManagement /></ProtectedRoute>}
+        element={<ProtectedRoute roles={['Staff', 'Admin', 'Faculty']}><ContractManagement /></ProtectedRoute>}
       />
     </Routes>
   )

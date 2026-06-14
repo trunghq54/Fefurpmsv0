@@ -3,7 +3,7 @@ export interface LoginRequest {
   password: string
 }
 
-export type RoleName = 'Administrator' | 'Staff' | 'Faculty' | 'ReviewCommittee'
+export type RoleName = 'Admin' | 'Staff' | 'Faculty' | 'ReviewCommittee'
 
 export interface UserInfo {
   id: string

@@ -31,6 +31,7 @@ export interface ProposalDto {
   cycleId: string
   cycleName: string
   trackId: string
+  researchTypeId?: number
   trackName: string
   principalInvestigatorName: string
   titleVI: string

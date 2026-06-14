@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import {
   CheckCircle, AlertCircle, ArrowLeft, ArrowRight, Home, List, LogOut,
-  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3, Upload, Paperclip, BookOpen, ClipboardList, GraduationCap,
+  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3, Upload, Paperclip, BookOpen, ClipboardList, GraduationCap, Eye, Pencil,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import MyAcademicProfile from './MyAcademicProfile'
@@ -17,7 +17,7 @@ import RoundResultsPanel from './RoundResultsPanel'
 import RoleSwitcher from './RoleSwitcher'
 import type { CycleDto } from '../../types/cycle'
 import type {
-  ProposalSummaryDto, CreateMemberRequest, CreateBudgetItemRequest,
+  ProposalSummaryDto, ProposalDto, CreateMemberRequest, CreateBudgetItemRequest,
 } from '../../types/proposal'
 
 interface User {
@@ -86,6 +86,12 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   const [myProposals, setMyProposals] = useState<ProposalSummaryDto[]>([])
   const [loadingList, setLoadingList] = useState(false)
   const [rowBusy, setRowBusy] = useState<string | null>(null)
+
+  // Chỉnh sửa đề xuất đã có (chỉ DRAFT). editingId != null => form ở chế độ sửa.
+  const [editingId, setEditingId] = useState<string | null>(null)
+  // Xem chi tiết (read-only) — mọi trạng thái
+  const [viewProposal, setViewProposal] = useState<ProposalDto | null>(null)
+  const [viewLoading, setViewLoading] = useState(false)
 
   // change-request modal
   const [crProposal, setCrProposal] = useState<ProposalSummaryDto | null>(null)
@@ -165,7 +171,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
 
   // Tự lưu nháp khi gõ (sau khi đã hydrate, chỉ ở chế độ tạo mới, bỏ qua nháp rỗng)
   useEffect(() => {
-    if (!hydratedRef.current || showSubmissions) return
+    if (!hydratedRef.current || showSubmissions || editingId) return
     const isEmpty =
       !titleVI && !titleEN && !trackId && !objectives && !methodology && !expectedOutput &&
       members.every((m) => !m.fullName?.trim()) && budgetItems.every((b) => !b.category?.trim())
@@ -227,19 +233,99 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     if (currentStep < 5) setCurrentStep(currentStep + 1)
   }
 
+  // Đổ dữ liệu một ProposalDto vào form (dùng cho chế độ sửa)
+  const fillForm = (p: ProposalDto) => {
+    setTitleVI(p.titleVI || '')
+    setTitleEN(p.titleEN || '')
+    setTrackId(p.trackId || '')
+    setResearchType(p.researchTypeId ?? (p.researchType === 'Applied' ? 1 : 2))
+    setDurationMonths(p.durationMonths || 12)
+    setObjectives(p.objectives || '')
+    setMethodology(p.methodology || '')
+    setExpectedOutput(p.expectedOutput || '')
+    setMembers(
+      p.members.length
+        ? p.members.map((m) => ({ fullName: m.fullName, email: m.email || '', department: m.department || '', role: m.role || '', workMonths: m.workMonths }))
+        : [{ ...emptyMember, role: 'Chủ nhiệm' }],
+    )
+    setBudgetItems(
+      p.budgetItems.length
+        ? p.budgetItems.map((b) => ({ category: b.category, amount: b.amount, note: b.note || '' }))
+        : [{ ...emptyBudget }],
+    )
+    setPendingDocs([])
+    setCurrentStep(1)
+    setError('')
+  }
+
+  // Mở form ở chế độ sửa (chỉ DRAFT)
+  const handleEdit = async (p: ProposalSummaryDto) => {
+    setRowBusy(p.id)
+    try {
+      const res = await proposalService.getById(p.id)
+      if (res.success && res.data) {
+        fillForm(res.data)
+        setEditingId(p.id)
+        setShowSubmissions(false)
+        setShowProfile(false)
+        setDraftRestored(false)
+      }
+    } catch (e) { console.error(e) } finally { setRowBusy(null) }
+  }
+
+  // Mở modal xem chi tiết (read-only, mọi trạng thái)
+  const handleView = async (p: ProposalSummaryDto) => {
+    setViewLoading(true); setViewProposal({ id: p.id } as ProposalDto)
+    try {
+      const res = await proposalService.getById(p.id)
+      if (res.success && res.data) setViewProposal(res.data)
+    } catch (e) { console.error(e) } finally { setViewLoading(false) }
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    resetForm()
+    setShowSubmissions(true)
+  }
+
   const handleSaveDraft = async () => {
     for (const s of [1, 3]) {
       const err = validateStep(s)
       if (err) { setError(err); setCurrentStep(s); return }
     }
     setSaving(true); setError('')
+    const payload = {
+      trackId, titleVI, titleEN, researchType, durationMonths,
+      objectives, methodology, expectedOutput,
+      members: members.filter((m) => m.fullName.trim()),
+      budgetItems: budgetItems.filter((b) => b.category.trim()),
+    }
     try {
-      const res = await proposalService.create({
-        trackId, titleVI, titleEN, researchType, durationMonths,
-        objectives, methodology, expectedOutput,
-        members: members.filter((m) => m.fullName.trim()),
-        budgetItems: budgetItems.filter((b) => b.category.trim()),
-      })
+      // Chế độ sửa đề xuất đã có
+      if (editingId) {
+        const res = await proposalService.update(editingId, payload)
+        if (res.success) {
+          // Upload tài liệu mới (nếu có)
+          const uploadErrors: string[] = []
+          for (const { file, documentType } of pendingDocs) {
+            try {
+              const up = await proposalService.uploadDocument(editingId, file, documentType)
+              if (!up.success) uploadErrors.push(`${file.name}: ${up.message || 'Lỗi tải lên'}`)
+            } catch (e: any) {
+              uploadErrors.push(`${file.name}: ${e.response?.data?.message || 'Lỗi tải lên'}`)
+            }
+          }
+          setEditingId(null)
+          resetForm()
+          if (uploadErrors.length) setError(`Đã cập nhật, nhưng một số tài liệu chưa tải lên:\n${uploadErrors.join('\n')}`)
+          setShowSubmissions(true)
+        } else {
+          setError(res.message || 'Cập nhật thất bại')
+        }
+        return
+      }
+
+      const res = await proposalService.create(payload)
       if (res.success && res.data) {
         const newId = res.data.id
         // Upload collected files sequentially
@@ -317,7 +403,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                 <BookOpen className="w-4 h-4" /> Hướng dẫn
               </button>
               <button
-                onClick={() => { setShowSubmissions(!showSubmissions); setShowProfile(false) }}
+                onClick={() => { if (editingId) { setEditingId(null); resetForm() } setShowSubmissions(!showSubmissions); setShowProfile(false) }}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
                 {showSubmissions ? <Home className="w-4 h-4" /> : <List className="w-4 h-4" />}
@@ -388,16 +474,26 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
             rowBusy={rowBusy}
             onSubmit={handleSubmit}
             onWithdraw={handleWithdraw}
+            onView={handleView}
+            onEdit={handleEdit}
             onChangeRequest={(p) => { setCrProposal(p); setCrType(CHANGE_TYPE.ExtendTime); setCrDesc(''); setCrNewValue(''); setCrMsg('') }}
             onDocuments={(p) => setDocProposal(p)}
             onResults={(p) => { setResultsProposal(p); setResultsRounds([]) }}
           />
-        ) : !activeCycle && !loadingCycle ? (
+        ) : !activeCycle && !loadingCycle && !editingId ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
             Không có đợt nộp đang mở.
           </div>
         ) : (
           <>
+            {editingId && (
+              <div className="mb-6 flex items-center justify-between bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3">
+                <p className="text-sm text-indigo-800">
+                  Đang chỉnh sửa đề xuất <b>nháp</b>. Bấm "Cập nhật" ở bước cuối để lưu thay đổi.
+                </p>
+                <button onClick={cancelEdit} className="text-sm font-medium text-indigo-700 hover:text-indigo-900 underline">Huỷ</button>
+              </div>
+            )}
             {/* Progress */}
             <div className="mb-10 flex items-center justify-between">
               {steps.map((step, index) => (
@@ -632,7 +728,11 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                   </div>
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                    <p className="text-sm text-green-700">Đề xuất sẽ được lưu ở trạng thái <b>Nháp</b>. Bạn có thể gửi duyệt sau ở mục "Đề xuất của tôi".</p>
+                    <p className="text-sm text-green-700">
+                      {editingId
+                        ? <>Thay đổi sẽ được lưu vào đề xuất <b>nháp</b> hiện tại.</>
+                        : <>Đề xuất sẽ được lưu ở trạng thái <b>Nháp</b>. Bạn có thể gửi duyệt sau ở mục "Đề xuất của tôi".</>}
+                    </p>
                   </div>
                 </div>
               )}
@@ -656,7 +756,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                 ) : (
                   <button onClick={handleSaveDraft} disabled={saving || overCap}
                     className="flex items-center gap-2 px-6 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed">
-                    <CheckCircle className="w-4 h-4" /> {saving ? 'Đang lưu...' : 'Lưu nháp'}
+                    <CheckCircle className="w-4 h-4" /> {saving ? 'Đang lưu...' : editingId ? 'Cập nhật' : 'Lưu nháp'}
                   </button>
                 )}
               </div>
@@ -666,6 +766,73 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
           </>
         )}
       </div>
+
+      {/* Xem chi tiết đề xuất (read-only) */}
+      {viewProposal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 bg-white">
+              <h3 className="text-xl font-bold text-gray-800">Chi tiết đề xuất</h3>
+              <button onClick={() => setViewProposal(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              {viewLoading || !viewProposal.titleVI ? (
+                <p className="text-sm text-gray-400">Đang tải...</p>
+              ) : (
+                <>
+                  <div className="bg-gray-50 rounded-lg p-5 space-y-2 text-sm">
+                    <Row label="Tên đề tài (VI)" value={viewProposal.titleVI || '—'} />
+                    <Row label="Tên đề tài (EN)" value={viewProposal.titleEN || '—'} />
+                    <Row label="Track" value={viewProposal.trackName || '—'} />
+                    <Row label="Loại nghiên cứu" value={viewProposal.researchType === 'Applied' ? 'Ứng dụng' : 'Cơ bản'} />
+                    <Row label="Trạng thái" value={viewProposal.status} />
+                    <Row label="Thời gian thực hiện" value={`${viewProposal.durationMonths} tháng`} />
+                    <Row label="Tổng kinh phí" value={formatVnd(viewProposal.totalBudget)} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 mb-1">Mục tiêu nghiên cứu</p>
+                    <p className="text-sm text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-lg p-3">{viewProposal.objectives || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 mb-1">Phương pháp / nội dung</p>
+                    <p className="text-sm text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-lg p-3">{viewProposal.methodology || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 mb-2">Thành viên ({viewProposal.members.length})</p>
+                    {viewProposal.members.length === 0 ? (
+                      <p className="text-sm text-gray-400">Chưa có thành viên.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {viewProposal.members.map((m) => (
+                          <div key={m.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm">
+                            <span className="text-gray-800">{m.fullName} {m.role && <span className="text-gray-400">· {m.role}</span>}</span>
+                            <span className="text-gray-500">{m.workMonths} tháng công</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {viewProposal.rejectionReason && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+                      <b>Lý do từ chối:</b> {viewProposal.rejectionReason}
+                    </div>
+                  )}
+                  {viewProposal.status === 'Draft' && (
+                    <div className="pt-2 flex justify-end">
+                      <button
+                        onClick={() => { const p = viewProposal; setViewProposal(null); handleEdit({ id: p.id } as ProposalSummaryDto) }}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm"
+                      >
+                        <Pencil className="w-4 h-4" /> Chỉnh sửa đề xuất này
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Documents modal */}
       {docProposal && (
@@ -782,12 +949,14 @@ interface MySubmissionsProps {
   rowBusy: string | null
   onSubmit: (id: string) => void
   onWithdraw: (id: string) => void
+  onView: (p: ProposalSummaryDto) => void
+  onEdit: (p: ProposalSummaryDto) => void
   onChangeRequest: (p: ProposalSummaryDto) => void
   onDocuments: (p: ProposalSummaryDto) => void
   onResults: (p: ProposalSummaryDto) => void
 }
 
-function MySubmissions({ proposals, loading, rowBusy, onSubmit, onWithdraw, onChangeRequest, onDocuments, onResults }: MySubmissionsProps) {
+function MySubmissions({ proposals, loading, rowBusy, onSubmit, onWithdraw, onView, onEdit, onChangeRequest, onDocuments, onResults }: MySubmissionsProps) {
   const navigate = useNavigate()
   return (
     <div className="space-y-6">
@@ -828,6 +997,16 @@ function MySubmissions({ proposals, loading, rowBusy, onSubmit, onWithdraw, onCh
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(p.status)}`}>{p.status}</span>
+                  <button onClick={() => onView(p)} disabled={rowBusy === p.id}
+                    className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-60">
+                    <Eye className="w-4 h-4" /> Xem
+                  </button>
+                  {p.status === 'Draft' && (
+                    <button onClick={() => onEdit(p)} disabled={rowBusy === p.id}
+                      className="flex items-center gap-1 px-3 py-1.5 text-sm border border-emerald-300 text-emerald-700 rounded-lg hover:bg-emerald-50 disabled:opacity-60">
+                      <Pencil className="w-4 h-4" /> Sửa
+                    </button>
+                  )}
                   {p.status === 'Draft' && (
                     <button onClick={() => onSubmit(p.id)} disabled={rowBusy === p.id}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
