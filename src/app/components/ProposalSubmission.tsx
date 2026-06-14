@@ -222,6 +222,27 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     setCurrentStep(1); setError('')
   }
 
+  // Điền nhanh dữ liệu mẫu hợp lệ để test (chỉ ở chế độ tạo mới)
+  const fillSample = () => {
+    setTitleVI('Nghiên cứu ứng dụng trí tuệ nhân tạo trong quản lý đề tài nghiên cứu khoa học')
+    setTitleEN('Applying Artificial Intelligence to Research Project Management')
+    if (activeTracks[0]) setTrackId(activeTracks[0].id)
+    setResearchType(1)
+    setDurationMonths(12)
+    setObjectives('1. Khảo sát hiện trạng quy trình quản lý đề tài.\n2. Xây dựng mô hình hỗ trợ ra quyết định.\n3. Thử nghiệm và đánh giá trên dữ liệu thực tế.')
+    setMethodology('Kết hợp nghiên cứu lý thuyết và thực nghiệm; thu thập dữ liệu thực tế; đánh giá bằng các chỉ số định lượng (precision, recall, F1).')
+    setExpectedOutput('01 bài báo hội nghị/tạp chí, 01 phần mềm demo, 01 báo cáo tổng kết.')
+    setMembers([
+      { fullName: 'Nguyễn Văn An', email: 'an.nv@fpt.edu.vn', department: 'SE', role: 'Chủ nhiệm', workMonths: 6 },
+      { fullName: 'Trần Thị Bình', email: 'binh.tt@fpt.edu.vn', department: 'AI', role: 'TVC', workMonths: 4 },
+    ])
+    setBudgetItems([
+      { category: budgetCategories[0]?.name || '', amount: 50000000, note: 'Thù lao nhóm nghiên cứu' },
+      { category: budgetCategories[1]?.name || '', amount: 20000000, note: 'Nguyên vật liệu, vật tư' },
+    ])
+    setCurrentStep(1); setError('')
+  }
+
   const validateStep = (step: number): string => {
     if (step === 1) {
       if (!titleVI.trim()) return 'Tên đề tài (VI) là bắt buộc'
@@ -498,6 +519,14 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                   Đang chỉnh sửa đề xuất <b>nháp</b>. Bấm "Cập nhật" ở bước cuối để lưu thay đổi.
                 </p>
                 <button onClick={cancelEdit} className="text-sm font-medium text-indigo-700 hover:text-indigo-900 underline">Huỷ</button>
+              </div>
+            )}
+            {!editingId && (
+              <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                <p className="text-sm text-amber-800">Đang tạo đề xuất mới. Muốn test nhanh? Bấm nút bên để điền sẵn dữ liệu mẫu.</p>
+                <button onClick={fillSample} className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700">
+                  <Plus className="w-4 h-4" /> Điền dữ liệu mẫu
+                </button>
               </div>
             )}
             {/* Progress */}
