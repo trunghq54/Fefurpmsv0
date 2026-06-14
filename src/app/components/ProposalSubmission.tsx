@@ -10,6 +10,8 @@ import { cycleService } from '../../services/cycleService'
 import { proposalService } from '../../services/proposalService'
 import { changeRequestService } from '../../services/changeRequestService'
 import { roundService } from '../../services/roundService'
+import { budgetExpenseCategoryService } from '../../services/masterDataService'
+import type { BudgetExpenseCategoryResponse } from '../../types/masterData'
 import { CHANGE_TYPE } from '../../types/changeRequest'
 import type { ReviewRoundDto } from '../../types/review'
 import ProposalDocuments from './ProposalDocuments'
@@ -61,6 +63,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
 
   const [activeCycle, setActiveCycle] = useState<CycleDto | null>(null)
   const [loadingCycle, setLoadingCycle] = useState(true)
+  const [budgetCategories, setBudgetCategories] = useState<BudgetExpenseCategoryResponse[]>([])
 
   const [titleVI, setTitleVI] = useState('')
   const [titleEN, setTitleEN] = useState('')
@@ -144,6 +147,9 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
       if (res.success && res.data) setActiveCycle(res.data)
       setLoadingCycle(false)
     })
+    budgetExpenseCategoryService.getAll().then((res) => {
+      if (res.success && res.data) setBudgetCategories(res.data.filter((c) => c.isActive))
+    }).catch(() => {})
   }, [])
 
   // Khôi phục bản nháp 1 lần khi mở form
@@ -630,9 +636,16 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                     <div key={i} className="grid md:grid-cols-12 gap-3 items-end border border-gray-200 rounded-lg p-4">
                       <div className="md:col-span-4">
                         <label className="block text-xs text-gray-500 mb-1">Hạng mục</label>
-                        <input value={b.category} onChange={(e) => setBudgetItems(budgetItems.map((x, j) => j === i ? { ...x, category: e.target.value } : x))}
-                          placeholder="Thù lao / Thiết bị / Thuê ngoài..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+                        <select value={b.category} onChange={(e) => setBudgetItems(budgetItems.map((x, j) => j === i ? { ...x, category: e.target.value } : x))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                          <option value="">— Chọn hạng mục —</option>
+                          {budgetCategories.map((c) => (
+                            <option key={c.id} value={c.name}>{c.name}</option>
+                          ))}
+                          {b.category && !budgetCategories.some((c) => c.name === b.category) && (
+                            <option value={b.category}>{b.category}</option>
+                          )}
+                        </select>
                       </div>
                       <div className="md:col-span-3">
                         <label className="block text-xs text-gray-500 mb-1">Số tiền (₫)</label>
@@ -805,10 +818,33 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                       <div className="space-y-2">
                         {viewProposal.members.map((m) => (
                           <div key={m.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm">
-                            <span className="text-gray-800">{m.fullName} {m.role && <span className="text-gray-400">· {m.role}</span>}</span>
+                            <span className="text-gray-800">
+                              {m.fullName} {m.role && <span className="text-gray-400">· {m.role}</span>}
+                              {m.department && <span className="text-gray-400"> · {m.department}</span>}
+                              {m.email && <span className="text-gray-400"> · {m.email}</span>}
+                            </span>
                             <span className="text-gray-500">{m.workMonths} tháng công</span>
                           </div>
                         ))}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 mb-2">Dự toán kinh phí</p>
+                    {viewProposal.budgetItems.length === 0 ? (
+                      <p className="text-sm text-gray-400">Chưa có khoản kinh phí.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {viewProposal.budgetItems.map((b) => (
+                          <div key={b.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm">
+                            <span className="text-gray-800">{b.category}{b.note && <span className="text-gray-400"> · {b.note}</span>}</span>
+                            <span className="text-gray-700 font-medium">{formatVnd(b.amount)}</span>
+                          </div>
+                        ))}
+                        <div className="flex items-center justify-between px-3 py-2 text-sm font-semibold text-gray-800 border-t border-gray-200">
+                          <span>Tổng cộng</span>
+                          <span>{formatVnd(viewProposal.totalBudget)}</span>
+                        </div>
                       </div>
                     )}
                   </div>
