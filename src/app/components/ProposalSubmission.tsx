@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import {
   CheckCircle, AlertCircle, ArrowLeft, ArrowRight, Home, List, LogOut,
-  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3, Upload, Paperclip, BookOpen, ClipboardList, GraduationCap, Eye, Pencil,
+  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3, Upload, Paperclip, BookOpen, ClipboardList, GraduationCap, Eye, Pencil, FolderOpen,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import MyAcademicProfile from './MyAcademicProfile'
@@ -15,6 +15,10 @@ import type { BudgetExpenseCategoryResponse } from '../../types/masterData'
 import { CHANGE_TYPE } from '../../types/changeRequest'
 import type { ReviewRoundDto } from '../../types/review'
 import ProposalDocuments from './ProposalDocuments'
+import ProposalDocumentPreview from './ProposalDocumentPreview'
+import ProposalDossierEditor from './ProposalDossierEditor'
+import CycleSelection from './CycleSelection'
+import ProposalWorkspace from './ProposalWorkspace'
 import RoundResultsPanel from './RoundResultsPanel'
 import RoleSwitcher from './RoleSwitcher'
 import type { CycleDto } from '../../types/cycle'
@@ -58,6 +62,10 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   const { user: authUser } = useAuth()
   const [showSubmissions, setShowSubmissions] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
+  // Luồng mới: chọn đợt → workspace
+  const [pickingCycle, setPickingCycle] = useState(false)
+  const [selectedCycleId, setSelectedCycleId] = useState<number | undefined>(undefined)
+  const [workspaceId, setWorkspaceId] = useState<string | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
 
   const [activeCycle, setActiveCycle] = useState<CycleDto | null>(null)
@@ -105,6 +113,10 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
 
   // documents modal
   const [docProposal, setDocProposal] = useState<ProposalSummaryDto | null>(null)
+
+  // hồ sơ Word/Excel (xem trước + tải) & soạn chi tiết
+  const [previewProposal, setPreviewProposal] = useState<ProposalSummaryDto | null>(null)
+  const [dossierProposal, setDossierProposal] = useState<ProposalSummaryDto | null>(null)
 
   // kết quả phản biện modal (PI xem điểm/phiếu các vòng của đề tài mình)
   const [resultsProposal, setResultsProposal] = useState<ProposalSummaryDto | null>(null)
@@ -321,6 +333,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     }
     setSaving(true); setError('')
     const payload = {
+      cycleId: selectedCycleId,
       trackId, titleVI, titleEN, researchType, durationMonths,
       objectives, methodology, expectedOutput,
       members: members.filter((m) => m.fullName.trim()),
@@ -367,12 +380,8 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
         localStorage.removeItem(DRAFT_KEY)
         setDraftRestored(false)
         resetForm()
-        if (uploadErrors.length) {
-          setError(`Đề xuất đã lưu, nhưng một số tài liệu chưa tải lên:\n${uploadErrors.join('\n')}`)
-          setShowSubmissions(true)
-        } else {
-          setShowSubmissions(true)
-        }
+        // Sau khi tạo nháp → vào thẳng workspace để soạn chi tiết + tài liệu + nộp.
+        setWorkspaceId(newId)
       } else {
         setError(res.message || 'Tạo đề xuất thất bại')
       }
@@ -429,11 +438,16 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                 <BookOpen className="w-4 h-4" /> Hướng dẫn
               </button>
               <button
-                onClick={() => { if (editingId) { setEditingId(null); resetForm() } setShowSubmissions(!showSubmissions); setShowProfile(false) }}
+                onClick={() => { setShowSubmissions(true); setPickingCycle(false); setWorkspaceId(null); setShowProfile(false); setEditingId(null) }}
+                className="flex items-center gap-2 px-4 py-2 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 transition"
+              >
+                <List className="w-4 h-4" /> Đề xuất của tôi
+              </button>
+              <button
+                onClick={() => { setPickingCycle(true); setShowSubmissions(false); setWorkspaceId(null); setShowProfile(false); setEditingId(null); resetForm() }}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
-                {showSubmissions ? <Home className="w-4 h-4" /> : <List className="w-4 h-4" />}
-                {showSubmissions ? 'Tạo đề xuất mới' : 'Đề xuất của tôi'}
+                <Plus className="w-4 h-4" /> Tạo đề tài mới
               </button>
               <button
                 onClick={() => { setShowProfile(!showProfile); setShowSubmissions(false) }}
@@ -483,7 +497,15 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-10">
-        {showProfile && authUser ? (
+        {workspaceId ? (
+          <ProposalWorkspace
+            proposalId={workspaceId}
+            onBack={() => { setWorkspaceId(null); setShowSubmissions(true); loadMy() }}
+            onChanged={loadMy}
+          />
+        ) : pickingCycle ? (
+          <CycleSelection onSelect={(c) => { setSelectedCycleId(Number(c.id)); setPickingCycle(false); resetForm(); setShowSubmissions(false) }} />
+        ) : showProfile && authUser ? (
           <MyAcademicProfile userId={authUser.id} />
         ) : (
           <>
@@ -498,12 +520,9 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
             proposals={myProposals}
             loading={loadingList}
             rowBusy={rowBusy}
-            onSubmit={handleSubmit}
+            onOpen={(p) => setWorkspaceId(p.id)}
             onWithdraw={handleWithdraw}
-            onView={handleView}
-            onEdit={handleEdit}
             onChangeRequest={(p) => { setCrProposal(p); setCrType(CHANGE_TYPE.ExtendTime); setCrDesc(''); setCrNewValue(''); setCrMsg('') }}
-            onDocuments={(p) => setDocProposal(p)}
             onResults={(p) => { setResultsProposal(p); setResultsRounds([]) }}
           />
         ) : !activeCycle && !loadingCycle && !editingId ? (
@@ -913,6 +932,16 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
         </div>
       )}
 
+      {/* Hồ sơ Word/Excel — xem trước + tải */}
+      {previewProposal && (
+        <ProposalDocumentPreview proposalId={previewProposal.id} title={previewProposal.titleVI} onClose={() => setPreviewProposal(null)} />
+      )}
+
+      {/* Soạn chi tiết hồ sơ */}
+      {dossierProposal && (
+        <ProposalDossierEditor proposalId={dossierProposal.id} title={dossierProposal.titleVI} onClose={() => setDossierProposal(null)} />
+      )}
+
       {/* Kết quả phản biện modal (PI) */}
       {resultsProposal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -1011,16 +1040,13 @@ interface MySubmissionsProps {
   proposals: ProposalSummaryDto[]
   loading: boolean
   rowBusy: string | null
-  onSubmit: (id: string) => void
+  onOpen: (p: ProposalSummaryDto) => void
   onWithdraw: (id: string) => void
-  onView: (p: ProposalSummaryDto) => void
-  onEdit: (p: ProposalSummaryDto) => void
   onChangeRequest: (p: ProposalSummaryDto) => void
-  onDocuments: (p: ProposalSummaryDto) => void
   onResults: (p: ProposalSummaryDto) => void
 }
 
-function MySubmissions({ proposals, loading, rowBusy, onSubmit, onWithdraw, onView, onEdit, onChangeRequest, onDocuments, onResults }: MySubmissionsProps) {
+function MySubmissions({ proposals, loading, rowBusy, onOpen, onWithdraw, onChangeRequest, onResults }: MySubmissionsProps) {
   const navigate = useNavigate()
   return (
     <div className="space-y-6">
@@ -1059,34 +1085,18 @@ function MySubmissions({ proposals, loading, rowBusy, onSubmit, onWithdraw, onVi
                     <span>Tạo: {new Date(p.createdAt).toLocaleDateString('vi-VN')}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(p.status)}`}>{p.status}</span>
-                  <button onClick={() => onView(p)} disabled={rowBusy === p.id}
-                    className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-60">
-                    <Eye className="w-4 h-4" /> Xem
+                  <button onClick={() => onOpen(p)} disabled={rowBusy === p.id}
+                    className="flex items-center gap-1 px-4 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+                    <FolderOpen className="w-4 h-4" /> Mở
                   </button>
-                  {p.status === 'DRAFT' && (
-                    <button onClick={() => onEdit(p)} disabled={rowBusy === p.id}
-                      className="flex items-center gap-1 px-3 py-1.5 text-sm border border-emerald-300 text-emerald-700 rounded-lg hover:bg-emerald-50 disabled:opacity-60">
-                      <Pencil className="w-4 h-4" /> Sửa
-                    </button>
-                  )}
-                  {p.status === 'DRAFT' && (
-                    <button onClick={() => onSubmit(p.id)} disabled={rowBusy === p.id}
-                      className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
-                      <Send className="w-4 h-4" /> Gửi duyệt
-                    </button>
-                  )}
                   {p.status === 'SUBMITTED' && (
                     <button onClick={() => onWithdraw(p.id)} disabled={rowBusy === p.id}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-60">
                       <Undo2 className="w-4 h-4" /> Rút lại
                     </button>
                   )}
-                  <button onClick={() => onDocuments(p)}
-                    className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-                    <FileText className="w-4 h-4" /> Tài liệu
-                  </button>
                   {p.status !== 'DRAFT' && (
                     <button onClick={() => onResults(p)}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50">

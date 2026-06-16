@@ -5,6 +5,9 @@ export interface ProposalMemberDto {
   department?: string
   role: string
   workMonths: number
+  academicTitle?: string
+  memberRoleCode?: string
+  isSecretary?: boolean
 }
 
 export interface BudgetItemDto {
@@ -44,6 +47,14 @@ export interface ProposalDto {
   expectedOutput: string
   totalBudget: number
   rejectionReason?: string
+  // Mẫu 1 bổ sung
+  abstractEN?: string
+  urgency?: string
+  novelty?: string
+  applicationPotential?: string
+  transferPotential?: string
+  facilities?: string
+  fundingMethod?: string
   submittedAt?: string
   createdAt: string
   members: ProposalMemberDto[]
@@ -69,6 +80,9 @@ export interface CreateMemberRequest {
   department?: string
   role: string
   workMonths: number
+  academicTitle?: string
+  memberRoleCode?: string
+  isSecretary?: boolean
 }
 
 export interface CreateBudgetItemRequest {
@@ -78,6 +92,7 @@ export interface CreateBudgetItemRequest {
 }
 
 export interface CreateProposalRequest {
+  cycleId?: number
   trackId: string
   titleVI: string
   titleEN: string
@@ -86,6 +101,14 @@ export interface CreateProposalRequest {
   objectives: string
   methodology: string
   expectedOutput: string
+  // Mẫu 1 bổ sung
+  abstractEN?: string
+  urgency?: string
+  novelty?: string
+  applicationPotential?: string
+  transferPotential?: string
+  facilities?: string
+  fundingMethod?: string
   members: CreateMemberRequest[]
   budgetItems: CreateBudgetItemRequest[]
 }

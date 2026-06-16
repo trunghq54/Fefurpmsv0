@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Search, Eye, X, FileText, Users, Wallet } from 'lucide-react'
+import { Search, Eye, X, FileText, Users, Wallet, ClipboardList } from 'lucide-react'
 import { proposalService } from '../../services/proposalService'
 import type { ProposalSummaryDto, ProposalDto } from '../../types/proposal'
 import ReviewRoundsPanel from './ReviewRoundsPanel'
 import AiSummaryPanel from './AiSummaryPanel'
 import ProposalDocuments from './ProposalDocuments'
+import ProposalDocumentPreview from './ProposalDocumentPreview'
 
 const STATUSES = [
   'DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'CONTRACT_SIGNED', 'IN_PROGRESS',
@@ -43,6 +44,7 @@ export default function ProposalManagement() {
 
   const [detail, setDetail] = useState<ProposalDto | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const [previewDoc, setPreviewDoc] = useState<{ id: string; title: string } | null>(null)
 
   const load = () => {
     setLoading(true)
@@ -179,7 +181,15 @@ export default function ProposalManagement() {
           <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 bg-white">
               <h3 className="text-xl font-bold text-gray-800">Chi tiết đề xuất</h3>
-              <button onClick={() => setDetail(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+              <div className="flex items-center gap-2">
+                {detail && (
+                  <button onClick={() => setPreviewDoc({ id: detail.id, title: detail.titleVI })}
+                    className="flex items-center gap-1 px-3 py-1.5 text-sm border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50">
+                    <ClipboardList className="w-4 h-4" /> Hồ sơ (Word/Excel)
+                  </button>
+                )}
+                <button onClick={() => setDetail(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+              </div>
             </div>
             {loadingDetail ? (
               <div className="p-12 text-center text-gray-400">Đang tải...</div>
@@ -243,6 +253,10 @@ export default function ProposalManagement() {
             ) : null}
           </div>
         </div>
+      )}
+
+      {previewDoc && (
+        <ProposalDocumentPreview proposalId={previewDoc.id} title={previewDoc.title} onClose={() => setPreviewDoc(null)} />
       )}
     </div>
   )
