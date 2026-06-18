@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, Edit, X, Mail, Phone, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Plus, Search, Edit, Mail, Phone, ToggleLeft, ToggleRight } from 'lucide-react'
 import { userService } from '../../services/userService'
+import { Button, Input, Select, Modal } from './ui-kit'
 import type { UserDto } from '../../types/user'
 import { ROLE_VALUE, ROLE_LABEL } from '../../types/user'
 
@@ -174,13 +175,8 @@ export default function UserManagement() {
           <div className="flex-1 min-w-[300px]">
             <div className="relative">
               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Tìm kiếm theo tên hoặc email..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
+              <Input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Tìm kiếm theo tên hoặc email..." className="pl-10" />
             </div>
           </div>
 
@@ -195,13 +191,9 @@ export default function UserManagement() {
             ))}
           </select>
 
-          <button
-            onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
-          >
-            <Plus className="w-5 h-5" />
-            Thêm người dùng
-          </button>
+          <Button onClick={() => handleOpenModal()}>
+            <Plus className="w-5 h-5" /> Thêm người dùng
+          </Button>
         </div>
       </div>
 
@@ -327,119 +319,72 @@ export default function UserManagement() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full">
-            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-800">
-                {editingUser ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}
-              </h3>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X className="w-5 h-5" />
-              </button>
+        <Modal
+          title={editingUser ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}
+          onClose={() => setShowModal(false)}
+          className="max-w-2xl"
+          footer={<>
+            <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? 'Đang lưu...' : editingUser ? 'Cập nhật' : 'Thêm mới'}</Button>
+          </>}
+        >
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Họ tên *</label>
+            <Input type="text" value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+              <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                disabled={!!editingUser} className="disabled:text-gray-500" />
             </div>
-
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Họ tên *</label>
-                <input
-                  type="text"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    disabled={!!editingUser}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
-                  <input
-                    type="tel"
-                    value={formData.phoneNumber}
-                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Vai trò * (chọn nhiều được)</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {ALL_ROLES.map((r) => {
-                    const value = ROLE_VALUE[r]
-                    const checked = formData.roles.includes(value)
-                    return (
-                      <label
-                        key={r}
-                        className={`flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer ${checked ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
-                      >
-                        <input type="checkbox" checked={checked} onChange={() => toggleRole(value)} className="accent-blue-600" />
-                        <span className="text-sm text-gray-800">{ROLE_LABEL[r]} <span className="text-gray-400">({r})</span></span>
-                      </label>
-                    )
-                  })}
-                </div>
-                <p className="text-xs text-gray-400 mt-1">Vai trò đầu tiên được dùng làm trang mặc định khi đăng nhập.</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Khoa</label>
-                <select
-                  value={formData.department}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                >
-                  <option value="">Chọn khoa</option>
-                  {departments.map((dept) => (
-                    <option key={dept} value={dept}>{dept}</option>
-                  ))}
-                </select>
-              </div>
-
-              {!editingUser && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu tạm thời *</label>
-                  <input
-                    type="password"
-                    value={formData.temporaryPassword}
-                    onChange={(e) => setFormData({ ...formData, temporaryPassword: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="Người dùng phải đổi mật khẩu khi đăng nhập lần đầu"
-                  />
-                </div>
-              )}
-
-              {formError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{formError}</div>
-              )}
-            </div>
-
-            <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-100 transition"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {saving ? 'Đang lưu...' : editingUser ? 'Cập nhật' : 'Thêm mới'}
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
+              <Input type="tel" value={formData.phoneNumber} onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} />
             </div>
           </div>
-        </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Vai trò * (chọn nhiều được)</label>
+            <div className="grid grid-cols-2 gap-2">
+              {ALL_ROLES.map((r) => {
+                const value = ROLE_VALUE[r]
+                const checked = formData.roles.includes(value)
+                return (
+                  <label
+                    key={r}
+                    className={`flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer ${checked ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+                  >
+                    <input type="checkbox" checked={checked} onChange={() => toggleRole(value)} className="accent-blue-600" />
+                    <span className="text-sm text-gray-800">{ROLE_LABEL[r]} <span className="text-gray-400">({r})</span></span>
+                  </label>
+                )
+              })}
+            </div>
+            <p className="text-xs text-gray-400 mt-1">Vai trò đầu tiên được dùng làm trang mặc định khi đăng nhập.</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Khoa</label>
+            <Select value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })}>
+              <option value="">Chọn khoa</option>
+              {departments.map((dept) => (<option key={dept} value={dept}>{dept}</option>))}
+            </Select>
+          </div>
+
+          {!editingUser && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu tạm thời *</label>
+              <Input type="password" value={formData.temporaryPassword} onChange={(e) => setFormData({ ...formData, temporaryPassword: e.target.value })}
+                placeholder="Người dùng phải đổi mật khẩu khi đăng nhập lần đầu" />
+            </div>
+          )}
+
+          {formError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{formError}</div>
+          )}
+        </Modal>
       )}
     </div>
   )

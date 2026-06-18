@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Video, Plus, Calendar, ExternalLink } from 'lucide-react'
 import { meetingService } from '../../services/meetingService'
 import type { MeetingDto } from '../../types/meeting'
+import { Button, Input, Select } from './ui-kit'
 
 const PLATFORM_LABEL: Record<string, string> = {
   GOOGLE_MEET: 'Google Meet',
@@ -70,19 +71,15 @@ export default function RoundMeetings({ roundId, councilId }: { roundId: string;
 
       {showForm && (
         <div className="grid md:grid-cols-2 gap-2 mt-2 bg-gray-50 rounded-lg p-3">
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Tiêu đề cuộc họp *"
-            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-          <input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-          <select value={platform} onChange={(e) => setPlatform(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Tiêu đề cuộc họp *" className="py-1.5" />
+          <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} className="py-1.5" />
+          <Select value={platform} onChange={(e) => setPlatform(e.target.value)} className="py-1.5">
             <option value="GOOGLE_MEET">Google Meet</option>
             <option value="TEAMS">Teams</option>
             <option value="IN_PERSON">Trực tiếp</option>
-          </select>
+          </Select>
           <div className="flex gap-1">
-            <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="Dán link họp vào đây"
-              className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+            <Input value={link} onChange={(e) => setLink(e.target.value)} placeholder="Dán link họp vào đây" className="flex-1 py-1.5" />
             {platform === 'GOOGLE_MEET' && (
               <a href="https://meet.google.com/new" target="_blank" rel="noreferrer"
                 title="Tạo Google Meet mới rồi sao chép link dán vào ô bên trái"
@@ -97,10 +94,9 @@ export default function RoundMeetings({ roundId, councilId }: { roundId: string;
             </p>
           )}
           <div className="md:col-span-2 flex justify-end">
-            <button onClick={create} disabled={busy}
-              className="px-4 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60">
+            <Button onClick={create} disabled={busy} className="py-1.5 bg-indigo-600 hover:bg-indigo-700">
               {busy ? 'Đang lưu...' : 'Lưu lịch họp'}
-            </button>
+            </Button>
           </div>
         </div>
       )}

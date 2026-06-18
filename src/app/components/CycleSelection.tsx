@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { CalendarRange, ArrowRight, Loader2 } from 'lucide-react'
+import { CalendarRange, ArrowRight } from 'lucide-react'
 import { cycleService } from '../../services/cycleService'
 import type { CycleDto } from '../../types/cycle'
+import { Button, Card, EmptyState, Spinner } from './ui-kit'
 
 const fmtVnd = (n: number) => (n || 0).toLocaleString('vi-VN') + ' ₫'
 const fmtDate = (s?: string) => (s ? new Date(s).toLocaleDateString('vi-VN') : '—')
@@ -18,7 +19,7 @@ export default function CycleSelection({ onSelect }: { onSelect: (cycle: CycleDt
     }).catch(() => setLoading(false))
   }, [])
 
-  if (loading) return <div className="flex items-center justify-center py-16 text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /> Đang tải đợt nộp...</div>
+  if (loading) return <Spinner text="Đang tải đợt nộp..." />
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -28,13 +29,11 @@ export default function CycleSelection({ onSelect }: { onSelect: (cycle: CycleDt
       </div>
 
       {cycles.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
-          Hiện không có đợt nộp nào đang mở. Vui lòng quay lại khi Phòng QLKH mở đợt.
-        </div>
+        <EmptyState>Hiện không có đợt nộp nào đang mở. Vui lòng quay lại khi Phòng QLKH mở đợt.</EmptyState>
       ) : (
         <div className="grid gap-4">
           {cycles.map((c) => (
-            <div key={c.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-start justify-between gap-4">
+            <Card key={c.id} className="shadow-sm p-6 flex items-start justify-between gap-4">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                   <CalendarRange className="w-6 h-6" />
@@ -50,11 +49,10 @@ export default function CycleSelection({ onSelect }: { onSelect: (cycle: CycleDt
                   {c.description && <p className="text-sm text-gray-400 mt-1">{c.description}</p>}
                 </div>
               </div>
-              <button onClick={() => onSelect(c)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm whitespace-nowrap">
+              <Button size="lg" onClick={() => onSelect(c)} className="text-sm">
                 Nộp vào đợt này <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+              </Button>
+            </Card>
           ))}
         </div>
       )}

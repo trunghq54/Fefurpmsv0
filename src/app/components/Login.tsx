@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Users, BookOpen, FileCheck, Calendar } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
+import { Button, Input } from './ui-kit'
 
 export default function Login() {
   const { login } = useAuth()
@@ -58,28 +59,14 @@ export default function Login() {
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                placeholder="Nhập email"
-                required
-                disabled={loading}
-              />
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                className="px-4 py-3 focus:border-transparent" placeholder="Nhập email" required disabled={loading} />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                placeholder="Nhập mật khẩu"
-                required
-                disabled={loading}
-              />
+              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                className="px-4 py-3 focus:border-transparent" placeholder="Nhập mật khẩu" required disabled={loading} />
             </div>
 
             {error && (
@@ -88,13 +75,9 @@ export default function Login() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
-            >
+            <Button type="submit" disabled={loading} className="w-full py-3 font-semibold shadow-lg hover:shadow-xl">
               {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
-            </button>
+            </Button>
           </form>
         </div>
       </div>

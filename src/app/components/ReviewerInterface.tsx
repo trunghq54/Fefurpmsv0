@@ -10,6 +10,7 @@ import type { SubmitScoreRequest, RubricTemplateDto } from '../../services/scori
 import { aiService } from '../../services/aiService'
 import { proposalService } from '../../services/proposalService'
 import RoleSwitcher from './RoleSwitcher'
+import { Button, Textarea } from './ui-kit'
 import type { MyAssignmentDto } from '../../types/review'
 import { VOTE_RESULT, ROUND_TYPE_LABEL } from '../../types/review'
 import ProposalDetailView from './ProposalDetailView'
@@ -60,12 +61,10 @@ export default function ReviewerInterface({ user, onLogout }: ReviewerInterfaceP
             <p className="text-sm text-gray-500">Reviewer Portal</p>
           </div>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/guide')}
-              className="flex items-center gap-1.5 px-3 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 text-sm"
-            >
+            <Button variant="outline" size="sm" onClick={() => navigate('/guide')}
+              className="text-blue-600 border-blue-200 hover:bg-blue-50">
               <BookOpen className="w-4 h-4" /> Hướng dẫn
-            </button>
+            </Button>
             <RoleSwitcher />
             <div className="border-l border-gray-300 pl-4">
               <p className="font-medium text-gray-800">{user.name}</p>
@@ -121,27 +120,18 @@ export default function ReviewerInterface({ user, onLogout }: ReviewerInterfaceP
                       <div className="flex items-center gap-2">
                         {a.status === 'Pending' && (
                           <>
-                            <button
-                              onClick={() => respond(a, true)}
-                              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
-                            >
+                            <Button variant="success" size="sm" onClick={() => respond(a, true)}>
                               <ThumbsUp className="w-4 h-4" /> Nhận
-                            </button>
-                            <button
-                              onClick={() => respond(a, false)}
-                              className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
-                            >
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => respond(a, false)}>
                               <ThumbsDown className="w-4 h-4" /> Từ chối
-                            </button>
+                            </Button>
                           </>
                         )}
                         {a.status === 'Accepted' && (
-                          <button
-                            onClick={() => setActive(a)}
-                            className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                          >
+                          <Button size="sm" onClick={() => setActive(a)}>
                             <ClipboardCheck className="w-4 h-4" /> Chấm điểm
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -325,25 +315,16 @@ function RubricForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDon
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Nhận xét chung</label>
-        <textarea
-          value={comments}
-          onChange={(e) => setComments(e.target.value)}
-          rows={4}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <Textarea value={comments} onChange={(e) => setComments(e.target.value)} rows={4} className="px-4 resize-y" />
         <p className="mt-1 text-xs text-gray-400">Dùng nút "✨ AI gợi ý" ở từng tiêu chí để nhận gợi ý nhận xét.</p>
       </div>
       {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
       <div className="flex items-center gap-3">
-        <button
-          onClick={submit}
-          disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60"
-        >
+        <Button size="lg" onClick={submit} disabled={saving}>
           <Send className="w-4 h-4" /> {saving ? 'Đang lưu...' : 'Nộp điểm'}
-        </button>
+        </Button>
         {saved && <span className="flex items-center gap-1 text-green-600 text-sm"><CheckCircle className="w-4 h-4" /> Đã lưu</span>}
-        <button onClick={onDone} className="px-5 py-2.5 border border-gray-300 rounded-lg font-medium hover:bg-gray-50">Xong</button>
+        <Button variant="outline" size="lg" onClick={onDone}>Xong</Button>
       </div>
     </div>
   )
@@ -410,23 +391,14 @@ function VoteForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDone:
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Nhận xét phản biện</label>
-        <textarea
-          value={writtenReview}
-          onChange={(e) => setWrittenReview(e.target.value)}
-          rows={4}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <Textarea value={writtenReview} onChange={(e) => setWrittenReview(e.target.value)} rows={4} className="px-4 resize-y" />
       </div>
       <div className="flex items-center gap-3">
-        <button
-          onClick={submit}
-          disabled={saving || !template}
-          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60"
-        >
+        <Button size="lg" onClick={submit} disabled={saving || !template}>
           <Send className="w-4 h-4" /> {saving ? 'Đang lưu...' : 'Nộp phiếu'}
-        </button>
+        </Button>
         {saved && <span className="flex items-center gap-1 text-green-600 text-sm"><CheckCircle className="w-4 h-4" /> Đã lưu</span>}
-        <button onClick={onDone} className="px-5 py-2.5 border border-gray-300 rounded-lg font-medium hover:bg-gray-50">Xong</button>
+        <Button variant="outline" size="lg" onClick={onDone}>Xong</Button>
       </div>
     </div>
   )
@@ -491,21 +463,18 @@ function FeedbackPanel({ councilId }: { councilId: string }) {
           <ScoreSlider label="Kết quả thực tế so với kỳ vọng" field="actualVsExpectedScore" />
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nhận xét khác</label>
-            <textarea rows={2} value={form.otherComments}
-              onChange={(e) => setForm({ ...form, otherComments: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+            <Textarea rows={2} value={form.otherComments}
+              onChange={(e) => setForm({ ...form, otherComments: e.target.value })} className="resize-none" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Kết luận tổng thể</label>
-            <textarea rows={2} value={form.overallAssessment}
-              onChange={(e) => setForm({ ...form, overallAssessment: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+            <Textarea rows={2} value={form.overallAssessment}
+              onChange={(e) => setForm({ ...form, overallAssessment: e.target.value })} className="resize-none" />
           </div>
           {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
-          <button onClick={submit} disabled={saving}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 disabled:opacity-60">
+          <Button onClick={submit} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
             <Send className="w-4 h-4" /> {saving ? 'Đang gửi...' : 'Gửi phản hồi'}
-          </button>
+          </Button>
         </div>
       )}
     </div>

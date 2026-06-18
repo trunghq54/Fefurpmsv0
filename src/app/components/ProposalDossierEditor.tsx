@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Plus, Trash2, Save, BookOpen, Package, Wallet, Users, Loader2, CheckCircle } from 'lucide-react'
+import { X, Plus, Trash2, Save, BookOpen, Package, Wallet, Users, CheckCircle } from 'lucide-react'
 import { proposalContentsService } from '../../services/proposalContentsService'
 import type { ResearchContentDto, ExpectedProductDto } from '../../services/proposalContentsService'
 import { proposalBudgetService } from '../../services/proposalBudgetService'
@@ -8,6 +8,7 @@ import { budgetExpenseCategoryService } from '../../services/masterDataService'
 import type { BudgetExpenseCategoryResponse } from '../../types/masterData'
 import { productCategoryService } from '../../services/productCategoryService'
 import type { ProductCategoryDto } from '../../services/productCategoryService'
+import { Button, Card, Input, Textarea, Select, Spinner, EmptyState } from './ui-kit'
 
 type Tab = 'contents' | 'products' | 'budget' | 'labor'
 const fmt = (n: number) => (n || 0).toLocaleString('vi-VN')
@@ -38,10 +39,10 @@ export default function ProposalDossierEditor({
 
   if (embedded) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200">
+      <Card>
         {tabs}
         <div className="p-4 bg-gray-50 rounded-b-xl">{sections}</div>
-      </div>
+      </Card>
     )
   }
   return (
@@ -71,7 +72,7 @@ function TabBtn({ active, onClick, icon, label }: { active: boolean; onClick: ()
   )
 }
 
-const inputCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500'
+const cellLabel = 'text-xs text-gray-500'
 
 // ── Nội dung nghiên cứu + hoạt động ────────────────────────────────────────
 function ContentsSection({ proposalId }: { proposalId: string }) {
@@ -101,15 +102,12 @@ function ContentsSection({ proposalId }: { proposalId: string }) {
   if (loading) return <Loading />
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
+      <Card className="p-4 space-y-3">
         <p className="font-semibold text-gray-800">Thêm nội dung nghiên cứu</p>
-        <input className={inputCls} placeholder="Tên nội dung" value={title} onChange={(e) => setTitle(e.target.value)} />
-        <textarea className={inputCls} rows={2} placeholder="Mô tả (tuỳ chọn)" value={desc} onChange={(e) => setDesc(e.target.value)} />
-        <button onClick={addContent} disabled={busy || !title.trim()}
-          className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
-          <Plus className="w-4 h-4" /> Thêm
-        </button>
-      </div>
+        <Input placeholder="Tên nội dung" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Textarea rows={2} placeholder="Mô tả (tuỳ chọn)" value={desc} onChange={(e) => setDesc(e.target.value)} />
+        <Button size="sm" onClick={addContent} disabled={busy || !title.trim()}><Plus className="w-4 h-4" /> Thêm</Button>
+      </Card>
       {contents.length === 0 ? <Empty text="Chưa có nội dung nghiên cứu." /> : contents.map((c) => (
         <ContentCard key={c.id} proposalId={proposalId} content={c} onChanged={load} onDelete={() => delContent(c.id)} />
       ))}
@@ -137,7 +135,7 @@ function ContentCard({ proposalId, content, onChanged, onDelete }: {
   const delAct = async (id: number) => { await proposalContentsService.deleteActivity(proposalId, id); onChanged() }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
+    <Card className="p-4">
       <div className="flex items-start justify-between">
         <div>
           <p className="font-semibold text-gray-800">Nội dung {content.contentNumber}: {content.title}</p>
@@ -154,14 +152,13 @@ function ContentCard({ proposalId, content, onChanged, onDelete }: {
         ))}
       </div>
       <div className="mt-3 grid md:grid-cols-12 gap-2 items-end">
-        <div className="md:col-span-4"><label className="text-xs text-gray-500">Hoạt động</label><input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} /></div>
-        <div className="md:col-span-4"><label className="text-xs text-gray-500">Kết quả cần đạt</label><input className={inputCls} value={result} onChange={(e) => setResult(e.target.value)} /></div>
-        <div className="md:col-span-1"><label className="text-xs text-gray-500">Từ (th)</label><input type="number" min={1} className={inputCls} value={sm} onChange={(e) => setSm(Number(e.target.value))} /></div>
-        <div className="md:col-span-1"><label className="text-xs text-gray-500">Đến (th)</label><input type="number" min={1} className={inputCls} value={em} onChange={(e) => setEm(Number(e.target.value))} /></div>
-        <div className="md:col-span-2"><button onClick={addActivity} disabled={busy || !name.trim()}
-          className="flex items-center gap-1 px-3 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-60"><Plus className="w-4 h-4" /> Hoạt động</button></div>
+        <div className="md:col-span-4"><label className={cellLabel}>Hoạt động</label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+        <div className="md:col-span-4"><label className={cellLabel}>Kết quả cần đạt</label><Input value={result} onChange={(e) => setResult(e.target.value)} /></div>
+        <div className="md:col-span-1"><label className={cellLabel}>Từ (th)</label><Input type="number" min={1} value={sm} onChange={(e) => setSm(Number(e.target.value))} /></div>
+        <div className="md:col-span-1"><label className={cellLabel}>Đến (th)</label><Input type="number" min={1} value={em} onChange={(e) => setEm(Number(e.target.value))} /></div>
+        <div className="md:col-span-2"><Button variant="success" onClick={addActivity} disabled={busy || !name.trim()}><Plus className="w-4 h-4" /> Hoạt động</Button></div>
       </div>
-    </div>
+    </Card>
   )
 }
 
@@ -195,27 +192,26 @@ function ProductsSection({ proposalId }: { proposalId: string }) {
   if (loading) return <Loading />
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-gray-200 p-4 grid md:grid-cols-12 gap-2 items-end">
-        <div className="md:col-span-4"><label className="text-xs text-gray-500">Tên sản phẩm</label><input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} /></div>
-        <div className="md:col-span-4"><label className="text-xs text-gray-500">Tiêu chí/Yêu cầu KH</label><input className={inputCls} value={req} onChange={(e) => setReq(e.target.value)} /></div>
-        <div className="md:col-span-2"><label className="text-xs text-gray-500">Dạng SP</label>
-          <select className={inputCls} value={catId} onChange={(e) => setCatId(e.target.value === '' ? '' : Number(e.target.value))}>
+      <Card className="p-4 grid md:grid-cols-12 gap-2 items-end">
+        <div className="md:col-span-4"><label className={cellLabel}>Tên sản phẩm</label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+        <div className="md:col-span-4"><label className={cellLabel}>Tiêu chí/Yêu cầu KH</label><Input value={req} onChange={(e) => setReq(e.target.value)} /></div>
+        <div className="md:col-span-2"><label className={cellLabel}>Dạng SP</label>
+          <Select value={catId} onChange={(e) => setCatId(e.target.value === '' ? '' : Number(e.target.value))}>
             <option value="">—</option>
             {cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          </Select>
         </div>
-        <div className="md:col-span-2"><button onClick={add} disabled={busy || !name.trim()}
-          className="flex items-center gap-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60"><Plus className="w-4 h-4" /> Thêm</button></div>
-      </div>
+        <div className="md:col-span-2"><Button onClick={add} disabled={busy || !name.trim()}><Plus className="w-4 h-4" /> Thêm</Button></div>
+      </Card>
       {products.length === 0 ? <Empty text="Chưa có sản phẩm dự kiến." /> : (
-        <div className="bg-white rounded-xl border border-gray-200 divide-y">
+        <Card className="divide-y">
           {products.map((p) => (
             <div key={p.id} className="flex items-center justify-between px-4 py-3 text-sm">
               <div><span className="font-medium text-gray-800">{p.productName}</span>{p.scientificRequirements && <span className="text-gray-400"> · {p.scientificRequirements}</span>}</div>
               <button onClick={() => del(p.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
             </div>
           ))}
-        </div>
+        </Card>
       )}
     </div>
   )
@@ -259,7 +255,7 @@ function BudgetSection({ proposalId }: { proposalId: string }) {
   if (loading) return <Loading />
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-gray-200 p-4 overflow-x-auto">
+      <Card className="p-4 overflow-x-auto">
         <table className="w-full text-sm">
           <thead><tr className="text-left text-gray-500 border-b">
             <th className="py-2 pr-2">Hạng mục</th><th className="px-2">Tổng (₫)</th><th className="px-2">Khoán</th><th className="px-2">Ngoài khoán</th><th className="px-2">NSNN</th><th className="px-2">Khác</th><th></th>
@@ -279,20 +275,20 @@ function BudgetSection({ proposalId }: { proposalId: string }) {
             {items.length === 0 && <tr><td colSpan={7} className="py-4 text-center text-gray-400">Chưa có khoản chi.</td></tr>}
           </tbody>
         </table>
-      </div>
+      </Card>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm" value={newCat} onChange={(e) => setNewCat(e.target.value === '' ? '' : Number(e.target.value))}>
             <option value="">— Chọn hạng mục —</option>
             {cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
-          <button onClick={addItem} disabled={newCat === ''} className="flex items-center gap-1 px-3 py-2 text-sm border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 disabled:opacity-50"><Plus className="w-4 h-4" /> Thêm khoản</button>
+          <Button variant="outline" onClick={addItem} disabled={newCat === ''} className="border-blue-300 text-blue-700 hover:bg-blue-50"><Plus className="w-4 h-4" /> Thêm khoản</Button>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-600">Tổng: <b className="text-gray-900">{fmt(total)} ₫</b></span>
-          <button onClick={save} disabled={saving} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60 text-sm">
+          <Button variant="success" onClick={save} disabled={saving}>
             {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />} {saved ? 'Đã lưu' : saving ? 'Đang lưu...' : 'Lưu kinh phí'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -326,7 +322,7 @@ function LaborSection({ proposalId }: { proposalId: string }) {
   if (loading) return <Loading />
   if (rows.length === 0) return <Empty text="Chưa có dòng tiền công. Thêm thành viên cho đề tài trước (hệ thống tự tạo dòng tiền công theo thành viên)." />
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 overflow-x-auto">
+    <Card className="p-4 overflow-x-auto">
       <table className="w-full text-sm">
         <thead><tr className="text-left text-gray-500 border-b">
           <th className="py-2 pr-2">Thành viên</th><th className="px-2">Số ngày công</th><th className="px-2">Hệ số</th><th className="px-2">Đơn giá ngày</th><th className="px-2">Tổng tiền</th><th></th>
@@ -339,14 +335,13 @@ function LaborSection({ proposalId }: { proposalId: string }) {
               <td className="px-1"><input type="number" step="0.01" className="w-24 px-2 py-1 border border-gray-300 rounded text-sm text-right" value={row.coefficient ?? 0} onChange={(e) => setField(idx, 'coefficient', Number(e.target.value))} /></td>
               <td className="px-2 text-right text-gray-600">{row.dailyRate != null ? fmt(row.dailyRate) : '—'}</td>
               <td className="px-2 text-right text-gray-800 font-medium">{row.computedDailyTotal != null ? fmt(row.computedDailyTotal) : (row.totalAmount ? fmt(row.totalAmount) : '—')}</td>
-              <td><button onClick={() => saveRow(row)} disabled={savingId === row.id}
-                className="flex items-center gap-1 px-2.5 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-60"><Save className="w-3.5 h-3.5" /> Lưu</button></td>
+              <td><Button variant="success" onClick={() => saveRow(row)} disabled={savingId === row.id} className="px-2.5 py-1 text-xs rounded"><Save className="w-3.5 h-3.5" /> Lưu</Button></td>
             </tr>
           ))}
         </tbody>
       </table>
       <p className="text-xs text-gray-400 mt-2">Đơn giá ngày = hệ số × lương cơ bản ngày; tổng tiền = số ngày công × đơn giá — hệ thống tự tính khi lưu.</p>
-    </div>
+    </Card>
   )
 }
 
@@ -354,5 +349,5 @@ function NumCell({ value, onChange }: { value: number; onChange: (v: number) => 
   return <input type="number" min={0} className="w-32 px-2 py-1 border border-gray-300 rounded text-sm text-right"
     value={value} onChange={(e) => onChange(Math.max(0, Number(e.target.value)))} />
 }
-function Loading() { return <div className="flex items-center justify-center py-12 text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /> Đang tải...</div> }
-function Empty({ text }: { text: string }) { return <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400 text-sm">{text}</div> }
+function Loading() { return <Spinner className="py-12" /> }
+function Empty({ text }: { text: string }) { return <EmptyState className="p-8 text-sm">{text}</EmptyState> }

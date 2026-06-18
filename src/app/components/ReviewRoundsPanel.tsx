@@ -5,6 +5,7 @@ import { scoringService } from '../../services/scoringService'
 import { userService } from '../../services/userService'
 import RoundMeetings from './RoundMeetings'
 import RoundResultsPanel from './RoundResultsPanel'
+import { Button, Select } from './ui-kit'
 import type { ReviewRoundDto } from '../../types/review'
 import { ROUND_TYPE_LABEL, ROUND_STATUS_LABEL, ASSIGNMENT_ROLE } from '../../types/review'
 import type { UserDto } from '../../types/user'
@@ -124,22 +125,14 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
           <Gavel className="w-4 h-4" /> Vòng phản biện ({rounds.length})
         </h5>
         <div className="flex items-center gap-2">
-          <select
-            value={newRoundType}
-            onChange={(e) => setNewRoundType(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-          >
+          <Select value={newRoundType} onChange={(e) => setNewRoundType(e.target.value)} className="w-auto py-1.5">
             <option value="SCREENING">Sàng lọc</option>
             <option value="REVIEW">Xét duyệt</option>
             <option value="ACCEPTANCE">Nghiệm thu</option>
-          </select>
-          <button
-            onClick={handleCreateRound}
-            disabled={creating}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60"
-          >
+          </Select>
+          <Button size="sm" onClick={handleCreateRound} disabled={creating}>
             <Plus className="w-4 h-4" /> Tạo vòng
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -208,7 +201,7 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
 
               {/* assign form */}
               <div className="flex flex-wrap items-center gap-2">
-                <select
+                <Select
                   value={assignSel[round.id]?.reviewerId || ''}
                   onChange={(e) =>
                     setAssignSel({
@@ -216,7 +209,7 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
                       [round.id]: { reviewerId: e.target.value, role: assignSel[round.id]?.role || ASSIGNMENT_ROLE.Member },
                     })
                   }
-                  className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-auto py-1.5"
                 >
                   <option value="">— Chọn người phản biện —</option>
                   {reviewers.map((r) => (
@@ -224,8 +217,8 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
                       {r.fullName}
                     </option>
                   ))}
-                </select>
-                <select
+                </Select>
+                <Select
                   value={assignSel[round.id]?.role || ASSIGNMENT_ROLE.Member}
                   onChange={(e) =>
                     setAssignSel({
@@ -233,19 +226,15 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
                       [round.id]: { reviewerId: assignSel[round.id]?.reviewerId || '', role: e.target.value },
                     })
                   }
-                  className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-auto py-1.5"
                 >
                   <option value="Member">Thành viên</option>
                   <option value="Chair">Chủ tịch</option>
                   <option value="Opponent">Phản biện</option>
-                </select>
-                <button
-                  onClick={() => handleAssign(round.id)}
-                  disabled={busy}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-60"
-                >
+                </Select>
+                <Button variant="success" size="sm" onClick={() => handleAssign(round.id)} disabled={busy}>
                   <Plus className="w-4 h-4" /> Phân công
-                </button>
+                </Button>
               </div>
               {assignError[round.id] && (
                 <div className="mt-2 flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
@@ -258,20 +247,12 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
               {!isCompleted(round) ? (
                 <div className="mt-3 pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2">
                   <span className="text-sm text-gray-500">Kết thúc vòng & công bố:</span>
-                  <button
-                    onClick={() => handleFinalize(round.id, 'Pass')}
-                    disabled={busy}
-                    className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60"
-                  >
+                  <Button variant="success" size="sm" onClick={() => handleFinalize(round.id, 'Pass')} disabled={busy}>
                     Đạt (APPROVED)
-                  </button>
-                  <button
-                    onClick={() => handleFinalize(round.id, 'Fail')}
-                    disabled={busy}
-                    className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60"
-                  >
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => handleFinalize(round.id, 'Fail')} disabled={busy}>
                     Từ chối (REJECTED)
-                  </button>
+                  </Button>
                   <span className="text-xs text-gray-400">— công bố ngay, cập nhật trạng thái đề tài.</span>
                 </div>
               ) : (

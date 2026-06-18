@@ -19,6 +19,7 @@ import ProposalDocumentPreview from './ProposalDocumentPreview'
 import ProposalDossierEditor from './ProposalDossierEditor'
 import CycleSelection from './CycleSelection'
 import ProposalWorkspace from './ProposalWorkspace'
+import { Button, EmptyState } from './ui-kit'
 import RoundResultsPanel from './RoundResultsPanel'
 import RoleSwitcher from './RoleSwitcher'
 import type { CycleDto } from '../../types/cycle'
@@ -431,30 +432,24 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
               <p className="text-sm text-gray-500">Faculty Portal</p>
             </div>
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate('/guide')}
-                className="flex items-center gap-2 px-3 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition"
-              >
+              <Button variant="outline" onClick={() => navigate('/guide')}
+                className="text-blue-600 border-blue-200 hover:bg-blue-50">
                 <BookOpen className="w-4 h-4" /> Hướng dẫn
-              </button>
-              <button
+              </Button>
+              <Button variant="outline"
                 onClick={() => { setShowSubmissions(true); setPickingCycle(false); setWorkspaceId(null); setShowProfile(false); setEditingId(null) }}
-                className="flex items-center gap-2 px-4 py-2 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 transition"
-              >
+                className="border-blue-300 text-blue-700 hover:bg-blue-50">
                 <List className="w-4 h-4" /> Đề xuất của tôi
-              </button>
-              <button
-                onClick={() => { setPickingCycle(true); setShowSubmissions(false); setWorkspaceId(null); setShowProfile(false); setEditingId(null); resetForm() }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
+              </Button>
+              <Button
+                onClick={() => { setPickingCycle(true); setShowSubmissions(false); setWorkspaceId(null); setShowProfile(false); setEditingId(null); resetForm() }}>
                 <Plus className="w-4 h-4" /> Tạo đề tài mới
-              </button>
-              <button
+              </Button>
+              <Button variant={showProfile ? 'primary' : 'outline'}
                 onClick={() => { setShowProfile(!showProfile); setShowSubmissions(false) }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${showProfile ? 'bg-purple-600 text-white hover:bg-purple-700' : 'border border-purple-300 text-purple-700 hover:bg-purple-50'}`}
-              >
+                className={showProfile ? 'bg-purple-600 text-white hover:bg-purple-700' : 'border-purple-300 text-purple-700 hover:bg-purple-50'}>
                 <GraduationCap className="w-4 h-4" /> Hồ sơ KH
-              </button>
+              </Button>
               <RoleSwitcher />
               <div className="border-l border-gray-300 pl-4">
                 <p className="font-medium text-gray-800">{user.name}</p>
@@ -542,9 +537,9 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
             {!editingId && (
               <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
                 <p className="text-sm text-amber-800">Đang tạo đề xuất mới. Muốn test nhanh? Bấm nút bên để điền sẵn dữ liệu mẫu.</p>
-                <button onClick={fillSample} className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700">
+                <Button variant="warning" size="sm" onClick={fillSample}>
                   <Plus className="w-4 h-4" /> Điền dữ liệu mẫu
-                </button>
+                </Button>
               </div>
             )}
             {/* Progress */}
@@ -627,10 +622,10 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-gray-800">Thành viên tham gia</h2>
-                    <button onClick={() => setMembers([...members, { ...emptyMember }])}
-                      className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">
+                    <Button variant="ghost" size="sm" onClick={() => setMembers([...members, { ...emptyMember }])}
+                      className="bg-blue-50 text-blue-700 hover:bg-blue-100">
                       <Plus className="w-4 h-4" /> Thêm thành viên
-                    </button>
+                    </Button>
                   </div>
                   {members.map((m, i) => (
                     <div key={i} className="grid md:grid-cols-12 gap-3 items-end border border-gray-200 rounded-lg p-4">
@@ -674,10 +669,10 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-gray-800">Dự toán kinh phí</h2>
-                    <button onClick={() => setBudgetItems([...budgetItems, { ...emptyBudget }])}
-                      className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">
+                    <Button variant="ghost" size="sm" onClick={() => setBudgetItems([...budgetItems, { ...emptyBudget }])}
+                      className="bg-blue-50 text-blue-700 hover:bg-blue-100">
                       <Plus className="w-4 h-4" /> Thêm khoản
-                    </button>
+                    </Button>
                   </div>
                   {budgetItems.map((b, i) => (
                     <div key={i} className="grid md:grid-cols-12 gap-3 items-end border border-gray-200 rounded-lg p-4">
@@ -735,10 +730,9 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                         <option value="CV">Lý lịch khoa học</option>
                         <option value="Other">Khác</option>
                       </select>
-                      <button type="button" onClick={() => docFileRef.current?.click()}
-                        className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                      <Button type="button" size="sm" onClick={() => docFileRef.current?.click()}>
                         <Upload className="w-4 h-4" /> Chọn file
-                      </button>
+                      </Button>
                       <input ref={docFileRef} type="file" className="hidden"
                         accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
                         onChange={(e) => {
@@ -803,21 +797,18 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
 
               {/* Nav buttons */}
               <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
-                <button onClick={() => { setError(''); if (currentStep > 1) setCurrentStep(currentStep - 1) }}
-                  disabled={currentStep === 1}
-                  className="flex items-center gap-2 px-6 py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                <Button variant="outline" size="lg" onClick={() => { setError(''); if (currentStep > 1) setCurrentStep(currentStep - 1) }}
+                  disabled={currentStep === 1}>
                   <ArrowLeft className="w-4 h-4" /> Trước
-                </button>
+                </Button>
                 {currentStep < 5 ? (
-                  <button onClick={handleNext}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
+                  <Button size="lg" onClick={handleNext}>
                     Tiếp <ArrowRight className="w-4 h-4" />
-                  </button>
+                  </Button>
                 ) : (
-                  <button onClick={handleSaveDraft} disabled={saving || overCap}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed">
+                  <Button variant="success" size="lg" onClick={handleSaveDraft} disabled={saving || overCap}>
                     <CheckCircle className="w-4 h-4" /> {saving ? 'Đang lưu...' : editingId ? 'Cập nhật' : 'Lưu nháp'}
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -902,12 +893,10 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                   )}
                   {viewProposal.status === 'DRAFT' && (
                     <div className="pt-2 flex justify-end">
-                      <button
-                        onClick={() => { const p = viewProposal; setViewProposal(null); handleEdit({ id: p.id } as ProposalSummaryDto) }}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm"
-                      >
+                      <Button variant="success"
+                        onClick={() => { const p = viewProposal; setViewProposal(null); handleEdit({ id: p.id } as ProposalSummaryDto) }}>
                         <Pencil className="w-4 h-4" /> Chỉnh sửa đề xuất này
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </>
@@ -1014,11 +1003,10 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
               {crMsg && <div className="text-sm text-blue-600">{crMsg}</div>}
             </div>
             <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-              <button onClick={() => setCrProposal(null)} className="px-4 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-100">Hủy</button>
-              <button onClick={submitCr} disabled={crBusy}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60">
+              <Button variant="outline" onClick={() => setCrProposal(null)}>Hủy</Button>
+              <Button onClick={submitCr} disabled={crBusy}>
                 {crBusy ? 'Đang gửi...' : 'Gửi yêu cầu'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1055,20 +1043,15 @@ function MySubmissions({ proposals, loading, rowBusy, onOpen, onWithdraw, onChan
           <h2 className="text-2xl font-bold text-gray-800">Đề xuất của tôi</h2>
           <p className="text-gray-500 mt-1">Theo dõi và gửi duyệt các đề xuất nghiên cứu</p>
         </div>
-        <button
-          onClick={() => navigate('/contracts')}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
-        >
+        <Button onClick={() => navigate('/contracts')} className="bg-indigo-600 hover:bg-indigo-700">
           <ClipboardList className="w-4 h-4" /> Hợp đồng & Báo cáo
-        </button>
+        </Button>
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">Đang tải...</div>
+        <EmptyState>Đang tải...</EmptyState>
       ) : proposals.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
-          Chưa có đề xuất nào. Bấm "Tạo đề xuất mới" để bắt đầu.
-        </div>
+        <EmptyState>Chưa có đề xuất nào. Bấm "Tạo đề xuất mới" để bắt đầu.</EmptyState>
       ) : (
         <div className="grid gap-4">
           {proposals.map((p) => (
@@ -1087,27 +1070,25 @@ function MySubmissions({ proposals, loading, rowBusy, onOpen, onWithdraw, onChan
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(p.status)}`}>{p.status}</span>
-                  <button onClick={() => onOpen(p)} disabled={rowBusy === p.id}
-                    className="flex items-center gap-1 px-4 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+                  <Button size="sm" onClick={() => onOpen(p)} disabled={rowBusy === p.id}>
                     <FolderOpen className="w-4 h-4" /> Mở
-                  </button>
+                  </Button>
                   {p.status === 'SUBMITTED' && (
-                    <button onClick={() => onWithdraw(p.id)} disabled={rowBusy === p.id}
-                      className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-60">
+                    <Button variant="outline" size="sm" onClick={() => onWithdraw(p.id)} disabled={rowBusy === p.id}>
                       <Undo2 className="w-4 h-4" /> Rút lại
-                    </button>
+                    </Button>
                   )}
                   {p.status !== 'DRAFT' && (
-                    <button onClick={() => onResults(p)}
-                      className="flex items-center gap-1 px-3 py-1.5 text-sm border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50">
+                    <Button variant="outline" size="sm" onClick={() => onResults(p)}
+                      className="border-blue-300 text-blue-700 hover:bg-blue-50">
                       <BarChart3 className="w-4 h-4" /> Kết quả
-                    </button>
+                    </Button>
                   )}
                   {p.status !== 'DRAFT' && (
-                    <button onClick={() => onChangeRequest(p)}
-                      className="flex items-center gap-1 px-3 py-1.5 text-sm border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50">
+                    <Button variant="outline" size="sm" onClick={() => onChangeRequest(p)}
+                      className="border-amber-300 text-amber-700 hover:bg-amber-50">
                       <FileText className="w-4 h-4" /> Yêu cầu thay đổi
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>

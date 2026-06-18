@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit, X, Building2 } from 'lucide-react'
+import { Plus, Edit, Building2 } from 'lucide-react'
 import { organizationalUnitService } from '../../services/organizationalUnitService'
 import type { OrgUnitDto, OrgUnitRequest } from '../../services/organizationalUnitService'
+import { Button, Input, Select, Modal } from './ui-kit'
 
 const UNIT_TYPES = ['UNIVERSITY', 'FACULTY', 'DEPARTMENT', 'CENTER', 'INSTITUTE', 'OTHER']
 
@@ -53,9 +54,7 @@ export default function OrgUnitManagement() {
           <h2 className="text-2xl font-bold text-gray-800">Đơn vị tổ chức</h2>
           <p className="text-gray-500 mt-1">Quản lý khoa, bộ môn, trung tâm nghiên cứu</p>
         </div>
-        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          <Plus className="w-4 h-4" /> Thêm đơn vị
-        </button>
+        <Button onClick={openAdd}><Plus className="w-4 h-4" /> Thêm đơn vị</Button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -98,51 +97,37 @@ export default function OrgUnitManagement() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
-            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-800">{editing ? 'Sửa đơn vị' : 'Thêm đơn vị'}</h3>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+        <Modal
+          title={editing ? 'Sửa đơn vị' : 'Thêm đơn vị'}
+          onClose={() => setShowModal(false)}
+          className="max-w-lg"
+          footer={<>
+            <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
+            <Button onClick={save} disabled={saving}>{saving ? 'Đang lưu...' : editing ? 'Cập nhật' : 'Thêm'}</Button>
+          </>}
+        >
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Mã đơn vị *</label>
+              <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="VD: FITHOU, DEPT_CS" />
             </div>
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã đơn vị *</label>
-                  <input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })}
-                    placeholder="VD: FITHOU, DEPT_CS"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Loại đơn vị *</label>
-                  <select value={form.unitType} onChange={(e) => setForm({ ...form, unitType: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                    {UNIT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tên đơn vị *</label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Tên đầy đủ của đơn vị"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Thứ tự hiển thị</label>
-                <input type="number" min={0} value={form.sortOrder ?? 0}
-                  onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-              </div>
-              {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
-            </div>
-            <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100">Hủy</button>
-              <button onClick={save} disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-60">
-                {saving ? 'Đang lưu...' : editing ? 'Cập nhật' : 'Thêm'}
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Loại đơn vị *</label>
+              <Select value={form.unitType} onChange={(e) => setForm({ ...form, unitType: e.target.value })}>
+                {UNIT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </Select>
             </div>
           </div>
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tên đơn vị *</label>
+            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Tên đầy đủ của đơn vị" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Thứ tự hiển thị</label>
+            <Input type="number" min={0} value={form.sortOrder ?? 0} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} />
+          </div>
+          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
+        </Modal>
       )}
     </div>
   )

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, X, GripVertical } from 'lucide-react'
+import { Plus, Edit, Trash2, GripVertical } from 'lucide-react'
 import { rubricService } from '../../services/rubricService'
+import { Button, Input, Select, Modal } from './ui-kit'
 import type { SaveRubricCriterionRequest } from '../../services/rubricService'
 import type { RubricCriterionDto } from '../../types/review'
 
@@ -86,10 +87,7 @@ export default function RubricSettings() {
                   <h3 className="font-semibold text-gray-800">{rt.label}</h3>
                   <p className="text-sm text-gray-500">{items.length} tiêu chí · tổng {total} điểm</p>
                 </div>
-                <button onClick={() => openAdd(rt.value)}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                  <Plus className="w-4 h-4" /> Thêm tiêu chí
-                </button>
+                <Button size="sm" onClick={() => openAdd(rt.value)}><Plus className="w-4 h-4" /> Thêm tiêu chí</Button>
               </div>
               {items.length === 0 ? (
                 <div className="p-6 text-sm text-gray-400">Chưa có tiêu chí. Bấm "Thêm tiêu chí".</div>
@@ -118,52 +116,41 @@ export default function RubricSettings() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
-            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-800">{editing ? 'Sửa tiêu chí' : 'Thêm tiêu chí'}</h3>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+        <Modal
+          title={editing ? 'Sửa tiêu chí' : 'Thêm tiêu chí'}
+          onClose={() => setShowModal(false)}
+          className="max-w-lg"
+          footer={<>
+            <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
+            <Button onClick={save} disabled={saving}>{saving ? 'Đang lưu...' : editing ? 'Cập nhật' : 'Thêm'}</Button>
+          </>}
+        >
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Loại vòng</label>
+            <Select value={form.roundType} onChange={(e) => setForm({ ...form, roundType: Number(e.target.value) })}>
+              {ROUND_TYPES.map((rt) => <option key={rt.value} value={rt.value}>{rt.label}</option>)}
+            </Select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Tên tiêu chí *</label>
+            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Điểm tối đa *</label>
+              <Input type="number" min={1} value={form.maxScore} onChange={(e) => setForm({ ...form, maxScore: Number(e.target.value) })} />
             </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Loại vòng</label>
-                <select value={form.roundType} onChange={(e) => setForm({ ...form, roundType: Number(e.target.value) })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                  {ROUND_TYPES.map((rt) => <option key={rt.value} value={rt.value}>{rt.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tên tiêu chí *</label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Điểm tối đa *</label>
-                  <input type="number" min={1} value={form.maxScore} onChange={(e) => setForm({ ...form, maxScore: Number(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Thứ tự</label>
-                  <input type="number" min={1} value={form.orderIndex} onChange={(e) => setForm({ ...form, orderIndex: Number(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-              </div>
-              <label className="flex items-center gap-2 text-sm text-gray-700">
-                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="accent-blue-600" />
-                Đang dùng (bỏ tích để ẩn khỏi phiếu chấm)
-              </label>
-              {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
-            </div>
-            <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-100">Hủy</button>
-              <button onClick={save} disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60">
-                {saving ? 'Đang lưu...' : editing ? 'Cập nhật' : 'Thêm'}
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Thứ tự</label>
+              <Input type="number" min={1} value={form.orderIndex} onChange={(e) => setForm({ ...form, orderIndex: Number(e.target.value) })} />
             </div>
           </div>
-        </div>
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="accent-blue-600" />
+            Đang dùng (bỏ tích để ẩn khỏi phiếu chấm)
+          </label>
+          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
+        </Modal>
       )}
     </div>
   )

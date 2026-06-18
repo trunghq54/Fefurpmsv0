@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Plus, X, ClipboardList, Link2 } from 'lucide-react'
+import { Plus, ClipboardList, Link2 } from 'lucide-react'
 import { researchOrderService } from '../../services/researchOrderService'
+import { Button, Input, Select, Textarea, Modal } from './ui-kit'
 import { organizationalUnitService } from '../../services/organizationalUnitService'
 import { cycleService } from '../../services/cycleService'
 import type { ResearchOrderDto } from '../../services/researchOrderService'
@@ -79,9 +80,7 @@ export default function ResearchOrderManagement() {
           <h2 className="text-2xl font-bold text-gray-800">Đặt hàng nghiên cứu</h2>
           <p className="text-gray-500 mt-1">Đơn vị yêu cầu nghiên cứu để giải quyết vấn đề thực tế</p>
         </div>
-        <button onClick={openModal} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          <Plus className="w-4 h-4" /> Tạo đặt hàng
-        </button>
+        <Button onClick={openModal}><Plus className="w-4 h-4" /> Tạo đặt hàng</Button>
       </div>
 
       <div className="flex gap-2">
@@ -134,58 +133,44 @@ export default function ResearchOrderManagement() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
-            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-800">Tạo đặt hàng nghiên cứu</h3>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+        <Modal
+          title="Tạo đặt hàng nghiên cứu"
+          onClose={() => setShowModal(false)}
+          className="max-w-lg"
+          footer={<>
+            <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
+            <Button onClick={create} disabled={saving}>{saving ? 'Đang tạo...' : 'Tạo đặt hàng'}</Button>
+          </>}
+        >
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Đợt nghiên cứu *</label>
+              <Select value={form.cycleId} onChange={(e) => setForm({ ...form, cycleId: Number(e.target.value) })}>
+                {cycles.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </Select>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Đợt nghiên cứu *</label>
-                  <select value={form.cycleId} onChange={(e) => setForm({ ...form, cycleId: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                    {cycles.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Đơn vị đặt hàng *</label>
-                  <select value={form.orderingUnitId} onChange={(e) => setForm({ ...form, orderingUnitId: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                    {units.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Lĩnh vực nghiên cứu *</label>
-                <input value={form.researchArea} onChange={(e) => setForm({ ...form, researchArea: e.target.value })}
-                  placeholder="VD: AI trong giáo dục, Năng lượng tái tạo..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả vấn đề *</label>
-                <textarea rows={3} value={form.problemDescription} onChange={(e) => setForm({ ...form, problemDescription: e.target.value })}
-                  placeholder="Mô tả chi tiết vấn đề cần nghiên cứu giải quyết..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sản phẩm kỳ vọng</label>
-                <input value={form.expectedProducts} onChange={(e) => setForm({ ...form, expectedProducts: e.target.value })}
-                  placeholder="Hệ thống phần mềm, bài báo ISI, quy trình..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-              </div>
-              {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
-            </div>
-            <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100">Hủy</button>
-              <button onClick={create} disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-60">
-                {saving ? 'Đang tạo...' : 'Tạo đặt hàng'}
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Đơn vị đặt hàng *</label>
+              <Select value={form.orderingUnitId} onChange={(e) => setForm({ ...form, orderingUnitId: Number(e.target.value) })}>
+                {units.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+              </Select>
             </div>
           </div>
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Lĩnh vực nghiên cứu *</label>
+            <Input value={form.researchArea} onChange={(e) => setForm({ ...form, researchArea: e.target.value })} placeholder="VD: AI trong giáo dục, Năng lượng tái tạo..." />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả vấn đề *</label>
+            <Textarea rows={3} value={form.problemDescription} onChange={(e) => setForm({ ...form, problemDescription: e.target.value })}
+              placeholder="Mô tả chi tiết vấn đề cần nghiên cứu giải quyết..." className="resize-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Sản phẩm kỳ vọng</label>
+            <Input value={form.expectedProducts} onChange={(e) => setForm({ ...form, expectedProducts: e.target.value })} placeholder="Hệ thống phần mềm, bài báo ISI, quy trình..." />
+          </div>
+          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
+        </Modal>
       )}
     </div>
   )

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { KeyRound, LogOut } from 'lucide-react'
 import { authService } from '../../services/authService'
 import { useAuth } from '../../contexts/AuthContext'
+import { Button, Input } from './ui-kit'
 
 export default function ChangePassword() {
   const { user, markPasswordChanged, logout } = useAuth()
@@ -45,24 +46,20 @@ export default function ChangePassword() {
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu hiện tại</label>
-            <input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+            <Input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} required className="px-4 py-2.5" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu mới</label>
-            <input type="password" value={next} onChange={(e) => setNext(e.target.value)} required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+            <Input type="password" value={next} onChange={(e) => setNext(e.target.value)} required className="px-4 py-2.5" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Xác nhận mật khẩu mới</label>
-            <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+            <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required className="px-4 py-2.5" />
           </div>
           {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
-          <button type="submit" disabled={saving}
-            className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-60">
+          <Button type="submit" disabled={saving} className="w-full py-2.5 font-semibold">
             {saving ? 'Đang lưu...' : 'Đổi mật khẩu'}
-          </button>
+          </Button>
         </form>
 
         <button onClick={logout} className="mt-4 w-full inline-flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-red-600">

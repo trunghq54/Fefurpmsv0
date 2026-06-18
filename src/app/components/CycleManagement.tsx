@@ -3,6 +3,7 @@ import { Plus, Edit, X, Power, Layers, CalendarRange, Wallet } from 'lucide-reac
 import { cycleService } from '../../services/cycleService'
 import type { CycleDto } from '../../types/cycle'
 import TrackWorkspace from './TrackWorkspace'
+import { Button, Input, Textarea } from './ui-kit'
 
 interface CycleForm {
   name: string
@@ -141,13 +142,9 @@ export default function CycleManagement() {
           <h2 className="text-2xl font-bold text-gray-800">Quản lý Đợt nộp (Cycles)</h2>
           <p className="text-gray-500 mt-1">Cấu hình đợt NCKH, mốc thời gian và hạn mức kinh phí</p>
         </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
-        >
-          <Plus className="w-5 h-5" />
-          Tạo đợt mới
-        </button>
+        <Button onClick={() => handleOpenModal()}>
+          <Plus className="w-5 h-5" /> Tạo đợt mới
+        </Button>
       </div>
 
       {/* Stats */}
@@ -229,14 +226,10 @@ export default function CycleManagement() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setWorkspaceCycle(cycle)}
-                          className="flex items-center gap-1 px-3 py-1.5 text-sm text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition"
-                          title="Quản lý track"
-                        >
-                          <Layers className="w-4 h-4" />
-                          Tracks ({cycle.trackCount})
-                        </button>
+                        <Button variant="ghost" size="sm" onClick={() => setWorkspaceCycle(cycle)} title="Quản lý track"
+                          className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                          <Layers className="w-4 h-4" /> Tracks ({cycle.trackCount})
+                        </Button>
                         <button
                           onClick={() => handleOpenModal(cycle)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
@@ -282,77 +275,35 @@ export default function CycleManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Tên đợt *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="vd: NCKH Cấp Trường 2026"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                  <Input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="vd: NCKH Cấp Trường 2026" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Năm học *</label>
-                  <input
-                    type="text"
-                    value={formData.academicYear}
-                    onChange={(e) => setFormData({ ...formData, academicYear: e.target.value })}
-                    placeholder="vd: 2025-2026"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                  <Input type="text" value={formData.academicYear} onChange={(e) => setFormData({ ...formData, academicYear: e.target.value })} placeholder="vd: 2025-2026" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Ngày mở nộp *</label>
-                  <input
-                    type="date"
-                    value={formData.submissionStartDate}
-                    onChange={(e) => setFormData({ ...formData, submissionStartDate: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                  <Input type="date" value={formData.submissionStartDate} onChange={(e) => setFormData({ ...formData, submissionStartDate: e.target.value })} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Hạn Quý I (Applied) *</label>
-                  <input
-                    type="date"
-                    value={formData.submissionEndDateApplied}
-                    onChange={(e) => setFormData({ ...formData, submissionEndDateApplied: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                  <Input type="date" value={formData.submissionEndDateApplied} onChange={(e) => setFormData({ ...formData, submissionEndDateApplied: e.target.value })} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Hạn Quý II (Basic) *</label>
-                  <input
-                    type="date"
-                    value={formData.submissionEndDateBasic}
-                    onChange={(e) => setFormData({ ...formData, submissionEndDateBasic: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                  <Input type="date" value={formData.submissionEndDateBasic} onChange={(e) => setFormData({ ...formData, submissionEndDateBasic: e.target.value })} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Hạn mức KP Applied (₫)</label>
-                  <input
-                    type="number"
-                    value={formData.fundingCapApplied}
-                    onChange={(e) => setFormData({ ...formData, fundingCapApplied: Number(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                  <Input type="number" value={formData.fundingCapApplied} onChange={(e) => setFormData({ ...formData, fundingCapApplied: Number(e.target.value) })} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Hạn mức KP Basic (₫)</label>
-                  <input
-                    type="number"
-                    value={formData.fundingCapBasic}
-                    onChange={(e) => setFormData({ ...formData, fundingCapBasic: Number(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                  <Input type="number" value={formData.fundingCapBasic} onChange={(e) => setFormData({ ...formData, fundingCapBasic: Number(e.target.value) })} />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                  <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} />
                 </div>
               </div>
 
@@ -364,19 +315,10 @@ export default function CycleManagement() {
             </div>
 
             <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3 sticky bottom-0">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-100 transition"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
-              >
+              <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
+              <Button onClick={handleSave} disabled={saving}>
                 {saving ? 'Đang lưu...' : editingCycle ? 'Cập nhật' : 'Tạo mới'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

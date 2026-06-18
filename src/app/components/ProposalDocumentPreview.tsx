@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, FileText, Sheet, Download, Loader2 } from 'lucide-react'
+import { X, FileText, Sheet, Download } from 'lucide-react'
 import { renderAsync } from 'docx-preview'
 import * as XLSX from 'xlsx'
 import { exportService } from '../../services/exportService'
+import { Button, Spinner } from './ui-kit'
 
 type Tab = 'word' | 'excel'
 
@@ -79,19 +80,14 @@ export default function ProposalDocumentPreview({
         <TabBtn active={tab === 'word'} onClick={() => setTab('word')} icon={<FileText className="w-4 h-4" />} label="Thuyết minh (Word)" />
         <TabBtn active={tab === 'excel'} onClick={() => setTab('excel')} icon={<Sheet className="w-4 h-4" />} label="Dự toán (Excel)" />
       </div>
-      <button onClick={download} disabled={loading}
-        className="flex items-center gap-2 px-3 py-1.5 my-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 text-sm">
+      <Button onClick={download} disabled={loading} size="sm" className="my-1">
         <Download className="w-4 h-4" /> Tải {tab === 'word' ? '.docx' : '.xlsx'}
-      </button>
+      </Button>
     </div>
   )
   const body = (
     <>
-      {loading && (
-        <div className="flex items-center justify-center py-16 text-gray-500">
-          <Loader2 className="w-5 h-5 animate-spin mr-2" /> Đang tải & dựng tài liệu...
-        </div>
-      )}
+      {loading && <Spinner text="Đang tải & dựng tài liệu..." />}
       {error && !loading && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
       )}

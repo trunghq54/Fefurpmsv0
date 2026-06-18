@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   ArrowLeft, FileText, Users, ListChecks, FileSpreadsheet, Send, Save, CheckCircle,
-  Loader2, Plus, AlertTriangle,
+  Plus, AlertTriangle,
 } from 'lucide-react'
 import { proposalService } from '../../services/proposalService'
 import type { ProposalDto, CreateProposalRequest } from '../../types/proposal'
@@ -11,16 +11,15 @@ import { teamMemberService } from '../../services/teamMemberService'
 import type { TeamMemberResponse } from '../../types/budget'
 import ProposalDossierEditor from './ProposalDossierEditor'
 import ProposalDocumentPreview from './ProposalDocumentPreview'
+import { Button, Card, Badge, Input, Textarea, Select, Label, Spinner } from './ui-kit'
 
 type Section = 'info' | 'members' | 'detail' | 'documents'
 const ROLE_CODES = [
   { code: 'CNNV', label: 'Chủ nhiệm' }, { code: 'TKKH', label: 'Thư ký khoa học' },
   { code: 'TVC', label: 'Thành viên chính' }, { code: 'TV', label: 'Thành viên' }, { code: 'KTV', label: 'Kỹ thuật viên' },
 ]
-const statusColor = (s: string) => ({
-  DRAFT: 'bg-gray-100 text-gray-700', SUBMITTED: 'bg-yellow-100 text-yellow-800',
-  APPROVED: 'bg-green-100 text-green-800', REJECTED: 'bg-red-100 text-red-800',
-}[s?.toUpperCase()] || 'bg-gray-100 text-gray-700')
+const statusTone = (s: string): 'gray' | 'yellow' | 'green' | 'red' =>
+  (({ DRAFT: 'gray', SUBMITTED: 'yellow', APPROVED: 'green', REJECTED: 'red' } as const)[s?.toUpperCase() as 'DRAFT'] || 'gray')
 
 // Không gian làm 1 đề tài (full-page, không popup): thông tin → thành viên → chi tiết → tài liệu → nộp.
 export default function ProposalWorkspace({
@@ -48,7 +47,7 @@ export default function ProposalWorkspace({
     } finally { setSubmitting(false) }
   }
 
-  if (loading || !p) return <div className="flex items-center justify-center py-20 text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /> Đang tải đề tài...</div>
+  if (loading || !p) return <Spinner text="Đang tải đề tài..." className="py-20" />
 
   const navItems: { id: Section; label: string; icon: React.ReactNode }[] = [
     { id: 'info', label: 'Thông tin chung', icon: <FileText className="w-4 h-4" /> },
@@ -62,20 +61,19 @@ export default function ProposalWorkspace({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="flex items-center gap-1 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+          <Button variant="outline" size="sm" onClick={onBack}>
             <ArrowLeft className="w-4 h-4" /> Danh sách
-          </button>
+          </Button>
           <div>
             <h2 className="text-xl font-bold text-gray-800">{p.titleVI || '(Chưa có tên)'}</h2>
-            <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(p.status)}`}>{p.status}</span>
+            <Badge tone={statusTone(p.status)} className="mt-0.5">{p.status}</Badge>
           </div>
         </div>
         {isDraft && (
-          <button onClick={submit} disabled={submitting}
-            className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60">
+          <Button variant="success" size="lg" onClick={submit} disabled={submitting}>
             {submitMsg === 'OK' ? <CheckCircle className="w-4 h-4" /> : <Send className="w-4 h-4" />}
             {submitMsg === 'OK' ? 'Đã nộp' : submitting ? 'Đang nộp...' : 'Nộp duyệt'}
-          </button>
+          </Button>
         )}
       </div>
       {submitMsg && submitMsg !== 'OK' && (
@@ -107,9 +105,6 @@ export default function ProposalWorkspace({
     </div>
   )
 }
-
-const inputCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500'
-const Label = ({ children }: { children: React.ReactNode }) => <label className="block text-sm font-medium text-gray-700 mb-1">{children}</label>
 
 // ── Thông tin chung (core + Mẫu 1) ─────────────────────────────────────────
 function InfoSection({ proposal, onSaved }: { proposal: ProposalDto; onSaved: () => void }) {
@@ -145,26 +140,26 @@ function InfoSection({ proposal, onSaved }: { proposal: ProposalDto; onSaved: ()
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+    <Card className="p-6 space-y-4">
       <div className="grid md:grid-cols-2 gap-4">
-        <div className="md:col-span-2"><Label>Tên đề tài (Tiếng Việt) *</Label><input className={inputCls} value={f.titleVI} onChange={(e) => set('titleVI', e.target.value)} /></div>
-        <div className="md:col-span-2"><Label>Tên đề tài (Tiếng Anh)</Label><input className={inputCls} value={f.titleEN} onChange={(e) => set('titleEN', e.target.value)} /></div>
+        <div className="md:col-span-2"><Label>Tên đề tài (Tiếng Việt) *</Label><Input value={f.titleVI} onChange={(e) => set('titleVI', e.target.value)} /></div>
+        <div className="md:col-span-2"><Label>Tên đề tài (Tiếng Anh)</Label><Input value={f.titleEN} onChange={(e) => set('titleEN', e.target.value)} /></div>
         <div><Label>Track *</Label>
-          <select className={inputCls} value={f.trackId} onChange={(e) => set('trackId', e.target.value)}>
+          <Select value={f.trackId} onChange={(e) => set('trackId', e.target.value)}>
             <option value="">— Chọn track —</option>
             {tracks.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
+          </Select>
         </div>
         <div><Label>Loại nghiên cứu *</Label>
-          <select className={inputCls} value={f.researchType} onChange={(e) => set('researchType', Number(e.target.value))}>
+          <Select value={f.researchType} onChange={(e) => set('researchType', Number(e.target.value))}>
             <option value={1}>Ứng dụng</option><option value={2}>Cơ bản</option>
-          </select>
+          </Select>
         </div>
-        <div><Label>Thời gian (tháng) *</Label><input type="number" min={1} className={inputCls} value={f.durationMonths} onChange={(e) => set('durationMonths', Number(e.target.value))} /></div>
+        <div><Label>Thời gian (tháng) *</Label><Input type="number" min={1} value={f.durationMonths} onChange={(e) => set('durationMonths', Number(e.target.value))} /></div>
         <div><Label>Phương thức khoán chi</Label>
-          <select className={inputCls} value={f.fundingMethod} onChange={(e) => set('fundingMethod', e.target.value)}>
+          <Select value={f.fundingMethod} onChange={(e) => set('fundingMethod', e.target.value)}>
             <option value="PARTIAL">Khoán từng phần</option><option value="WHOLE">Khoán đến sản phẩm cuối</option>
-          </select>
+          </Select>
         </div>
       </div>
       <Field label="Mục tiêu nghiên cứu" value={f.objectives} onChange={(v) => set('objectives', v)} />
@@ -185,16 +180,16 @@ function InfoSection({ proposal, onSaved }: { proposal: ProposalDto; onSaved: ()
 
       {err && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm">{err}</div>}
       <div className="flex justify-end">
-        <button onClick={save} disabled={saving} className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+        <Button onClick={save} disabled={saving}>
           {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />} {saved ? 'Đã lưu' : saving ? 'Đang lưu...' : 'Lưu thông tin'}
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   )
 }
 
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return <div><Label>{label}</Label><textarea rows={2} className={inputCls + ' resize-y'} value={value} onChange={(e) => onChange(e.target.value)} /></div>
+  return <div><Label>{label}</Label><Textarea rows={2} value={value} onChange={(e) => onChange(e.target.value)} /></div>
 }
 
 // ── Thành viên ─────────────────────────────────────────────────────────────
@@ -221,10 +216,10 @@ function MembersSection({ proposalId, canEdit }: { proposalId: string; canEdit: 
     } finally { setBusy(false) }
   }
 
-  if (loading) return <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400"><Loader2 className="w-5 h-5 animate-spin inline" /></div>
+  if (loading) return <Spinner />
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-gray-200 divide-y">
+      <Card className="divide-y">
         {members.length === 0 && <div className="px-4 py-6 text-center text-gray-400 text-sm">Chưa có thành viên.</div>}
         {members.map((m) => (
           <div key={m.id} className="flex items-center justify-between px-4 py-3 text-sm">
@@ -236,23 +231,23 @@ function MembersSection({ proposalId, canEdit }: { proposalId: string; canEdit: 
             <span className="text-gray-500">{m.workMonths} tháng</span>
           </div>
         ))}
-      </div>
+      </Card>
       {canEdit && (
-        <div className="bg-white rounded-xl border border-gray-200 p-4 grid md:grid-cols-12 gap-2 items-end">
-          <div className="md:col-span-2"><Label>Học hàm</Label><input className={inputCls} value={n.academicTitle} onChange={(e) => setN({ ...n, academicTitle: e.target.value })} placeholder="GS.TS" /></div>
-          <div className="md:col-span-3"><Label>Họ tên *</Label><input className={inputCls} value={n.fullName} onChange={(e) => setN({ ...n, fullName: e.target.value })} /></div>
+        <Card className="p-4 grid md:grid-cols-12 gap-2 items-end">
+          <div className="md:col-span-2"><Label>Học hàm</Label><Input value={n.academicTitle} onChange={(e) => setN({ ...n, academicTitle: e.target.value })} placeholder="GS.TS" /></div>
+          <div className="md:col-span-3"><Label>Họ tên *</Label><Input value={n.fullName} onChange={(e) => setN({ ...n, fullName: e.target.value })} /></div>
           <div className="md:col-span-2"><Label>Vai trò</Label>
-            <select className={inputCls} value={n.memberRoleCode} onChange={(e) => setN({ ...n, memberRoleCode: e.target.value })}>
+            <Select value={n.memberRoleCode} onChange={(e) => setN({ ...n, memberRoleCode: e.target.value })}>
               {ROLE_CODES.map((r) => <option key={r.code} value={r.code}>{r.label}</option>)}
-            </select>
+            </Select>
           </div>
-          <div className="md:col-span-2"><Label>Đơn vị</Label><input className={inputCls} value={n.unitName} onChange={(e) => setN({ ...n, unitName: e.target.value })} /></div>
-          <div className="md:col-span-1"><Label>Tháng</Label><input type="number" min={0} className={inputCls} value={n.workMonths} onChange={(e) => setN({ ...n, workMonths: Number(e.target.value) })} /></div>
+          <div className="md:col-span-2"><Label>Đơn vị</Label><Input value={n.unitName} onChange={(e) => setN({ ...n, unitName: e.target.value })} /></div>
+          <div className="md:col-span-1"><Label>Tháng</Label><Input type="number" min={0} value={n.workMonths} onChange={(e) => setN({ ...n, workMonths: Number(e.target.value) })} /></div>
           <div className="md:col-span-2 flex items-center gap-2">
             <label className="flex items-center gap-1 text-sm text-gray-600"><input type="checkbox" checked={n.isSecretary} onChange={(e) => setN({ ...n, isSecretary: e.target.checked })} /> Thư ký</label>
-            <button onClick={add} disabled={busy || !n.fullName.trim()} className="flex items-center gap-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60"><Plus className="w-4 h-4" /> Thêm</button>
+            <Button size="sm" onClick={add} disabled={busy || !n.fullName.trim()}><Plus className="w-4 h-4" /> Thêm</Button>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   )
