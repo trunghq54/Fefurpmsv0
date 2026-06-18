@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { FileText, Download, Search } from 'lucide-react'
 import { proposalService } from '../../services/proposalService'
 import type { ProposalDocumentDto } from '../../types/proposal'
+import { Input, Select } from './ui-kit'
 
 const fmtSize = (b: number) =>
   b < 1024 ? `${b} B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`
@@ -40,20 +41,15 @@ export default function DocumentRepository() {
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="flex-1 min-w-[280px] relative">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm theo tên file / tên đề tài..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-            />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)}
+              placeholder="Tìm theo tên file / tên đề tài..." className="pl-10" />
           </div>
-          <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+          <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="w-auto">
             <option value="all">Tất cả loại</option>
             <option value="Proposal">Thuyết minh</option>
             <option value="CV">Lý lịch KH</option>
             <option value="Other">Khác</option>
-          </select>
+          </Select>
         </div>
       </div>
 

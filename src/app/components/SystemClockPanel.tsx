@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Clock, FastForward, RotateCcw, BellRing, CheckCircle } from 'lucide-react'
 import { systemClockService } from '../../services/systemClockService'
 import type { SystemClockDto } from '../../services/systemClockService'
+import { Button, Input } from './ui-kit'
 
 // Bảng "mô phỏng thời gian" cho Admin — tua nhanh đồng hồ hệ thống để test các mốc hạn
 // dài ngày (nhắc hạn sản phẩm, quá hạn hợp đồng...) mà không phải chờ thật.
@@ -69,30 +70,26 @@ export default function SystemClockPanel() {
 
       <div className="flex flex-wrap items-center gap-2">
         {[7, 14, 30, 90, 180].map((d) => (
-          <button key={d} onClick={() => apply((clock?.offsetDays ?? 0) + d)} disabled={busy}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50 disabled:opacity-60">
+          <Button key={d} variant="outline" size="sm" onClick={() => apply((clock?.offsetDays ?? 0) + d)} disabled={busy}
+            className="border-purple-300 text-purple-700 hover:bg-purple-50">
             <FastForward className="w-3.5 h-3.5" /> +{d} ngày
-          </button>
+          </Button>
         ))}
         <div className="flex items-center gap-1">
-          <input
-            type="number" min={0} value={custom} onChange={(e) => setCustom(e.target.value)}
-            placeholder="offset"
-            className="w-24 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-purple-500"
-          />
-          <button onClick={() => apply(Math.max(0, Number(custom) || 0))} disabled={busy || custom === ''}
-            className="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-60">
+          <Input type="number" min={0} value={custom} onChange={(e) => setCustom(e.target.value)}
+            placeholder="offset" className="w-24 px-2 py-1.5 focus:ring-purple-500" />
+          <Button size="sm" onClick={() => apply(Math.max(0, Number(custom) || 0))} disabled={busy || custom === ''}
+            className="bg-purple-600 hover:bg-purple-700">
             Đặt
-          </button>
+          </Button>
         </div>
-        <button onClick={() => apply(0)} disabled={busy}
-          className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-60">
+        <Button variant="outline" size="sm" onClick={() => apply(0)} disabled={busy}>
           <RotateCcw className="w-3.5 h-3.5" /> Đặt lại
-        </button>
-        <button onClick={runScan} disabled={busy}
-          className="flex items-center gap-1 px-3 py-1.5 text-sm border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50 disabled:opacity-60">
+        </Button>
+        <Button variant="outline" size="sm" onClick={runScan} disabled={busy}
+          className="border-amber-300 text-amber-700 hover:bg-amber-50">
           <BellRing className="w-3.5 h-3.5" /> Chạy quét nhắc hạn
-        </button>
+        </Button>
       </div>
 
       {msg && (

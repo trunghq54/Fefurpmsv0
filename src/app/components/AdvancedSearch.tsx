@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Search, FileText } from 'lucide-react'
 import { aiService } from '../../services/aiService'
 import type { ProposalSummaryDto } from '../../types/proposal'
+import { Button, Input } from './ui-kit'
 
 const statusColor = (s: string) => {
   const map: Record<string, string> = {
@@ -42,20 +43,13 @@ export default function AdvancedSearch() {
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <div className="relative">
           <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+          <Input value={q} onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && runSearch()}
-            placeholder="Nhập từ khoá rồi nhấn Enter..."
-            className="w-full pl-10 pr-28 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-          <button
-            onClick={runSearch}
-            disabled={loading || !q.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-60"
-          >
+            placeholder="Nhập từ khoá rồi nhấn Enter..." className="pl-10 pr-28 py-3" />
+          <Button onClick={runSearch} disabled={loading || !q.trim()}
+            className="absolute right-2 top-1/2 -translate-y-1/2 py-1.5">
             {loading ? 'Đang tìm...' : 'Tìm'}
-          </button>
+          </Button>
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Upload, FileText, Download, Trash2, Paperclip } from 'lucide-react'
 import { proposalService } from '../../services/proposalService'
 import type { ProposalDocumentDto } from '../../types/proposal'
+import { Button, Select } from './ui-kit'
 
 const fmtSize = (b: number) => (b < 1024 ? `${b} B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`)
 
@@ -50,16 +51,14 @@ export default function ProposalDocuments({ proposalId, canEdit = true }: { prop
         <h5 className="flex items-center gap-2 font-semibold text-gray-800"><Paperclip className="w-4 h-4" /> Tài liệu ({docs.length})</h5>
         {canEdit && (
           <div className="flex items-center gap-2">
-            <select value={docType} onChange={(e) => setDocType(e.target.value)}
-              className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+            <Select value={docType} onChange={(e) => setDocType(e.target.value)} className="w-auto py-1.5">
               <option value="Proposal">Thuyết minh</option>
               <option value="CV">Lý lịch khoa học</option>
               <option value="Other">Khác</option>
-            </select>
-            <button onClick={() => fileRef.current?.click()} disabled={busy}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+            </Select>
+            <Button size="sm" onClick={() => fileRef.current?.click()} disabled={busy}>
               <Upload className="w-4 h-4" /> {busy ? 'Đang tải...' : 'Tải lên'}
-            </button>
+            </Button>
             <input ref={fileRef} type="file" onChange={onPick} accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" className="hidden" />
           </div>
         )}

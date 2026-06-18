@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ArrowLeft, Plus, Edit, X, Trash2, UserCheck, Layers } from 'lucide-react'
 import { cycleService } from '../../services/cycleService'
 import { userService } from '../../services/userService'
+import { Button, Input, Select, Textarea, Modal } from './ui-kit'
 import type { CycleDto, TrackDto } from '../../types/cycle'
 import type { UserDto } from '../../types/user'
 
@@ -131,13 +132,9 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
-        >
-          <Plus className="w-5 h-5" />
-          Thêm track
-        </button>
+        <Button onClick={() => handleOpenModal()}>
+          <Plus className="w-5 h-5" /> Thêm track
+        </Button>
       </div>
 
       {/* Tracks */}
@@ -179,11 +176,11 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <UserCheck className="w-4 h-4 text-gray-400" />
-                        <select
+                        <Select
                           value={track.ownerId || ''}
                           onChange={(e) => handleAssignOwner(track.id, e.target.value)}
                           disabled={!track.isActive}
-                          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                          className="w-auto py-1.5 disabled:text-gray-400"
                         >
                           <option value="">— Chưa gán —</option>
                           {users.map((u) => (
@@ -191,7 +188,7 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
                               {u.fullName}
                             </option>
                           ))}
-                        </select>
+                        </Select>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -233,79 +230,34 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
-            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-800">
-                {editingTrack ? 'Chỉnh sửa track' : 'Thêm track mới'}
-              </h3>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tên track *</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="vd: Công nghệ thông tin"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Người phụ trách</label>
-                <select
-                  value={formData.ownerId}
-                  onChange={(e) => setFormData({ ...formData, ownerId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                >
-                  <option value="">— Chưa gán —</option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.fullName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {formError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  {formError}
-                </div>
-              )}
-            </div>
-
-            <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-100 transition"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {saving ? 'Đang lưu...' : editingTrack ? 'Cập nhật' : 'Thêm mới'}
-              </button>
-            </div>
+        <Modal
+          title={editingTrack ? 'Chỉnh sửa track' : 'Thêm track mới'}
+          onClose={() => setShowModal(false)}
+          className="max-w-lg"
+          footer={<>
+            <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? 'Đang lưu...' : editingTrack ? 'Cập nhật' : 'Thêm mới'}</Button>
+          </>}
+        >
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Tên track *</label>
+            <Input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="vd: Công nghệ thông tin" />
           </div>
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
+            <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Người phụ trách</label>
+            <Select value={formData.ownerId} onChange={(e) => setFormData({ ...formData, ownerId: e.target.value })}>
+              <option value="">— Chưa gán —</option>
+              {users.map((u) => (<option key={u.id} value={u.id}>{u.fullName}</option>))}
+            </Select>
+          </div>
+          {formError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{formError}</div>
+          )}
+        </Modal>
       )}
     </div>
   )

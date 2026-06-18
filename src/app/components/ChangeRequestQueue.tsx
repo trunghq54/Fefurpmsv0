@@ -3,6 +3,7 @@ import { Check, X, FileEdit, Inbox } from 'lucide-react'
 import { changeRequestService } from '../../services/changeRequestService'
 import type { ChangeRequestDto } from '../../types/changeRequest'
 import { CHANGE_TYPE_LABEL } from '../../types/changeRequest'
+import { Button, Input, EmptyState } from './ui-kit'
 
 export default function ChangeRequestQueue() {
   const [items, setItems] = useState<ChangeRequestDto[]>([])
@@ -37,12 +38,12 @@ export default function ChangeRequestQueue() {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">Đang tải...</div>
+        <EmptyState>Đang tải...</EmptyState>
       ) : items.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
+        <EmptyState>
           <Inbox className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           Không có yêu cầu nào đang chờ duyệt.
-        </div>
+        </EmptyState>
       ) : (
         <div className="grid gap-4">
           {items.map((cr) => (
@@ -60,17 +61,14 @@ export default function ChangeRequestQueue() {
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <input value={notes[cr.id] || ''} onChange={(e) => setNotes({ ...notes, [cr.id]: e.target.value })}
-                  placeholder="Ghi chú của admin (tùy chọn)"
-                  className="flex-1 min-w-[220px] px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                <button onClick={() => review(cr.id, true)} disabled={busy === cr.id}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60">
+                <Input value={notes[cr.id] || ''} onChange={(e) => setNotes({ ...notes, [cr.id]: e.target.value })}
+                  placeholder="Ghi chú của admin (tùy chọn)" className="flex-1 min-w-[220px] py-1.5" />
+                <Button variant="success" size="sm" onClick={() => review(cr.id, true)} disabled={busy === cr.id}>
                   <Check className="w-4 h-4" /> Duyệt
-                </button>
-                <button onClick={() => review(cr.id, false)} disabled={busy === cr.id}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-60">
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => review(cr.id, false)} disabled={busy === cr.id}>
                   <X className="w-4 h-4" /> Từ chối
-                </button>
+                </Button>
               </div>
             </div>
           ))}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Sparkles, Save, CheckCircle, X, RefreshCw, FileText, AlertTriangle } from 'lucide-react'
 import { aiService } from '../../services/aiService'
+import { Button, Textarea } from './ui-kit'
 
 interface Props {
   proposalId: string
@@ -124,13 +125,11 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
   return (
     <>
       {/* Trigger */}
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-purple-200 text-purple-700 rounded-lg hover:bg-purple-50 transition"
-      >
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)}
+        className="border-purple-200 text-purple-700 hover:bg-purple-50">
         <Sparkles className="w-4 h-4" />
         Tóm tắt AI {hasSummary && <span className="text-xs text-purple-400">·đã có</span>}
-      </button>
+      </Button>
 
       {/* Non-blocking right-side panel — no backdrop, page stays interactive */}
       {open && (
@@ -153,14 +152,10 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
             <SourceBanner source={source} sourceFileName={sourceFileName} />
 
             {/* Generate / Regenerate CTA */}
-            <button
-              onClick={generate}
-              disabled={busy}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-60"
-            >
+            <Button onClick={generate} disabled={busy} className="w-full py-3 bg-purple-600 hover:bg-purple-700">
               <Sparkles className="w-4 h-4" />
               {busy ? 'Đang xử lý...' : hasSummary ? 'Tạo lại tóm tắt' : 'Tóm tắt tài liệu'}
-            </button>
+            </Button>
 
             {msg && (
               <div className="bg-amber-50 border border-amber-200 text-amber-700 text-sm px-4 py-3 rounded-lg">{msg}</div>
@@ -169,38 +164,26 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
             {/* Summary editor */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Nội dung tóm tắt</label>
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={10}
+              <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={10}
                 placeholder="Chưa có tóm tắt. Bấm 'Tóm tắt tài liệu' để tạo bằng AI, hoặc tự nhập."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-purple-500 resize-none"
-              />
+                className="px-4 py-3 focus:ring-purple-500 resize-none" />
             </div>
 
             {/* Save */}
             <div className="flex items-center gap-3">
-              <button
-                onClick={save}
-                disabled={busy || !text.trim()}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-60"
-              >
+              <Button variant="outline" onClick={save} disabled={busy || !text.trim()}>
                 <Save className="w-4 h-4" /> Lưu chỉnh sửa
-              </button>
+              </Button>
               {saved && (
                 <span className="flex items-center gap-1 text-green-600 text-sm">
                   <CheckCircle className="w-4 h-4" /> Đã lưu
                 </span>
               )}
               {hasSummary && (
-                <button
-                  onClick={generate}
-                  disabled={busy}
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg disabled:opacity-60"
-                  title="Tạo lại từ AI"
-                >
+                <Button variant="ghost" onClick={generate} disabled={busy}
+                  className="text-purple-600 hover:bg-purple-50" title="Tạo lại từ AI">
                   <RefreshCw className="w-4 h-4" /> Tạo lại
-                </button>
+                </Button>
               )}
             </div>
 
@@ -221,14 +204,11 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
                 </div>
 
                 {!assessment && (
-                  <button
-                    onClick={generateAssessment}
-                    disabled={assessmentBusy}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-purple-200 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-50 disabled:opacity-60"
-                  >
+                  <Button variant="outline" onClick={generateAssessment} disabled={assessmentBusy}
+                    className="w-full py-2.5 border-purple-200 text-purple-700 hover:bg-purple-50">
                     <Sparkles className="w-4 h-4" />
                     {assessmentBusy ? 'Đang đánh giá...' : 'Đánh giá theo tiêu chí'}
-                  </button>
+                  </Button>
                 )}
 
                 {assessmentBusy && !assessment && (

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Save, GraduationCap, BookOpen, Users, CheckCircle } from 'lucide-react'
 import { academicProfileService } from '../../services/academicProfileService'
 import type { AcademicProfileRequest } from '../../services/academicProfileService'
+import { Button, Input, Select, Textarea } from './ui-kit'
 
 const DEGREE_OPTIONS = ['Cử nhân', 'Thạc sĩ', 'Tiến sĩ', 'PGS.TS', 'GS.TS']
 const GENDER_OPTIONS = ['Nam', 'Nữ', 'Khác']
@@ -97,14 +98,10 @@ export default function MyAcademicProfile({ userId }: { userId: string }) {
           <h2 className="text-2xl font-bold text-gray-800">Hồ sơ khoa học</h2>
           <p className="text-gray-500 mt-1">Thông tin học hàm, học vị và công trình nghiên cứu của bạn</p>
         </div>
-        <button
-          onClick={save}
-          disabled={saving}
-          className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60"
-        >
+        <Button onClick={save} disabled={saving} className="px-5">
           {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
           {saved ? 'Đã lưu!' : saving ? 'Đang lưu...' : 'Lưu hồ sơ'}
-        </button>
+        </Button>
       </div>
 
       {error && (
@@ -140,13 +137,9 @@ export default function MyAcademicProfile({ userId }: { userId: string }) {
           <InputField label="Địa chỉ đơn vị" value={form.institutionAddress ?? ''} onChange={(v) => set('institutionAddress', v)} placeholder="VD: Khu CNC Hòa Lạc, Thạch Thất, HN" className="md:col-span-2" />
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Lĩnh vực chuyên môn</label>
-            <textarea
-              rows={2}
-              value={form.specializationAreas ?? ''}
+            <Textarea rows={2} value={form.specializationAreas ?? ''}
               onChange={(e) => set('specializationAreas', e.target.value)}
-              placeholder="VD: Trí tuệ nhân tạo, Học máy, Xử lý ngôn ngữ tự nhiên"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            />
+              placeholder="VD: Trí tuệ nhân tạo, Học máy, Xử lý ngôn ngữ tự nhiên" className="resize-none" />
           </div>
         </div>
       </div>
@@ -186,13 +179,7 @@ function InputField({
   return (
     <div className={className}>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-      />
+      <Input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
     </div>
   )
 }
@@ -203,13 +190,9 @@ function SelectField({
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-      >
+      <Select value={value} onChange={(e) => onChange(e.target.value)}>
         {options.map((o) => <option key={o} value={o}>{o || '— Chọn —'}</option>)}
-      </select>
+      </Select>
     </div>
   )
 }
@@ -218,13 +201,7 @@ function CountField({ label, value, onChange }: { label: string; value: number; 
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <input
-        type="number"
-        min={0}
-        value={value}
-        onChange={(e) => onChange(Math.max(0, Number(e.target.value)))}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-      />
+      <Input type="number" min={0} value={value} onChange={(e) => onChange(Math.max(0, Number(e.target.value)))} />
     </div>
   )
 }

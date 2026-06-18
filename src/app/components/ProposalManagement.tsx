@@ -6,6 +6,7 @@ import ReviewRoundsPanel from './ReviewRoundsPanel'
 import AiSummaryPanel from './AiSummaryPanel'
 import ProposalDocuments from './ProposalDocuments'
 import ProposalDocumentPreview from './ProposalDocumentPreview'
+import { Button, Input, Select } from './ui-kit'
 
 const STATUSES = [
   'DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'CONTRACT_SIGNED', 'IN_PROGRESS',
@@ -85,25 +86,19 @@ export default function ProposalManagement() {
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="flex-1 min-w-[280px] relative">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+            <Input value={search} onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && load()}
-              placeholder="Tìm theo tên đề tài... (Enter)"
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-            />
+              placeholder="Tìm theo tên đề tài... (Enter)" className="pl-10" />
           </div>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+          <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-auto">
             <option value="all">Tất cả trạng thái</option>
             {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s] ?? s}</option>)}
-          </select>
-          <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+          </Select>
+          <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="w-auto">
             <option value="all">Tất cả loại</option>
             <option value="Applied">Applied</option>
             <option value="Basic">Basic</option>
-          </select>
+          </Select>
         </div>
       </div>
 
@@ -183,10 +178,10 @@ export default function ProposalManagement() {
               <h3 className="text-xl font-bold text-gray-800">Chi tiết đề xuất</h3>
               <div className="flex items-center gap-2">
                 {detail && (
-                  <button onClick={() => setPreviewDoc({ id: detail.id, title: detail.titleVI })}
-                    className="flex items-center gap-1 px-3 py-1.5 text-sm border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50">
+                  <Button variant="outline" size="sm" onClick={() => setPreviewDoc({ id: detail.id, title: detail.titleVI })}
+                    className="border-purple-300 text-purple-700 hover:bg-purple-50">
                     <ClipboardList className="w-4 h-4" /> Hồ sơ (Word/Excel)
-                  </button>
+                  </Button>
                 )}
                 <button onClick={() => setDetail(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
               </div>
