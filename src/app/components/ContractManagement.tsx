@@ -25,6 +25,7 @@ import type {
   ReviewAmendmentRequest,
 } from '../../types/contract'
 import { FileText, Plus, CheckCircle, Clock, AlertCircle, ChevronLeft, RefreshCw } from 'lucide-react'
+import { Button, Input, Select, Textarea } from './ui-kit'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -104,12 +105,9 @@ function DisbursementsTab({
   return (
     <div className="space-y-4">
       {isStaff && items.length === 0 && contractStatus === 'ACTIVE' && (
-        <button
-          onClick={handleGenerate}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-        >
+        <Button size="sm" onClick={handleGenerate}>
           <Plus size={14} /> Tạo lịch giải ngân
-        </button>
+        </Button>
       )}
 
       {items.length === 0 ? (
@@ -166,35 +164,23 @@ function DisbursementsTab({
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Số tiền thực tế (VNĐ)</label>
-                <input
-                  type="number"
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={confirmForm.actualAmount}
-                  onChange={(e) => setConfirmForm({ ...confirmForm, actualAmount: Number(e.target.value) })}
-                />
+                <Input type="number" className="mt-1" value={confirmForm.actualAmount}
+                  onChange={(e) => setConfirmForm({ ...confirmForm, actualAmount: Number(e.target.value) })} />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Mã tham chiếu ngân hàng</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={confirmForm.bankReference}
-                  onChange={(e) => setConfirmForm({ ...confirmForm, bankReference: e.target.value })}
-                />
+                <Input type="text" className="mt-1" value={confirmForm.bankReference}
+                  onChange={(e) => setConfirmForm({ ...confirmForm, bankReference: e.target.value })} />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Ghi chú</label>
-                <textarea
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  rows={2}
-                  value={confirmForm.notes ?? ''}
-                  onChange={(e) => setConfirmForm({ ...confirmForm, notes: e.target.value })}
-                />
+                <Textarea className="mt-1" rows={2} value={confirmForm.notes ?? ''}
+                  onChange={(e) => setConfirmForm({ ...confirmForm, notes: e.target.value })} />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <button onClick={() => setConfirmTarget(null)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleConfirm} className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700">Xác nhận</button>
+              <Button variant="outline" onClick={() => setConfirmTarget(null)}>Hủy</Button>
+              <Button variant="success" onClick={handleConfirm}>Xác nhận</Button>
             </div>
           </div>
         </div>
@@ -292,27 +278,18 @@ function DeliverablesTab({
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">URL file sản phẩm</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={submitForm.fileUrl}
-                  onChange={(e) => setSubmitForm({ ...submitForm, fileUrl: e.target.value })}
-                  placeholder="https://..."
-                />
+                <Input type="text" className="mt-1" value={submitForm.fileUrl}
+                  onChange={(e) => setSubmitForm({ ...submitForm, fileUrl: e.target.value })} placeholder="https://..." />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Mô tả</label>
-                <textarea
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  rows={3}
-                  value={submitForm.description ?? ''}
-                  onChange={(e) => setSubmitForm({ ...submitForm, description: e.target.value })}
-                />
+                <Textarea className="mt-1" rows={3} value={submitForm.description ?? ''}
+                  onChange={(e) => setSubmitForm({ ...submitForm, description: e.target.value })} />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <button onClick={() => setSubmitTarget(null)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleSubmit} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Nộp</button>
+              <Button variant="outline" onClick={() => setSubmitTarget(null)}>Hủy</Button>
+              <Button onClick={handleSubmit}>Nộp</Button>
             </div>
           </div>
         </div>
@@ -325,28 +302,21 @@ function DeliverablesTab({
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Kết quả đánh giá</label>
-                <select
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={evalForm.acceptanceStatus}
-                  onChange={(e) => setEvalForm({ ...evalForm, acceptanceStatus: e.target.value as 'PASSED' | 'FAILED' })}
-                >
+                <Select className="mt-1" value={evalForm.acceptanceStatus}
+                  onChange={(e) => setEvalForm({ ...evalForm, acceptanceStatus: e.target.value as 'PASSED' | 'FAILED' })}>
                   <option value="PASSED">Đạt (PASSED)</option>
                   <option value="FAILED">Không đạt (FAILED)</option>
-                </select>
+                </Select>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Nhận xét chất lượng</label>
-                <textarea
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  rows={3}
-                  value={evalForm.qualityAssessment ?? ''}
-                  onChange={(e) => setEvalForm({ ...evalForm, qualityAssessment: e.target.value })}
-                />
+                <Textarea className="mt-1" rows={3} value={evalForm.qualityAssessment ?? ''}
+                  onChange={(e) => setEvalForm({ ...evalForm, qualityAssessment: e.target.value })} />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <button onClick={() => setEvalTarget(null)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleEvaluate} className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700">Lưu đánh giá</button>
+              <Button variant="outline" onClick={() => setEvalTarget(null)}>Hủy</Button>
+              <Button onClick={handleEvaluate} className="bg-purple-600 hover:bg-purple-700">Lưu đánh giá</Button>
             </div>
           </div>
         </div>
@@ -410,12 +380,9 @@ function AmendmentsTab({
   return (
     <div className="space-y-4">
       {isPi && (
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-        >
+        <Button size="sm" onClick={() => setShowCreate(true)}>
           <Plus size={14} /> Tạo yêu cầu điều chỉnh
-        </button>
+        </Button>
       )}
 
       {items.length === 0 ? (
@@ -467,49 +434,29 @@ function AmendmentsTab({
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">ID danh mục điều chỉnh</label>
-                <input
-                  type="number"
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={createForm.categoryId}
-                  onChange={(e) => setCreateForm({ ...createForm, categoryId: Number(e.target.value) })}
-                />
+                <Input type="number" className="mt-1" value={createForm.categoryId}
+                  onChange={(e) => setCreateForm({ ...createForm, categoryId: Number(e.target.value) })} />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Mô tả thay đổi</label>
-                <textarea
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  rows={3}
-                  value={createForm.changeDescription}
-                  onChange={(e) => setCreateForm({ ...createForm, changeDescription: e.target.value })}
-                />
+                <Textarea className="mt-1" rows={3} value={createForm.changeDescription}
+                  onChange={(e) => setCreateForm({ ...createForm, changeDescription: e.target.value })} />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Lý do</label>
-                <textarea
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  rows={3}
-                  value={createForm.justification}
-                  onChange={(e) => setCreateForm({ ...createForm, justification: e.target.value })}
-                />
+                <Textarea className="mt-1" rows={3} value={createForm.justification}
+                  onChange={(e) => setCreateForm({ ...createForm, justification: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Giá trị cũ</label>
-                  <input
-                    type="text"
-                    className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    value={createForm.oldValue ?? ''}
-                    onChange={(e) => setCreateForm({ ...createForm, oldValue: e.target.value })}
-                  />
+                  <Input type="text" className="mt-1" value={createForm.oldValue ?? ''}
+                    onChange={(e) => setCreateForm({ ...createForm, oldValue: e.target.value })} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Giá trị mới</label>
-                  <input
-                    type="text"
-                    className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    value={createForm.newValue ?? ''}
-                    onChange={(e) => setCreateForm({ ...createForm, newValue: e.target.value })}
-                  />
+                  <Input type="text" className="mt-1" value={createForm.newValue ?? ''}
+                    onChange={(e) => setCreateForm({ ...createForm, newValue: e.target.value })} />
                 </div>
               </div>
               <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -522,8 +469,8 @@ function AmendmentsTab({
               </label>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleCreate} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Tạo yêu cầu</button>
+              <Button variant="outline" onClick={() => setShowCreate(false)}>Hủy</Button>
+              <Button onClick={handleCreate}>Tạo yêu cầu</Button>
             </div>
           </div>
         </div>
@@ -537,21 +484,14 @@ function AmendmentsTab({
             </h3>
             <div>
               <label className="text-sm font-medium text-gray-700">Nhận xét</label>
-              <textarea
-                className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                rows={3}
-                value={reviewForm.reviewerComments ?? ''}
-                onChange={(e) => setReviewForm({ reviewerComments: e.target.value })}
-              />
+              <Textarea className="mt-1" rows={3} value={reviewForm.reviewerComments ?? ''}
+                onChange={(e) => setReviewForm({ reviewerComments: e.target.value })} />
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <button onClick={() => setReviewTarget(null)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
-              <button
-                onClick={handleReview}
-                className={`px-4 py-2 text-sm text-white rounded-lg ${reviewTarget.action === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-500 hover:bg-red-600'}`}
-              >
+              <Button variant="outline" onClick={() => setReviewTarget(null)}>Hủy</Button>
+              <Button variant={reviewTarget.action === 'approve' ? 'success' : 'danger'} onClick={handleReview}>
                 {reviewTarget.action === 'approve' ? 'Xác nhận duyệt' : 'Xác nhận từ chối'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -650,10 +590,10 @@ function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string;
       )}
       <div className="flex gap-2">
         {isPi && detail.status === 'DRAFT' && (
-          <button onClick={() => handleSubmit(detail.id)} className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Nộp báo cáo</button>
+          <Button size="sm" onClick={() => handleSubmit(detail.id)}>Nộp báo cáo</Button>
         )}
         {isStaff && detail.status === 'SUBMITTED' && (
-          <button onClick={() => { setEvalTarget(detail.id); setEvalForm({ evaluationResult: 'SATISFACTORY' }) }} className="text-sm px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Đánh giá</button>
+          <Button size="sm" onClick={() => { setEvalTarget(detail.id); setEvalForm({ evaluationResult: 'SATISFACTORY' }) }} className="bg-purple-600 hover:bg-purple-700">Đánh giá</Button>
         )}
       </div>
     </div>
@@ -662,9 +602,9 @@ function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string;
   return (
     <div className="space-y-4">
       {isPi && (
-        <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+        <Button size="sm" onClick={() => setShowCreate(true)}>
           <Plus size={14} /> Tạo báo cáo tiến độ
-        </button>
+        </Button>
       )}
       {reports.length === 0 ? (
         <p className="text-gray-400 text-sm">Chưa có báo cáo tiến độ nào.</p>
@@ -701,53 +641,46 @@ function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string;
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Từ ngày</label>
-                  <input type="date" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    value={createForm.reportingPeriodStart}
+                  <Input type="date" className="mt-1" value={createForm.reportingPeriodStart}
                     onChange={(e) => setCreateForm({ ...createForm, reportingPeriodStart: e.target.value })} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Đến ngày</label>
-                  <input type="date" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    value={createForm.reportingPeriodEnd}
+                  <Input type="date" className="mt-1" value={createForm.reportingPeriodEnd}
                     onChange={(e) => setCreateForm({ ...createForm, reportingPeriodEnd: e.target.value })} />
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Nội dung đã hoàn thành *</label>
-                <textarea rows={3} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={createForm.completedContent}
+                <Textarea rows={3} className="mt-1" value={createForm.completedContent}
                   onChange={(e) => setCreateForm({ ...createForm, completedContent: e.target.value })} />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Nội dung chưa hoàn thành</label>
-                <textarea rows={2} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={createForm.pendingContent ?? ''}
+                <Textarea rows={2} className="mt-1" value={createForm.pendingContent ?? ''}
                   onChange={(e) => setCreateForm({ ...createForm, pendingContent: e.target.value })} />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Kế hoạch kỳ tiếp</label>
-                <textarea rows={2} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={createForm.nextPeriodPlan ?? ''}
+                <Textarea rows={2} className="mt-1" value={createForm.nextPeriodPlan ?? ''}
                   onChange={(e) => setCreateForm({ ...createForm, nextPeriodPlan: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Tiến độ tổng thể (%)</label>
-                  <input type="number" min={0} max={100} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    value={createForm.overallCompletionPct}
+                  <Input type="number" min={0} max={100} className="mt-1" value={createForm.overallCompletionPct}
                     onChange={(e) => setCreateForm({ ...createForm, overallCompletionPct: Number(e.target.value) })} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Chi tiêu đến nay (₫)</label>
-                  <input type="number" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    value={createForm.expenditureToDate}
+                  <Input type="number" className="mt-1" value={createForm.expenditureToDate}
                     onChange={(e) => setCreateForm({ ...createForm, expenditureToDate: Number(e.target.value) })} />
                 </div>
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleCreate} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Tạo báo cáo</button>
+              <Button variant="outline" onClick={() => setShowCreate(false)}>Hủy</Button>
+              <Button onClick={handleCreate}>Tạo báo cáo</Button>
             </div>
           </div>
         </div>
@@ -760,24 +693,22 @@ function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string;
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Kết quả đánh giá</label>
-                <select className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={evalForm.evaluationResult}
+                <Select className="mt-1" value={evalForm.evaluationResult}
                   onChange={(e) => setEvalForm({ ...evalForm, evaluationResult: e.target.value as EvaluateProgressReportRequest['evaluationResult'] })}>
                   <option value="SATISFACTORY">Đạt yêu cầu</option>
                   <option value="UNSATISFACTORY">Không đạt</option>
                   <option value="NEEDS_IMPROVEMENT">Cần cải thiện</option>
-                </select>
+                </Select>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Nhận xét</label>
-                <textarea rows={3} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={evalForm.evaluationComments ?? ''}
+                <Textarea rows={3} className="mt-1" value={evalForm.evaluationComments ?? ''}
                   onChange={(e) => setEvalForm({ ...evalForm, evaluationComments: e.target.value })} />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <button onClick={() => setEvalTarget(null)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleEvaluate} className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700">Lưu đánh giá</button>
+              <Button variant="outline" onClick={() => setEvalTarget(null)}>Hủy</Button>
+              <Button onClick={handleEvaluate} className="bg-purple-600 hover:bg-purple-700">Lưu đánh giá</Button>
             </div>
           </div>
         </div>
@@ -845,9 +776,9 @@ function FinalReportTab({ contractId, isStaff, isPi }: { contractId: string; isS
           <FileText size={36} className="mx-auto mb-2 opacity-30" />
           <p className="text-sm">Chưa có báo cáo tổng kết.</p>
           {isPi && (
-            <button onClick={() => setShowSubmit(true)} className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+            <Button size="sm" className="mt-3" onClick={() => setShowSubmit(true)}>
               Nộp báo cáo tổng kết
-            </button>
+            </Button>
           )}
         </div>
       ) : (
@@ -873,18 +804,18 @@ function FinalReportTab({ contractId, isStaff, isPi }: { contractId: string; isS
           )}
           <div className="flex gap-2 flex-wrap">
             {isPi && (report.status === 'NOT_SUBMITTED' || report.status === 'REVISION_REQUIRED') && (
-              <button onClick={() => setShowSubmit(true)} className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <Button size="sm" onClick={() => setShowSubmit(true)}>
                 {report.status === 'REVISION_REQUIRED' ? 'Nộp lại' : 'Nộp báo cáo'}
-              </button>
+              </Button>
             )}
             {isStaff && report.status === 'SUBMITTED' && (
               <>
-                <button onClick={handleAccept} className="text-sm px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700">Chấp nhận</button>
-                <button onClick={() => setShowRevision(true)} className="text-sm px-3 py-1.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">Yêu cầu chỉnh sửa</button>
+                <Button variant="success" size="sm" onClick={handleAccept}>Chấp nhận</Button>
+                <Button size="sm" onClick={() => setShowRevision(true)} className="bg-yellow-500 hover:bg-yellow-600">Yêu cầu chỉnh sửa</Button>
               </>
             )}
             {isStaff && report.status === 'ACCEPTED' && !report.archivedAt && (
-              <button onClick={handleArchive} className="text-sm px-3 py-1.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Lưu trữ</button>
+              <Button size="sm" onClick={handleArchive} className="bg-gray-600 hover:bg-gray-700">Lưu trữ</Button>
             )}
           </div>
         </div>
@@ -897,29 +828,26 @@ function FinalReportTab({ contractId, isStaff, isPi }: { contractId: string; isS
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">URL file báo cáo *</label>
-                <input type="text" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={submitForm.reportFileUrl} placeholder="https://..."
+                <Input type="text" className="mt-1" value={submitForm.reportFileUrl} placeholder="https://..."
                   onChange={(e) => setSubmitForm({ ...submitForm, reportFileUrl: e.target.value })} />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">URL tóm tắt (tùy chọn)</label>
-                <input type="text" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={submitForm.summaryFileUrl ?? ''} placeholder="https://..."
+                <Input type="text" className="mt-1" value={submitForm.summaryFileUrl ?? ''} placeholder="https://..."
                   onChange={(e) => setSubmitForm({ ...submitForm, summaryFileUrl: e.target.value })} />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Ngôn ngữ báo cáo</label>
-                <select className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={submitForm.language}
+                <Select className="mt-1" value={submitForm.language}
                   onChange={(e) => setSubmitForm({ ...submitForm, language: e.target.value })}>
                   <option value="vi">Tiếng Việt</option>
                   <option value="en">English</option>
-                </select>
+                </Select>
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <button onClick={() => setShowSubmit(false)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleSubmit} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Nộp</button>
+              <Button variant="outline" onClick={() => setShowSubmit(false)}>Hủy</Button>
+              <Button onClick={handleSubmit}>Nộp</Button>
             </div>
           </div>
         </div>
@@ -931,13 +859,11 @@ function FinalReportTab({ contractId, isStaff, isPi }: { contractId: string; isS
             <h3 className="text-lg font-semibold mb-4">Yêu cầu chỉnh sửa</h3>
             <div>
               <label className="text-sm font-medium text-gray-700">Nội dung yêu cầu</label>
-              <textarea rows={4} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                value={revisionNotes}
-                onChange={(e) => setRevisionNotes(e.target.value)} />
+              <Textarea rows={4} className="mt-1" value={revisionNotes} onChange={(e) => setRevisionNotes(e.target.value)} />
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <button onClick={() => setShowRevision(false)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleRevision} className="px-4 py-2 text-sm bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">Gửi yêu cầu</button>
+              <Button variant="outline" onClick={() => setShowRevision(false)}>Hủy</Button>
+              <Button onClick={handleRevision} className="bg-yellow-500 hover:bg-yellow-600">Gửi yêu cầu</Button>
             </div>
           </div>
         </div>
@@ -1001,9 +927,9 @@ function SettlementTab({ contractId, isStaff }: { contractId: string; isStaff: b
           <FileText size={36} className="mx-auto mb-2 opacity-30" />
           <p className="text-sm">Chưa có hồ sơ thanh lý.</p>
           {isStaff && (
-            <button onClick={() => setShowCreate(true)} className="mt-3 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 mx-auto">
+            <Button size="sm" className="mt-3 mx-auto" onClick={() => setShowCreate(true)}>
               <Plus size={14} /> Tạo hồ sơ thanh lý
-            </button>
+            </Button>
           )}
         </div>
       ) : (
@@ -1045,26 +971,23 @@ function SettlementTab({ contractId, isStaff }: { contractId: string; isStaff: b
                 <div className="flex gap-2 items-end">
                   <div className="flex-1">
                     <label className="text-xs text-gray-500">ID người ký Bên A (GUID)</label>
-                    <input type="text" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-mono"
-                      value={signeeId} placeholder="xxxxxxxx-xxxx-..."
+                    <Input type="text" className="mt-1 py-1.5 font-mono" value={signeeId} placeholder="xxxxxxxx-xxxx-..."
                       onChange={(e) => setSigneeId(e.target.value)} />
                   </div>
-                  <button onClick={handleSign} className="px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap">Ký thanh lý</button>
+                  <Button variant="success" onClick={handleSign} className="py-2 whitespace-nowrap">Ký thanh lý</Button>
                 </div>
               )}
               {(!settlement.accountingClearedAt || !settlement.assetsClearedAt) && (
                 <div className="flex gap-2 items-end">
                   <div className="flex-1">
                     <label className="text-xs text-gray-500">Ngày xác nhận</label>
-                    <input type="date" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
-                      value={clearedDate}
-                      onChange={(e) => setClearedDate(e.target.value)} />
+                    <Input type="date" className="mt-1 py-1.5" value={clearedDate} onChange={(e) => setClearedDate(e.target.value)} />
                   </div>
                   {!settlement.accountingClearedAt && (
-                    <button onClick={handleAccountingCleared} className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">Kế toán ✓</button>
+                    <Button onClick={handleAccountingCleared} className="py-2 whitespace-nowrap">Kế toán ✓</Button>
                   )}
                   {!settlement.assetsClearedAt && (
-                    <button onClick={handleAssetsCleared} className="px-3 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 whitespace-nowrap">Tài sản ✓</button>
+                    <Button onClick={handleAssetsCleared} className="py-2 whitespace-nowrap bg-purple-600 hover:bg-purple-700">Tài sản ✓</Button>
                   )}
                 </div>
               )}
@@ -1081,45 +1004,39 @@ function SettlementTab({ contractId, isStaff }: { contractId: string; isStaff: b
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Tổng HĐ (₫)</label>
-                  <input type="number" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    value={createForm.totalContractedAmount}
+                  <Input type="number" className="mt-1" value={createForm.totalContractedAmount}
                     onChange={(e) => setCreateForm({ ...createForm, totalContractedAmount: Number(e.target.value) })} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Đã giải ngân (₫)</label>
-                  <input type="number" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    value={createForm.totalDisbursedAmount}
+                  <Input type="number" className="mt-1" value={createForm.totalDisbursedAmount}
                     onChange={(e) => setCreateForm({ ...createForm, totalDisbursedAmount: Number(e.target.value) })} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Hoàn trả (₫)</label>
-                  <input type="number" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    value={createForm.totalReturnedAmount}
+                  <Input type="number" className="mt-1" value={createForm.totalReturnedAmount}
                     onChange={(e) => setCreateForm({ ...createForm, totalReturnedAmount: Number(e.target.value) })} />
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Tóm tắt sản phẩm đã nộp</label>
-                <textarea rows={2} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={createForm.productsSubmittedSummary ?? ''}
+                <Textarea rows={2} className="mt-1" value={createForm.productsSubmittedSummary ?? ''}
                   onChange={(e) => setCreateForm({ ...createForm, productsSubmittedSummary: e.target.value })} />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Hạn thanh lý</label>
-                <input type="date" className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={createForm.settlementDeadline ?? ''}
+                <Input type="date" className="mt-1" value={createForm.settlementDeadline ?? ''}
                   onChange={(e) => setCreateForm({ ...createForm, settlementDeadline: e.target.value })} />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Ghi chú</label>
-                <textarea rows={2} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={createForm.notes ?? ''}
+                <Textarea rows={2} className="mt-1" value={createForm.notes ?? ''}
                   onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })} />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleCreate} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Tạo hồ sơ</button>
+              <Button variant="outline" onClick={() => setShowCreate(false)}>Hủy</Button>
+              <Button onClick={handleCreate}>Tạo hồ sơ</Button>
             </div>
           </div>
         </div>
@@ -1309,12 +1226,9 @@ export default function ContractManagement() {
             <RefreshCw size={16} />
           </button>
           {isStaff && (
-            <button
-              onClick={() => setShowCreate(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-            >
+            <Button size="sm" onClick={() => setShowCreate(true)}>
               <Plus size={14} /> Tạo hợp đồng
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -1395,65 +1309,41 @@ export default function ContractManagement() {
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">ID đề xuất (APPROVED)</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono"
-                  value={createForm.proposalId}
+                <Input type="text" className="mt-1 font-mono" value={createForm.proposalId}
                   onChange={(e) => setCreateForm({ ...createForm, proposalId: e.target.value })}
-                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                />
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Số hợp đồng</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={createForm.contractNumber}
-                  onChange={(e) => setCreateForm({ ...createForm, contractNumber: e.target.value })}
-                />
+                <Input type="text" className="mt-1" value={createForm.contractNumber}
+                  onChange={(e) => setCreateForm({ ...createForm, contractNumber: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Ngày bắt đầu</label>
-                  <input
-                    type="date"
-                    className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    value={createForm.startDate}
-                    onChange={(e) => setCreateForm({ ...createForm, startDate: e.target.value })}
-                  />
+                  <Input type="date" className="mt-1" value={createForm.startDate}
+                    onChange={(e) => setCreateForm({ ...createForm, startDate: e.target.value })} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Ngày kết thúc</label>
-                  <input
-                    type="date"
-                    className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    value={createForm.endDate}
-                    onChange={(e) => setCreateForm({ ...createForm, endDate: e.target.value })}
-                  />
+                  <Input type="date" className="mt-1" value={createForm.endDate}
+                    onChange={(e) => setCreateForm({ ...createForm, endDate: e.target.value })} />
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Số tháng gia hạn tối đa</label>
-                <input
-                  type="number"
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={createForm.maxExtensionMonths ?? 6}
-                  onChange={(e) => setCreateForm({ ...createForm, maxExtensionMonths: Number(e.target.value) })}
-                />
+                <Input type="number" className="mt-1" value={createForm.maxExtensionMonths ?? 6}
+                  onChange={(e) => setCreateForm({ ...createForm, maxExtensionMonths: Number(e.target.value) })} />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Đại diện bên A</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  value={createForm.sideARepresentative ?? ''}
-                  onChange={(e) => setCreateForm({ ...createForm, sideARepresentative: e.target.value })}
-                />
+                <Input type="text" className="mt-1" value={createForm.sideARepresentative ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, sideARepresentative: e.target.value })} />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleCreate} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Tạo hợp đồng</button>
+              <Button variant="outline" onClick={() => setShowCreate(false)}>Hủy</Button>
+              <Button onClick={handleCreate}>Tạo hợp đồng</Button>
             </div>
           </div>
         </div>

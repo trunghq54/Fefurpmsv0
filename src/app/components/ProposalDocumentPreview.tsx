@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { X, FileText, Sheet, Download } from 'lucide-react'
-import { renderAsync } from 'docx-preview'
-import * as XLSX from 'xlsx'
 import { exportService } from '../../services/exportService'
 import { Button, Spinner } from './ui-kit'
+// docx-preview (~) và xlsx (~) là lib nặng, chỉ cần khi mở tài liệu →
+// import động để tách khỏi bundle chính (lazy-load lúc render).
 
 type Tab = 'word' | 'excel'
 
@@ -31,6 +31,7 @@ export default function ProposalDocumentPreview({
           if (cancelled) return
           blobs.current.word = blob
           if (wordRef.current) {
+            const { renderAsync } = await import('docx-preview')
             wordRef.current.innerHTML = ''
             await renderAsync(blob, wordRef.current, undefined, {
               className: 'docx', inWrapper: true, ignoreWidth: false, ignoreHeight: false,
@@ -41,6 +42,7 @@ export default function ProposalDocumentPreview({
           if (cancelled) return
           blobs.current.excel = blob
           const buf = await blob.arrayBuffer()
+          const XLSX = await import('xlsx')
           const wb = XLSX.read(buf, { type: 'array' })
           const sheets = wb.SheetNames.map((name) => ({
             name,

@@ -1,7 +1,11 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Loader2, X } from 'lucide-react'
-import { cn } from './ui/utils'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+// gộp class Tailwind (xử lý xung đột) — thay cho ./ui/utils đã gỡ.
+const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs))
 
 // ── ui-kit ──────────────────────────────────────────────────────────────────
 // Lớp primitive dùng chung cho các màn hình (thay cho việc lặp class Tailwind

@@ -1,16 +1,19 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router'
 import { AuthProvider, useAuth, roleToPath } from '../contexts/AuthContext'
-import AdminDashboard from './components/AdminDashboard'
-import StaffDashboard from './components/StaffDashboard'
-import ProposalSubmission from './components/ProposalSubmission'
-import ReviewerInterface from './components/ReviewerInterface'
-import MeetingsOverview from './components/MeetingsOverview'
-import UserGuide from './components/UserGuide'
 import Login from './components/Login'
 import SelectRole from './components/SelectRole'
 import ChangePassword from './components/ChangePassword'
 import ProtectedRoute from './components/ProtectedRoute'
-import ContractManagement from './components/ContractManagement'
+
+// Route nặng → lazy-load để tách khỏi bundle chính (AdminDashboard kéo theo recharts).
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'))
+const StaffDashboard = lazy(() => import('./components/StaffDashboard'))
+const ProposalSubmission = lazy(() => import('./components/ProposalSubmission'))
+const ReviewerInterface = lazy(() => import('./components/ReviewerInterface'))
+const MeetingsOverview = lazy(() => import('./components/MeetingsOverview'))
+const UserGuide = lazy(() => import('./components/UserGuide'))
+const ContractManagement = lazy(() => import('./components/ContractManagement'))
 
 function AppRoutes() {
   const { user, logout, isAuthenticated, activeRole, roles } = useAuth()
@@ -25,6 +28,7 @@ function AppRoutes() {
   }
 
   return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-400">Đang tải…</div>}>
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route
@@ -59,6 +63,7 @@ function AppRoutes() {
         element={<ProtectedRoute roles={['Staff', 'Admin', 'Faculty']}><ContractManagement /></ProtectedRoute>}
       />
     </Routes>
+    </Suspense>
   )
 }
 
