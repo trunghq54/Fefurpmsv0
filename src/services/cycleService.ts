@@ -2,8 +2,13 @@ import api from '../lib/api'
 import type { ApiResponse } from '../types/auth'
 import type { CycleDto, TrackDto, CreateCycleRequest, CreateTrackRequest } from '../types/cycle'
 
-interface UpdateTrackRequest { name?: string; description?: string }
-interface AssignOwnerRequest { ownerId: string | null }
+interface UpdateTrackRequest {
+  name?: string
+  description?: string
+}
+interface AssignOwnerRequest {
+  ownerId: string | null
+}
 
 export const cycleService = {
   getAll: async () => {
@@ -13,13 +18,15 @@ export const cycleService = {
 
   getActive: async () => {
     const res = await api.get<ApiResponse<CycleDto[]>>('/api/cycles')
-    const open = res.data.data?.find(c => c.status === 'Open' || c.status === 'OPEN') ?? null
+    const open = res.data.data?.find((c) => c.status === 'Open' || c.status === 'OPEN') ?? null
     // Cycle DTO không kèm tracks → nạp danh sách track từ endpoint riêng để form có lựa chọn.
     if (open && (!open.tracks || open.tracks.length === 0)) {
       try {
         const tr = await api.get<ApiResponse<TrackDto[]>>('/api/cycles/tracks')
         if (tr.data.success && tr.data.data) open.tracks = tr.data.data
-      } catch { /* để trống nếu lỗi */ }
+      } catch {
+        /* để trống nếu lỗi */
+      }
     }
     return { ...res.data, data: open }
   },

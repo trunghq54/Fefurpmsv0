@@ -9,8 +9,16 @@ type Tab = 'word' | 'excel'
 
 // Xem trước (render đúng file BE sinh ra) + tải Word (Thuyết minh) / Excel (Dự toán).
 export default function ProposalDocumentPreview({
-  proposalId, title, onClose, embedded,
-}: { proposalId: string; title?: string; onClose?: () => void; embedded?: boolean }) {
+  proposalId,
+  title,
+  onClose,
+  embedded,
+}: {
+  proposalId: string
+  title?: string
+  onClose?: () => void
+  embedded?: boolean
+}) {
   const [tab, setTab] = useState<Tab>('word')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -24,7 +32,8 @@ export default function ProposalDocumentPreview({
   useEffect(() => {
     let cancelled = false
     const load = async () => {
-      setLoading(true); setError('')
+      setLoading(true)
+      setError('')
       try {
         if (tab === 'word') {
           const blob = await exportService.downloadScientific(proposalId)
@@ -34,7 +43,10 @@ export default function ProposalDocumentPreview({
             const { renderAsync } = await import('docx-preview')
             wordRef.current.innerHTML = ''
             await renderAsync(blob, wordRef.current, undefined, {
-              className: 'docx', inWrapper: true, ignoreWidth: false, ignoreHeight: false,
+              className: 'docx',
+              inWrapper: true,
+              ignoreWidth: false,
+              ignoreHeight: false,
             })
           }
         } else {
@@ -51,15 +63,20 @@ export default function ProposalDocumentPreview({
           if (!cancelled) setExcelHtml(sheets)
         }
       } catch (e: any) {
-        if (!cancelled) setError(e?.response?.status === 404
-          ? 'Endpoint xuất file chưa sẵn sàng.'
-          : (e?.message || 'Không tải được tài liệu.'))
+        if (!cancelled)
+          setError(
+            e?.response?.status === 404
+              ? 'Endpoint xuất file chưa sẵn sàng.'
+              : e?.message || 'Không tải được tài liệu.',
+          )
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
     load()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [tab, proposalId])
 
   const download = () => {
@@ -79,8 +96,18 @@ export default function ProposalDocumentPreview({
   const tabs = (
     <div className="flex items-center justify-between border-b border-gray-200 px-2">
       <div className="flex">
-        <TabBtn active={tab === 'word'} onClick={() => setTab('word')} icon={<FileText className="w-4 h-4" />} label="Thuyết minh (Word)" />
-        <TabBtn active={tab === 'excel'} onClick={() => setTab('excel')} icon={<Sheet className="w-4 h-4" />} label="Dự toán (Excel)" />
+        <TabBtn
+          active={tab === 'word'}
+          onClick={() => setTab('word')}
+          icon={<FileText className="w-4 h-4" />}
+          label="Thuyết minh (Word)"
+        />
+        <TabBtn
+          active={tab === 'excel'}
+          onClick={() => setTab('excel')}
+          icon={<Sheet className="w-4 h-4" />}
+          label="Dự toán (Excel)"
+        />
       </div>
       <Button onClick={download} disabled={loading} size="sm" className="my-1">
         <Download className="w-4 h-4" /> Tải {tab === 'word' ? '.docx' : '.xlsx'}
@@ -100,12 +127,14 @@ export default function ProposalDocumentPreview({
         <div className="space-y-6">
           {excelHtml.length === 0 ? (
             <p className="text-sm text-gray-400">Chưa có dữ liệu dự toán.</p>
-          ) : excelHtml.map((s) => (
-            <div key={s.name} className="bg-white rounded-lg shadow p-4 overflow-auto">
-              <p className="font-semibold text-gray-700 mb-2">Sheet: {s.name}</p>
-              <div className="excel-preview text-sm" dangerouslySetInnerHTML={{ __html: s.html }} />
-            </div>
-          ))}
+          ) : (
+            excelHtml.map((s) => (
+              <div key={s.name} className="bg-white rounded-lg shadow p-4 overflow-auto">
+                <p className="font-semibold text-gray-700 mb-2">Sheet: {s.name}</p>
+                <div className="excel-preview text-sm" dangerouslySetInnerHTML={{ __html: s.html }} />
+              </div>
+            ))
+          )}
         </div>
       )}
     </>
@@ -128,7 +157,9 @@ export default function ProposalDocumentPreview({
             <h3 className="text-xl font-bold text-gray-800">Hồ sơ tài liệu</h3>
             {title && <p className="text-sm text-gray-500 truncate max-w-2xl">{title}</p>}
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+            <X className="w-5 h-5" />
+          </button>
         </div>
         {tabs}
         <div className="flex-1 overflow-auto bg-gray-100 p-4">{body}</div>
@@ -138,12 +169,24 @@ export default function ProposalDocumentPreview({
   )
 }
 
-function TabBtn({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+function TabBtn({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean
+  onClick: () => void
+  icon: React.ReactNode
+  label: string
+}) {
   return (
-    <button onClick={onClick}
+    <button
+      onClick={onClick}
       className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition ${
         active ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
-      }`}>
+      }`}
+    >
       {icon} {label}
     </button>
   )

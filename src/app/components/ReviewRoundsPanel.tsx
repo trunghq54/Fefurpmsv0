@@ -41,9 +41,9 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
     loadRounds()
     userService.getAll().then((res) => {
       if (res.success && res.data) {
-        setReviewers(res.data.filter(
-          (u) => u.roles?.includes('ReviewCommittee') || u.accountType === 'ReviewCommittee',
-        ))
+        setReviewers(
+          res.data.filter((u) => u.roles?.includes('ReviewCommittee') || u.accountType === 'ReviewCommittee'),
+        )
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -147,9 +147,7 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
               <div className="flex items-center justify-between mb-3">
                 <span className="font-medium text-gray-800">
                   {ROUND_TYPE_LABEL[round.roundType] ?? round.roundType} · Vòng {round.roundNumber}
-                  {round.dimension && (
-                    <span className="ml-2 text-xs text-gray-500">({round.dimension})</span>
-                  )}
+                  {round.dimension && <span className="ml-2 text-xs text-gray-500">({round.dimension})</span>}
                 </span>
                 <div className="flex items-center gap-2">
                   <button
@@ -175,16 +173,16 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
 
               {/* member list */}
               <div className="space-y-2 mb-3">
-                {round.assignments.length === 0 && (
-                  <p className="text-sm text-gray-400">Chưa phân công ai.</p>
-                )}
+                {round.assignments.length === 0 && <p className="text-sm text-gray-400">Chưa phân công ai.</p>}
                 {round.assignments.map((a) => (
                   <div key={a.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
                     <div className="flex items-center gap-2 text-sm">
                       <UserCheck className="w-4 h-4 text-gray-400" />
                       <span className="text-gray-800">{a.reviewerName}</span>
                       <span className="text-gray-400">· {ROLE_LABEL[a.role] ?? a.role}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${MEMBER_STATUS_COLOR[a.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs ${MEMBER_STATUS_COLOR[a.status] ?? 'bg-gray-100 text-gray-700'}`}
+                      >
                         {a.status}
                       </span>
                     </div>
@@ -206,7 +204,10 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
                   onChange={(e) =>
                     setAssignSel({
                       ...assignSel,
-                      [round.id]: { reviewerId: e.target.value, role: assignSel[round.id]?.role || ASSIGNMENT_ROLE.Member },
+                      [round.id]: {
+                        reviewerId: e.target.value,
+                        role: assignSel[round.id]?.role || ASSIGNMENT_ROLE.Member,
+                      },
                     })
                   }
                   className="w-auto py-1.5"
@@ -242,7 +243,9 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
                 </div>
               )}
 
-              {showResults[round.id] && <RoundResultsPanel roundId={round.id} councilId={round.councilId} showFeedback />}
+              {showResults[round.id] && (
+                <RoundResultsPanel roundId={round.id} councilId={round.councilId} showFeedback />
+              )}
 
               {!isCompleted(round) ? (
                 <div className="mt-3 pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2">

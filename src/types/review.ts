@@ -1,8 +1,8 @@
 // ---- Assignment/Member view (FE-side, mapped from BE MyMembershipDto) ----
 
 export interface ReviewAssignmentDto {
-  id: string           // CouncilMember.Id
-  councilId: string    // CouncilMember.CouncilId
+  id: string // CouncilMember.Id
+  councilId: string // CouncilMember.CouncilId
   reviewRoundId: string
   reviewerId: string
   reviewerName: string
@@ -17,26 +17,26 @@ export interface ReviewAssignmentDto {
 export interface ReviewRoundDto {
   id: string
   proposalId?: string
-  roundType: string    // BE values: SCREENING | REVIEW | ACCEPTANCE
+  roundType: string // BE values: SCREENING | REVIEW | ACCEPTANCE
   roundNumber: number
-  dimension?: string   // SCIENCE | FINANCE
-  status: string       // BE values: PENDING | OPEN | PASSED | FAILED
-  result?: string      // APPROVED | REJECTED | REVISION_REQUIRED
+  dimension?: string // SCIENCE | FINANCE
+  status: string // BE values: PENDING | OPEN | PASSED | FAILED
+  result?: string // APPROVED | REJECTED | REVISION_REQUIRED
   councilId?: string
   openedAt?: string
   closedAt?: string
-  assignments: ReviewAssignmentDto[]  // mapped from Members
+  assignments: ReviewAssignmentDto[] // mapped from Members
 }
 
 // Returned by GET /api/councils/my-memberships (mapped to FE shape in service)
 export interface MyAssignmentDto {
-  assignmentId: string   // maps to CouncilMember.Id (memberId)
-  councilId: string      // CouncilMember.CouncilId
+  assignmentId: string // maps to CouncilMember.Id (memberId)
+  councilId: string // CouncilMember.CouncilId
   roundId?: string
-  roundType: string      // REVIEW | ACCEPTANCE | SCREENING (BE values)
-  roundStatus: string    // PENDING | OPEN | PASSED | FAILED (BE values)
-  role: string           // Member | Chair | Opponent
-  status: string         // Pending | Accepted | Declined (mapped from INVITED/CONFIRMED/DECLINED)
+  roundType: string // REVIEW | ACCEPTANCE | SCREENING (BE values)
+  roundStatus: string // PENDING | OPEN | PASSED | FAILED (BE values)
+  role: string // Member | Chair | Opponent
+  status: string // Pending | Accepted | Declined (mapped from INVITED/CONFIRMED/DECLINED)
   proposalId: string
   proposalTitleVI: string
   proposalStatus: string

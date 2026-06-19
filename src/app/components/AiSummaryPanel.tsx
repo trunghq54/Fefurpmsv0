@@ -24,8 +24,8 @@ function SourceBanner({ source, sourceFileName }: { source?: string; sourceFileN
       <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-start gap-3">
         <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
         <p className="text-sm text-amber-700">
-          Tài liệu tải lên (<b>{sourceFileName}</b>) là hình ảnh hoặc định dạng AI không đọc được.
-          Bản tóm tắt dưới đây <b>chỉ dựa trên thông tin đề xuất đã nhập</b>, KHÔNG đọc nội dung file.
+          Tài liệu tải lên (<b>{sourceFileName}</b>) là hình ảnh hoặc định dạng AI không đọc được. Bản tóm tắt dưới đây{' '}
+          <b>chỉ dựa trên thông tin đề xuất đã nhập</b>, KHÔNG đọc nội dung file.
         </p>
       </div>
     )
@@ -33,9 +33,7 @@ function SourceBanner({ source, sourceFileName }: { source?: string; sourceFileN
   return (
     <div className="bg-purple-50 border border-purple-100 rounded-lg px-4 py-3 flex items-start gap-3">
       <FileText className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
-      <p className="text-sm text-purple-700">
-        Chưa có file PDF — AI tóm tắt từ các trường thông tin đề xuất đã nhập.
-      </p>
+      <p className="text-sm text-purple-700">Chưa có file PDF — AI tóm tắt từ các trường thông tin đề xuất đã nhập.</p>
     </div>
   )
 }
@@ -60,7 +58,9 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
   // Close on Esc
   useEffect(() => {
     if (!open) return
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [open])
@@ -82,7 +82,9 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
   }, [open, loaded, proposalId])
 
   const generate = async () => {
-    setBusy(true); setMsg(''); setSaved(false)
+    setBusy(true)
+    setMsg('')
+    setSaved(false)
     try {
       const res = await aiService.generateSummary(proposalId)
       if (res.success && res.data) {
@@ -96,20 +98,30 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
       }
     } catch (e: any) {
       setMsg(e.response?.data?.message || 'Cần cấu hình Gemini API key để tạo tóm tắt AI.')
-    } finally { setBusy(false) }
+    } finally {
+      setBusy(false)
+    }
   }
 
   const save = async () => {
-    setBusy(true); setSaved(false)
+    setBusy(true)
+    setSaved(false)
     try {
       const res = await aiService.updateSummary(proposalId, text)
-      if (res.success) { setSaved(true); setHasSummary(true); setEdited(true) }
-    } finally { setBusy(false) }
+      if (res.success) {
+        setSaved(true)
+        setHasSummary(true)
+        setEdited(true)
+      }
+    } finally {
+      setBusy(false)
+    }
   }
 
   const generateAssessment = async () => {
     if (!assignmentId) return
-    setAssessmentBusy(true); setAssessmentMsg('')
+    setAssessmentBusy(true)
+    setAssessmentMsg('')
     try {
       const res = await aiService.aiRubricAssessment(assignmentId)
       if (res.success && res.data) {
@@ -119,14 +131,20 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
       }
     } catch (e: any) {
       setAssessmentMsg(e.response?.data?.message || 'Cần cấu hình Gemini API key.')
-    } finally { setAssessmentBusy(false) }
+    } finally {
+      setAssessmentBusy(false)
+    }
   }
 
   return (
     <>
       {/* Trigger */}
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}
-        className="border-purple-200 text-purple-700 hover:bg-purple-50">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setOpen(true)}
+        className="border-purple-200 text-purple-700 hover:bg-purple-50"
+      >
         <Sparkles className="w-4 h-4" />
         Tóm tắt AI {hasSummary && <span className="text-xs text-purple-400">·đã có</span>}
       </Button>
@@ -139,7 +157,9 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-500" />
               <h3 className="text-lg font-semibold text-gray-800">Tóm tắt AI</h3>
-              {edited && <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">đã chỉnh sửa</span>}
+              {edited && (
+                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">đã chỉnh sửa</span>
+              )}
             </div>
             <button onClick={() => setOpen(false)} className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
               <X className="w-5 h-5" />
@@ -158,15 +178,21 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
             </Button>
 
             {msg && (
-              <div className="bg-amber-50 border border-amber-200 text-amber-700 text-sm px-4 py-3 rounded-lg">{msg}</div>
+              <div className="bg-amber-50 border border-amber-200 text-amber-700 text-sm px-4 py-3 rounded-lg">
+                {msg}
+              </div>
             )}
 
             {/* Summary editor */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Nội dung tóm tắt</label>
-              <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={10}
+              <Textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={10}
                 placeholder="Chưa có tóm tắt. Bấm 'Tóm tắt tài liệu' để tạo bằng AI, hoặc tự nhập."
-                className="px-4 py-3 focus:ring-purple-500 resize-none" />
+                className="px-4 py-3 focus:ring-purple-500 resize-none"
+              />
             </div>
 
             {/* Save */}
@@ -180,8 +206,13 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
                 </span>
               )}
               {hasSummary && (
-                <Button variant="ghost" onClick={generate} disabled={busy}
-                  className="text-purple-600 hover:bg-purple-50" title="Tạo lại từ AI">
+                <Button
+                  variant="ghost"
+                  onClick={generate}
+                  disabled={busy}
+                  className="text-purple-600 hover:bg-purple-50"
+                  title="Tạo lại từ AI"
+                >
                   <RefreshCw className="w-4 h-4" /> Tạo lại
                 </Button>
               )}
@@ -204,8 +235,12 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
                 </div>
 
                 {!assessment && (
-                  <Button variant="outline" onClick={generateAssessment} disabled={assessmentBusy}
-                    className="w-full py-2.5 border-purple-200 text-purple-700 hover:bg-purple-50">
+                  <Button
+                    variant="outline"
+                    onClick={generateAssessment}
+                    disabled={assessmentBusy}
+                    className="w-full py-2.5 border-purple-200 text-purple-700 hover:bg-purple-50"
+                  >
                     <Sparkles className="w-4 h-4" />
                     {assessmentBusy ? 'Đang đánh giá...' : 'Đánh giá theo tiêu chí'}
                   </Button>
@@ -216,7 +251,9 @@ export default function AiSummaryPanel({ proposalId, assignmentId }: Props) {
                 )}
 
                 {assessmentMsg && (
-                  <div className="bg-amber-50 border border-amber-200 text-amber-700 text-sm px-4 py-3 rounded-lg">{assessmentMsg}</div>
+                  <div className="bg-amber-50 border border-amber-200 text-amber-700 text-sm px-4 py-3 rounded-lg">
+                    {assessmentMsg}
+                  </div>
                 )}
 
                 {assessment && (

@@ -1,8 +1,30 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import {
-  CheckCircle, AlertCircle, ArrowLeft, ArrowRight, Home, List, LogOut,
-  Plus, Trash2, Send, Undo2, Users, Wallet, FileText, X, BarChart3, Upload, Paperclip, BookOpen, ClipboardList, GraduationCap, Eye, Pencil, FolderOpen,
+  CheckCircle,
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  Home,
+  List,
+  LogOut,
+  Plus,
+  Trash2,
+  Send,
+  Undo2,
+  Users,
+  Wallet,
+  FileText,
+  X,
+  BarChart3,
+  Upload,
+  Paperclip,
+  BookOpen,
+  ClipboardList,
+  GraduationCap,
+  Eye,
+  Pencil,
+  FolderOpen,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import MyAcademicProfile from './MyAcademicProfile'
@@ -24,7 +46,10 @@ import RoundResultsPanel from './RoundResultsPanel'
 import RoleSwitcher from './RoleSwitcher'
 import type { CycleDto } from '../../types/cycle'
 import type {
-  ProposalSummaryDto, ProposalDto, CreateMemberRequest, CreateBudgetItemRequest,
+  ProposalSummaryDto,
+  ProposalDto,
+  CreateMemberRequest,
+  CreateBudgetItemRequest,
 } from '../../types/proposal'
 
 interface User {
@@ -134,24 +159,36 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   }, [resultsProposal])
 
   const ROUND_LABEL: Record<string, string> = {
-    SCREENING: 'Sàng lọc', REVIEW: 'Xét duyệt', ACCEPTANCE: 'Nghiệm thu',
-    ProposalReview: 'Xét duyệt', ProgressCheck: 'Kiểm tra tiến độ', Acceptance: 'Nghiệm thu',
+    SCREENING: 'Sàng lọc',
+    REVIEW: 'Xét duyệt',
+    ACCEPTANCE: 'Nghiệm thu',
+    ProposalReview: 'Xét duyệt',
+    ProgressCheck: 'Kiểm tra tiến độ',
+    Acceptance: 'Nghiệm thu',
   }
 
   const submitCr = async () => {
-    if (!crProposal || !crDesc.trim()) { setCrMsg('Nhập mô tả'); return }
-    setCrBusy(true); setCrMsg('')
+    if (!crProposal || !crDesc.trim()) {
+      setCrMsg('Nhập mô tả')
+      return
+    }
+    setCrBusy(true)
+    setCrMsg('')
     try {
       const res = await changeRequestService.create(crProposal.id, {
         type: crType,
         description: crDesc,
         newValue: crType === CHANGE_TYPE.ExtendTime && crNewValue ? `${crNewValue}T00:00:00Z` : undefined,
       })
-      if (res.success) { setCrMsg('Đã gửi yêu cầu'); setTimeout(() => setCrProposal(null), 800) }
-      else setCrMsg(res.message || 'Lỗi')
+      if (res.success) {
+        setCrMsg('Đã gửi yêu cầu')
+        setTimeout(() => setCrProposal(null), 800)
+      } else setCrMsg(res.message || 'Lỗi')
     } catch (e: any) {
       setCrMsg(e.response?.data?.message || 'Có lỗi xảy ra')
-    } finally { setCrBusy(false) }
+    } finally {
+      setCrBusy(false)
+    }
   }
 
   useEffect(() => {
@@ -159,9 +196,12 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
       if (res.success && res.data) setActiveCycle(res.data)
       setLoadingCycle(false)
     })
-    budgetExpenseCategoryService.getAll().then((res) => {
-      if (res.success && res.data) setBudgetCategories(res.data.filter((c) => c.isActive))
-    }).catch(() => {})
+    budgetExpenseCategoryService
+      .getAll()
+      .then((res) => {
+        if (res.success && res.data) setBudgetCategories(res.data.filter((c) => c.isActive))
+      })
+      .catch(() => {})
   }, [])
 
   // Khôi phục bản nháp 1 lần khi mở form
@@ -183,7 +223,9 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
         if (d.currentStep) setCurrentStep(d.currentStep)
         setDraftRestored(true)
       }
-    } catch { /* nháp hỏng -> bỏ qua */ }
+    } catch {
+      /* nháp hỏng -> bỏ qua */
+    }
     hydratedRef.current = true
   }, [])
 
@@ -191,17 +233,50 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   useEffect(() => {
     if (!hydratedRef.current || showSubmissions || editingId) return
     const isEmpty =
-      !titleVI && !titleEN && !trackId && !objectives && !methodology && !expectedOutput &&
-      members.every((m) => !m.fullName?.trim()) && budgetItems.every((b) => !b.category?.trim())
+      !titleVI &&
+      !titleEN &&
+      !trackId &&
+      !objectives &&
+      !methodology &&
+      !expectedOutput &&
+      members.every((m) => !m.fullName?.trim()) &&
+      budgetItems.every((b) => !b.category?.trim())
     if (isEmpty) return
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({
-        titleVI, titleEN, trackId, researchType, durationMonths,
-        objectives, methodology, expectedOutput, members, budgetItems, currentStep,
-      }))
-    } catch { /* hết quota -> bỏ qua */ }
+      localStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({
+          titleVI,
+          titleEN,
+          trackId,
+          researchType,
+          durationMonths,
+          objectives,
+          methodology,
+          expectedOutput,
+          members,
+          budgetItems,
+          currentStep,
+        }),
+      )
+    } catch {
+      /* hết quota -> bỏ qua */
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [titleVI, titleEN, trackId, researchType, durationMonths, objectives, methodology, expectedOutput, members, budgetItems, currentStep, showSubmissions])
+  }, [
+    titleVI,
+    titleEN,
+    trackId,
+    researchType,
+    durationMonths,
+    objectives,
+    methodology,
+    expectedOutput,
+    members,
+    budgetItems,
+    currentStep,
+    showSubmissions,
+  ])
 
   const discardDraft = () => {
     localStorage.removeItem(DRAFT_KEY)
@@ -222,16 +297,24 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   }, [showSubmissions])
 
   const activeTracks = (activeCycle?.tracks || []).filter((t) => t.isActive)
-  const fundingCap = researchType === 1 ? activeCycle?.fundingCapApplied ?? 0 : activeCycle?.fundingCapBasic ?? 0
+  const fundingCap = researchType === 1 ? (activeCycle?.fundingCapApplied ?? 0) : (activeCycle?.fundingCapBasic ?? 0)
   const totalBudget = budgetItems.reduce((s, b) => s + (Number(b.amount) || 0), 0)
   const overCap = activeCycle != null && totalBudget > fundingCap
 
   const resetForm = () => {
-    setTitleVI(''); setTitleEN(''); setTrackId(''); setResearchType(1); setDurationMonths(12)
-    setObjectives(''); setMethodology(''); setExpectedOutput('')
-    setMembers([{ ...emptyMember, role: 'Chủ nhiệm' }]); setBudgetItems([{ ...emptyBudget }])
+    setTitleVI('')
+    setTitleEN('')
+    setTrackId('')
+    setResearchType(1)
+    setDurationMonths(12)
+    setObjectives('')
+    setMethodology('')
+    setExpectedOutput('')
+    setMembers([{ ...emptyMember, role: 'Chủ nhiệm' }])
+    setBudgetItems([{ ...emptyBudget }])
     setPendingDocs([])
-    setCurrentStep(1); setError('')
+    setCurrentStep(1)
+    setError('')
   }
 
   // Điền nhanh dữ liệu mẫu hợp lệ để test (chỉ ở chế độ tạo mới)
@@ -241,8 +324,12 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     if (activeTracks[0]) setTrackId(activeTracks[0].id)
     setResearchType(1)
     setDurationMonths(12)
-    setObjectives('1. Khảo sát hiện trạng quy trình quản lý đề tài.\n2. Xây dựng mô hình hỗ trợ ra quyết định.\n3. Thử nghiệm và đánh giá trên dữ liệu thực tế.')
-    setMethodology('Kết hợp nghiên cứu lý thuyết và thực nghiệm; thu thập dữ liệu thực tế; đánh giá bằng các chỉ số định lượng (precision, recall, F1).')
+    setObjectives(
+      '1. Khảo sát hiện trạng quy trình quản lý đề tài.\n2. Xây dựng mô hình hỗ trợ ra quyết định.\n3. Thử nghiệm và đánh giá trên dữ liệu thực tế.',
+    )
+    setMethodology(
+      'Kết hợp nghiên cứu lý thuyết và thực nghiệm; thu thập dữ liệu thực tế; đánh giá bằng các chỉ số định lượng (precision, recall, F1).',
+    )
     setExpectedOutput('01 bài báo hội nghị/tạp chí, 01 phần mềm demo, 01 báo cáo tổng kết.')
     setMembers([
       { fullName: 'Nguyễn Văn An', email: 'an.nv@fpt.edu.vn', department: 'SE', role: 'Chủ nhiệm', workMonths: 6 },
@@ -252,7 +339,8 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
       { category: budgetCategories[0]?.name || '', amount: 50000000, note: 'Thù lao nhóm nghiên cứu' },
       { category: budgetCategories[1]?.name || '', amount: 20000000, note: 'Nguyên vật liệu, vật tư' },
     ])
-    setCurrentStep(1); setError('')
+    setCurrentStep(1)
+    setError('')
   }
 
   const validateStep = (step: number): string => {
@@ -267,7 +355,10 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
 
   const handleNext = () => {
     const err = validateStep(currentStep)
-    if (err) { setError(err); return }
+    if (err) {
+      setError(err)
+      return
+    }
     setError('')
     if (currentStep < 5) setCurrentStep(currentStep + 1)
   }
@@ -284,7 +375,13 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     setExpectedOutput(p.expectedOutput || '')
     setMembers(
       p.members.length
-        ? p.members.map((m) => ({ fullName: m.fullName, email: m.email || '', department: m.department || '', role: m.role || '', workMonths: m.workMonths }))
+        ? p.members.map((m) => ({
+            fullName: m.fullName,
+            email: m.email || '',
+            department: m.department || '',
+            role: m.role || '',
+            workMonths: m.workMonths,
+          }))
         : [{ ...emptyMember, role: 'Chủ nhiệm' }],
     )
     setBudgetItems(
@@ -309,16 +406,25 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
         setShowProfile(false)
         setDraftRestored(false)
       }
-    } catch (e) { console.error(e) } finally { setRowBusy(null) }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setRowBusy(null)
+    }
   }
 
   // Mở modal xem chi tiết (read-only, mọi trạng thái)
   const handleView = async (p: ProposalSummaryDto) => {
-    setViewLoading(true); setViewProposal({ id: p.id } as ProposalDto)
+    setViewLoading(true)
+    setViewProposal({ id: p.id } as ProposalDto)
     try {
       const res = await proposalService.getById(p.id)
       if (res.success && res.data) setViewProposal(res.data)
-    } catch (e) { console.error(e) } finally { setViewLoading(false) }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setViewLoading(false)
+    }
   }
 
   const cancelEdit = () => {
@@ -330,13 +436,24 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   const handleSaveDraft = async () => {
     for (const s of [1, 3]) {
       const err = validateStep(s)
-      if (err) { setError(err); setCurrentStep(s); return }
+      if (err) {
+        setError(err)
+        setCurrentStep(s)
+        return
+      }
     }
-    setSaving(true); setError('')
+    setSaving(true)
+    setError('')
     const payload = {
       cycleId: selectedCycleId,
-      trackId, titleVI, titleEN, researchType, durationMonths,
-      objectives, methodology, expectedOutput,
+      trackId,
+      titleVI,
+      titleEN,
+      researchType,
+      durationMonths,
+      objectives,
+      methodology,
+      expectedOutput,
       members: members.filter((m) => m.fullName.trim()),
       budgetItems: budgetItems.filter((b) => b.category.trim()),
     }
@@ -357,7 +474,8 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
           }
           setEditingId(null)
           resetForm()
-          if (uploadErrors.length) setError(`Đã cập nhật, nhưng một số tài liệu chưa tải lên:\n${uploadErrors.join('\n')}`)
+          if (uploadErrors.length)
+            setError(`Đã cập nhật, nhưng một số tài liệu chưa tải lên:\n${uploadErrors.join('\n')}`)
           setShowSubmissions(true)
         } else {
           setError(res.message || 'Cập nhật thất bại')
@@ -398,9 +516,15 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     try {
       const res = await proposalService.submit(id)
       if (res.success && res.data) {
-        setMyProposals((prev) => prev.map((p) => (p.id === id ? { ...p, status: res.data!.status, submittedAt: res.data!.submittedAt } : p)))
+        setMyProposals((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, status: res.data!.status, submittedAt: res.data!.submittedAt } : p)),
+        )
       }
-    } catch (e) { console.error(e) } finally { setRowBusy(null) }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setRowBusy(null)
+    }
   }
 
   const handleWithdraw = async (id: string) => {
@@ -408,9 +532,15 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     try {
       const res = await proposalService.withdraw(id)
       if (res.success && res.data) {
-        setMyProposals((prev) => prev.map((p) => (p.id === id ? { ...p, status: res.data!.status, submittedAt: undefined } : p)))
+        setMyProposals((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, status: res.data!.status, submittedAt: undefined } : p)),
+        )
       }
-    } catch (e) { console.error(e) } finally { setRowBusy(null) }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setRowBusy(null)
+    }
   }
 
   const steps = [
@@ -432,22 +562,50 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
               <p className="text-sm text-gray-500">Faculty Portal</p>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={() => navigate('/guide')}
-                className="text-blue-600 border-blue-200 hover:bg-blue-50">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/guide')}
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
                 <BookOpen className="w-4 h-4" /> Hướng dẫn
               </Button>
-              <Button variant="outline"
-                onClick={() => { setShowSubmissions(true); setPickingCycle(false); setWorkspaceId(null); setShowProfile(false); setEditingId(null) }}
-                className="border-blue-300 text-blue-700 hover:bg-blue-50">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowSubmissions(true)
+                  setPickingCycle(false)
+                  setWorkspaceId(null)
+                  setShowProfile(false)
+                  setEditingId(null)
+                }}
+                className="border-blue-300 text-blue-700 hover:bg-blue-50"
+              >
                 <List className="w-4 h-4" /> Đề xuất của tôi
               </Button>
               <Button
-                onClick={() => { setPickingCycle(true); setShowSubmissions(false); setWorkspaceId(null); setShowProfile(false); setEditingId(null); resetForm() }}>
+                onClick={() => {
+                  setPickingCycle(true)
+                  setShowSubmissions(false)
+                  setWorkspaceId(null)
+                  setShowProfile(false)
+                  setEditingId(null)
+                  resetForm()
+                }}
+              >
                 <Plus className="w-4 h-4" /> Tạo đề tài mới
               </Button>
-              <Button variant={showProfile ? 'primary' : 'outline'}
-                onClick={() => { setShowProfile(!showProfile); setShowSubmissions(false) }}
-                className={showProfile ? 'bg-purple-600 text-white hover:bg-purple-700' : 'border-purple-300 text-purple-700 hover:bg-purple-50'}>
+              <Button
+                variant={showProfile ? 'primary' : 'outline'}
+                onClick={() => {
+                  setShowProfile(!showProfile)
+                  setShowSubmissions(false)
+                }}
+                className={
+                  showProfile
+                    ? 'bg-purple-600 text-white hover:bg-purple-700'
+                    : 'border-purple-300 text-purple-700 hover:bg-purple-50'
+                }
+              >
                 <GraduationCap className="w-4 h-4" /> Hồ sơ KH
               </Button>
               <RoleSwitcher />
@@ -456,7 +614,9 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                 <p className="text-sm text-gray-500">Chủ nhiệm đề tài</p>
               </div>
               <button
-                onClick={() => { if (window.confirm('Bạn có chắc muốn đăng xuất?')) onLogout() }}
+                onClick={() => {
+                  if (window.confirm('Bạn có chắc muốn đăng xuất?')) onLogout()
+                }}
                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
               >
                 <LogOut className="w-5 h-5" />
@@ -475,16 +635,20 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
               <p className="text-sm text-gray-600">Đang tải đợt nộp...</p>
             ) : activeCycle ? (
               <>
-                <p className="font-medium text-blue-800">Đợt đang mở: {activeCycle.name} ({activeCycle.academicYear})</p>
+                <p className="font-medium text-blue-800">
+                  Đợt đang mở: {activeCycle.name} ({activeCycle.academicYear})
+                </p>
                 <p className="text-sm text-blue-700">
-                  Hạn nộp Quý I: {new Date(activeCycle.submissionEndDateApplied).toLocaleDateString('vi-VN')} ·
-                  Hạn mức: Applied {formatVnd(activeCycle.fundingCapApplied)} / Basic {formatVnd(activeCycle.fundingCapBasic)}
+                  Hạn nộp Quý I: {new Date(activeCycle.submissionEndDateApplied).toLocaleDateString('vi-VN')} · Hạn mức:
+                  Applied {formatVnd(activeCycle.fundingCapApplied)} / Basic {formatVnd(activeCycle.fundingCapBasic)}
                 </p>
               </>
             ) : (
               <>
                 <p className="font-medium text-yellow-800">Hiện không có đợt nộp nào đang mở</p>
-                <p className="text-sm text-yellow-700">Bạn chưa thể tạo đề xuất mới. Vui lòng quay lại khi có đợt mở.</p>
+                <p className="text-sm text-yellow-700">
+                  Bạn chưa thể tạo đề xuất mới. Vui lòng quay lại khi có đợt mở.
+                </p>
               </>
             )}
           </div>
@@ -495,325 +659,515 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
         {workspaceId ? (
           <ProposalWorkspace
             proposalId={workspaceId}
-            onBack={() => { setWorkspaceId(null); setShowSubmissions(true); loadMy() }}
+            onBack={() => {
+              setWorkspaceId(null)
+              setShowSubmissions(true)
+              loadMy()
+            }}
             onChanged={loadMy}
           />
         ) : pickingCycle ? (
-          <CycleSelection onSelect={(c) => { setSelectedCycleId(Number(c.id)); setPickingCycle(false); resetForm(); setShowSubmissions(false) }} />
+          <CycleSelection
+            onSelect={(c) => {
+              setSelectedCycleId(Number(c.id))
+              setPickingCycle(false)
+              resetForm()
+              setShowSubmissions(false)
+            }}
+          />
         ) : showProfile && authUser ? (
           <MyAcademicProfile userId={authUser.id} />
         ) : (
           <>
-        {!showSubmissions && draftRestored && (
-          <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
-            <p className="text-sm text-amber-800">Đã khôi phục bản nháp bạn đang nhập dở (lưu tự động trên máy này).</p>
-            <button onClick={discardDraft} className="text-sm font-medium text-amber-700 hover:text-amber-900 underline">Xoá nháp</button>
-          </div>
-        )}
-        {showSubmissions ? (
-          <MySubmissions
-            proposals={myProposals}
-            loading={loadingList}
-            rowBusy={rowBusy}
-            onOpen={(p) => setWorkspaceId(p.id)}
-            onWithdraw={handleWithdraw}
-            onChangeRequest={(p) => { setCrProposal(p); setCrType(CHANGE_TYPE.ExtendTime); setCrDesc(''); setCrNewValue(''); setCrMsg('') }}
-            onResults={(p) => { setResultsProposal(p); setResultsRounds([]) }}
-          />
-        ) : !activeCycle && !loadingCycle && !editingId ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
-            Không có đợt nộp đang mở.
-          </div>
-        ) : (
-          <>
-            {editingId && (
-              <div className="mb-6 flex items-center justify-between bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3">
-                <p className="text-sm text-indigo-800">
-                  Đang chỉnh sửa đề xuất <b>nháp</b>. Bấm "Cập nhật" ở bước cuối để lưu thay đổi.
-                </p>
-                <button onClick={cancelEdit} className="text-sm font-medium text-indigo-700 hover:text-indigo-900 underline">Huỷ</button>
-              </div>
-            )}
-            {!editingId && (
+            {!showSubmissions && draftRestored && (
               <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
-                <p className="text-sm text-amber-800">Đang tạo đề xuất mới. Muốn test nhanh? Bấm nút bên để điền sẵn dữ liệu mẫu.</p>
-                <Button variant="warning" size="sm" onClick={fillSample}>
-                  <Plus className="w-4 h-4" /> Điền dữ liệu mẫu
-                </Button>
+                <p className="text-sm text-amber-800">
+                  Đã khôi phục bản nháp bạn đang nhập dở (lưu tự động trên máy này).
+                </p>
+                <button
+                  onClick={discardDraft}
+                  className="text-sm font-medium text-amber-700 hover:text-amber-900 underline"
+                >
+                  Xoá nháp
+                </button>
               </div>
             )}
-            {/* Progress */}
-            <div className="mb-10 flex items-center justify-between">
-              {steps.map((step, index) => (
-                <div key={step.number} className="flex items-center flex-1">
-                  <div className="flex flex-col items-center flex-1">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold mb-2 transition ${
-                      currentStep >= step.number ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
-                    }`}>
-                      {currentStep > step.number ? <CheckCircle className="w-6 h-6" /> : <step.icon className="w-5 h-5" />}
-                    </div>
-                    <p className="font-medium text-gray-800 text-center text-sm">{step.title}</p>
+            {showSubmissions ? (
+              <MySubmissions
+                proposals={myProposals}
+                loading={loadingList}
+                rowBusy={rowBusy}
+                onOpen={(p) => setWorkspaceId(p.id)}
+                onWithdraw={handleWithdraw}
+                onChangeRequest={(p) => {
+                  setCrProposal(p)
+                  setCrType(CHANGE_TYPE.ExtendTime)
+                  setCrDesc('')
+                  setCrNewValue('')
+                  setCrMsg('')
+                }}
+                onResults={(p) => {
+                  setResultsProposal(p)
+                  setResultsRounds([])
+                }}
+              />
+            ) : !activeCycle && !loadingCycle && !editingId ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
+                Không có đợt nộp đang mở.
+              </div>
+            ) : (
+              <>
+                {editingId && (
+                  <div className="mb-6 flex items-center justify-between bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3">
+                    <p className="text-sm text-indigo-800">
+                      Đang chỉnh sửa đề xuất <b>nháp</b>. Bấm "Cập nhật" ở bước cuối để lưu thay đổi.
+                    </p>
+                    <button
+                      onClick={cancelEdit}
+                      className="text-sm font-medium text-indigo-700 hover:text-indigo-900 underline"
+                    >
+                      Huỷ
+                    </button>
                   </div>
-                  {index < steps.length - 1 && (
-                    <div className={`h-1 flex-1 mx-2 transition ${currentStep > step.number ? 'bg-blue-600' : 'bg-gray-200'}`} />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-              {/* Step 1 */}
-              {currentStep === 1 && (
-                <div className="space-y-5">
-                  <h2 className="text-xl font-semibold text-gray-800">Thông tin cơ bản</h2>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Tên đề tài (Tiếng Việt) *</label>
-                    <input value={titleVI} onChange={(e) => setTitleVI(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Tên đề tài (Tiếng Anh)</label>
-                    <input value={titleEN} onChange={(e) => setTitleEN(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                  </div>
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Track *</label>
-                      <select value={trackId} onChange={(e) => setTrackId(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="">— Chọn track —</option>
-                        {activeTracks.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Loại nghiên cứu *</label>
-                      <select value={researchType} onChange={(e) => setResearchType(Number(e.target.value))}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value={1}>Applied (Quý I)</option>
-                        <option value={2}>Basic (Quý II)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Thời gian (tháng) *</label>
-                      <input type="number" value={durationMonths} onChange={(e) => setDurationMonths(Number(e.target.value))}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Mục tiêu</label>
-                    <textarea value={objectives} onChange={(e) => setObjectives(e.target.value)} rows={3}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Phương pháp nghiên cứu</label>
-                    <textarea value={methodology} onChange={(e) => setMethodology(e.target.value)} rows={3}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Sản phẩm dự kiến</label>
-                    <textarea value={expectedOutput} onChange={(e) => setExpectedOutput(e.target.value)} rows={2}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                  </div>
-                </div>
-              )}
-
-              {/* Step 2 — Members */}
-              {currentStep === 2 && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-gray-800">Thành viên tham gia</h2>
-                    <Button variant="ghost" size="sm" onClick={() => setMembers([...members, { ...emptyMember }])}
-                      className="bg-blue-50 text-blue-700 hover:bg-blue-100">
-                      <Plus className="w-4 h-4" /> Thêm thành viên
+                )}
+                {!editingId && (
+                  <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                    <p className="text-sm text-amber-800">
+                      Đang tạo đề xuất mới. Muốn test nhanh? Bấm nút bên để điền sẵn dữ liệu mẫu.
+                    </p>
+                    <Button variant="warning" size="sm" onClick={fillSample}>
+                      <Plus className="w-4 h-4" /> Điền dữ liệu mẫu
                     </Button>
                   </div>
-                  {members.map((m, i) => (
-                    <div key={i} className="grid md:grid-cols-12 gap-3 items-end border border-gray-200 rounded-lg p-4">
-                      <div className="md:col-span-3">
-                        <label className="block text-xs text-gray-500 mb-1">Họ tên</label>
-                        <input value={m.fullName} onChange={(e) => setMembers(members.map((x, j) => j === i ? { ...x, fullName: e.target.value } : x))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                      <div className="md:col-span-3">
-                        <label className="block text-xs text-gray-500 mb-1">Email</label>
-                        <input value={m.email} onChange={(e) => setMembers(members.map((x, j) => j === i ? { ...x, email: e.target.value } : x))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-xs text-gray-500 mb-1">Khoa</label>
-                        <input value={m.department} onChange={(e) => setMembers(members.map((x, j) => j === i ? { ...x, department: e.target.value } : x))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-xs text-gray-500 mb-1">Vai trò</label>
-                        <input value={m.role} onChange={(e) => setMembers(members.map((x, j) => j === i ? { ...x, role: e.target.value } : x))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                      <div className="md:col-span-1">
-                        <label className="block text-xs text-gray-500 mb-1">Tháng</label>
-                        <input type="number" value={m.workMonths} onChange={(e) => setMembers(members.map((x, j) => j === i ? { ...x, workMonths: Number(e.target.value) } : x))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                      <div className="md:col-span-1">
-                        <button onClick={() => setMembers(members.filter((_, j) => j !== i))}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
-                      </div>
-                    </div>
-                  ))}
-                  {members.length === 0 && <p className="text-sm text-gray-400">Chưa có thành viên nào.</p>}
-                </div>
-              )}
-
-              {/* Step 3 — Budget */}
-              {currentStep === 3 && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-gray-800">Dự toán kinh phí</h2>
-                    <Button variant="ghost" size="sm" onClick={() => setBudgetItems([...budgetItems, { ...emptyBudget }])}
-                      className="bg-blue-50 text-blue-700 hover:bg-blue-100">
-                      <Plus className="w-4 h-4" /> Thêm khoản
-                    </Button>
-                  </div>
-                  {budgetItems.map((b, i) => (
-                    <div key={i} className="grid md:grid-cols-12 gap-3 items-end border border-gray-200 rounded-lg p-4">
-                      <div className="md:col-span-4">
-                        <label className="block text-xs text-gray-500 mb-1">Hạng mục</label>
-                        <select value={b.category} onChange={(e) => setBudgetItems(budgetItems.map((x, j) => j === i ? { ...x, category: e.target.value } : x))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                          <option value="">— Chọn hạng mục —</option>
-                          {budgetCategories.map((c) => (
-                            <option key={c.id} value={c.name}>{c.name}</option>
-                          ))}
-                          {b.category && !budgetCategories.some((c) => c.name === b.category) && (
-                            <option value={b.category}>{b.category}</option>
+                )}
+                {/* Progress */}
+                <div className="mb-10 flex items-center justify-between">
+                  {steps.map((step, index) => (
+                    <div key={step.number} className="flex items-center flex-1">
+                      <div className="flex flex-col items-center flex-1">
+                        <div
+                          className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold mb-2 transition ${
+                            currentStep >= step.number ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
+                          }`}
+                        >
+                          {currentStep > step.number ? (
+                            <CheckCircle className="w-6 h-6" />
+                          ) : (
+                            <step.icon className="w-5 h-5" />
                           )}
-                        </select>
+                        </div>
+                        <p className="font-medium text-gray-800 text-center text-sm">{step.title}</p>
                       </div>
-                      <div className="md:col-span-3">
-                        <label className="block text-xs text-gray-500 mb-1">Số tiền (₫)</label>
-                        <input type="number" value={b.amount} onChange={(e) => setBudgetItems(budgetItems.map((x, j) => j === i ? { ...x, amount: Number(e.target.value) } : x))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                      <div className="md:col-span-4">
-                        <label className="block text-xs text-gray-500 mb-1">Ghi chú</label>
-                        <input value={b.note} onChange={(e) => setBudgetItems(budgetItems.map((x, j) => j === i ? { ...x, note: e.target.value } : x))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                      <div className="md:col-span-1">
-                        <button onClick={() => setBudgetItems(budgetItems.filter((_, j) => j !== i))}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
-                      </div>
+                      {index < steps.length - 1 && (
+                        <div
+                          className={`h-1 flex-1 mx-2 transition ${currentStep > step.number ? 'bg-blue-600' : 'bg-gray-200'}`}
+                        />
+                      )}
                     </div>
                   ))}
-                  <div className={`flex items-center justify-between p-4 rounded-lg ${overCap ? 'bg-red-50 border border-red-200' : 'bg-gray-50 border border-gray-200'}`}>
-                    <span className="font-medium text-gray-700">Tổng kinh phí</span>
-                    <span className={`font-bold ${overCap ? 'text-red-600' : 'text-gray-800'}`}>
-                      {formatVnd(totalBudget)} / hạn mức {formatVnd(fundingCap)}
-                    </span>
-                  </div>
-                  {overCap && <p className="text-sm text-red-600">⚠️ Tổng kinh phí vượt hạn mức cho loại nghiên cứu này.</p>}
                 </div>
-              )}
 
-              {/* Step 4 — Documents */}
-              {currentStep === 4 && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-800">Đính kèm tài liệu</h2>
-                      <p className="text-sm text-gray-500 mt-0.5">Tài liệu sẽ được tải lên ngay sau khi lưu đề xuất. Có thể thêm sau ở mục "Đề xuất của tôi".</p>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                  {/* Step 1 */}
+                  {currentStep === 1 && (
+                    <div className="space-y-5">
+                      <h2 className="text-xl font-semibold text-gray-800">Thông tin cơ bản</h2>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Tên đề tài (Tiếng Việt) *
+                        </label>
+                        <input
+                          value={titleVI}
+                          onChange={(e) => setTitleVI(e.target.value)}
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Tên đề tài (Tiếng Anh)</label>
+                        <input
+                          value={titleEN}
+                          onChange={(e) => setTitleEN(e.target.value)}
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                      </div>
+                      <div className="grid md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Track *</label>
+                          <select
+                            value={trackId}
+                            onChange={(e) => setTrackId(e.target.value)}
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                          >
+                            <option value="">— Chọn track —</option>
+                            {activeTracks.map((t) => (
+                              <option key={t.id} value={t.id}>
+                                {t.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Loại nghiên cứu *</label>
+                          <select
+                            value={researchType}
+                            onChange={(e) => setResearchType(Number(e.target.value))}
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                          >
+                            <option value={1}>Applied (Quý I)</option>
+                            <option value={2}>Basic (Quý II)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Thời gian (tháng) *</label>
+                          <input
+                            type="number"
+                            value={durationMonths}
+                            onChange={(e) => setDurationMonths(Number(e.target.value))}
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Mục tiêu</label>
+                        <textarea
+                          value={objectives}
+                          onChange={(e) => setObjectives(e.target.value)}
+                          rows={3}
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Phương pháp nghiên cứu</label>
+                        <textarea
+                          value={methodology}
+                          onChange={(e) => setMethodology(e.target.value)}
+                          rows={3}
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Sản phẩm dự kiến</label>
+                        <textarea
+                          value={expectedOutput}
+                          onChange={(e) => setExpectedOutput(e.target.value)}
+                          rows={2}
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <select value={pendingDocType} onChange={(e) => setPendingDocType(e.target.value)}
-                        className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="Proposal">Thuyết minh</option>
-                        <option value="CV">Lý lịch khoa học</option>
-                        <option value="Other">Khác</option>
-                      </select>
-                      <Button type="button" size="sm" onClick={() => docFileRef.current?.click()}>
-                        <Upload className="w-4 h-4" /> Chọn file
-                      </Button>
-                      <input ref={docFileRef} type="file" className="hidden"
-                        accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (file) setPendingDocs((prev) => [...prev, { file, documentType: pendingDocType }])
-                          if (docFileRef.current) docFileRef.current.value = ''
-                        }} />
-                    </div>
-                  </div>
-                  {pendingDocs.length === 0 ? (
-                    <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center text-sm text-gray-400">
-                      Chưa có tài liệu. Có thể bỏ qua và tải lên sau.
-                    </div>
-                  ) : (
-                    <div className="border border-gray-200 rounded-lg divide-y">
-                      {pendingDocs.map((d, i) => (
-                        <div key={i} className="px-4 py-2.5 flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-gray-400" />
-                            <span className="text-gray-800">{d.file.name}</span>
-                            <span className="text-gray-400">· {d.documentType} · {(d.file.size / 1024).toFixed(0)} KB</span>
+                  )}
+
+                  {/* Step 2 — Members */}
+                  {currentStep === 2 && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-semibold text-gray-800">Thành viên tham gia</h2>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setMembers([...members, { ...emptyMember }])}
+                          className="bg-blue-50 text-blue-700 hover:bg-blue-100"
+                        >
+                          <Plus className="w-4 h-4" /> Thêm thành viên
+                        </Button>
+                      </div>
+                      {members.map((m, i) => (
+                        <div
+                          key={i}
+                          className="grid md:grid-cols-12 gap-3 items-end border border-gray-200 rounded-lg p-4"
+                        >
+                          <div className="md:col-span-3">
+                            <label className="block text-xs text-gray-500 mb-1">Họ tên</label>
+                            <input
+                              value={m.fullName}
+                              onChange={(e) =>
+                                setMembers(members.map((x, j) => (j === i ? { ...x, fullName: e.target.value } : x)))
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                            />
                           </div>
-                          <button onClick={() => setPendingDocs((prev) => prev.filter((_, j) => j !== i))}
-                            className="p-1 text-red-500 hover:bg-red-50 rounded">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="md:col-span-3">
+                            <label className="block text-xs text-gray-500 mb-1">Email</label>
+                            <input
+                              value={m.email}
+                              onChange={(e) =>
+                                setMembers(members.map((x, j) => (j === i ? { ...x, email: e.target.value } : x)))
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-xs text-gray-500 mb-1">Khoa</label>
+                            <input
+                              value={m.department}
+                              onChange={(e) =>
+                                setMembers(members.map((x, j) => (j === i ? { ...x, department: e.target.value } : x)))
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-xs text-gray-500 mb-1">Vai trò</label>
+                            <input
+                              value={m.role}
+                              onChange={(e) =>
+                                setMembers(members.map((x, j) => (j === i ? { ...x, role: e.target.value } : x)))
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div className="md:col-span-1">
+                            <label className="block text-xs text-gray-500 mb-1">Tháng</label>
+                            <input
+                              type="number"
+                              value={m.workMonths}
+                              onChange={(e) =>
+                                setMembers(
+                                  members.map((x, j) => (j === i ? { ...x, workMonths: Number(e.target.value) } : x)),
+                                )
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div className="md:col-span-1">
+                            <button
+                              onClick={() => setMembers(members.filter((_, j) => j !== i))}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       ))}
+                      {members.length === 0 && <p className="text-sm text-gray-400">Chưa có thành viên nào.</p>}
                     </div>
                   )}
-                </div>
-              )}
 
-              {/* Step 5 — Review */}
-              {currentStep === 5 && (
-                <div className="space-y-5">
-                  <h2 className="text-xl font-semibold text-gray-800">Xem lại & lưu</h2>
-                  <div className="bg-gray-50 rounded-lg p-6 space-y-3 text-sm">
-                    <Row label="Tên đề tài (VI)" value={titleVI || '—'} />
-                    <Row label="Tên đề tài (EN)" value={titleEN || '—'} />
-                    <Row label="Track" value={activeTracks.find((t) => t.id === trackId)?.name || '—'} />
-                    <Row label="Loại nghiên cứu" value={researchType === 1 ? 'Applied' : 'Basic'} />
-                    <Row label="Thời gian" value={`${durationMonths} tháng`} />
-                    <Row label="Số thành viên" value={String(members.filter((m) => m.fullName.trim()).length)} />
-                    <Row label="Tổng kinh phí" value={`${formatVnd(totalBudget)} / hạn mức ${formatVnd(fundingCap)}`} />
-                    <Row label="Tài liệu đính kèm" value={pendingDocs.length ? `${pendingDocs.length} file` : 'Không có'} />
+                  {/* Step 3 — Budget */}
+                  {currentStep === 3 && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-semibold text-gray-800">Dự toán kinh phí</h2>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setBudgetItems([...budgetItems, { ...emptyBudget }])}
+                          className="bg-blue-50 text-blue-700 hover:bg-blue-100"
+                        >
+                          <Plus className="w-4 h-4" /> Thêm khoản
+                        </Button>
+                      </div>
+                      {budgetItems.map((b, i) => (
+                        <div
+                          key={i}
+                          className="grid md:grid-cols-12 gap-3 items-end border border-gray-200 rounded-lg p-4"
+                        >
+                          <div className="md:col-span-4">
+                            <label className="block text-xs text-gray-500 mb-1">Hạng mục</label>
+                            <select
+                              value={b.category}
+                              onChange={(e) =>
+                                setBudgetItems(
+                                  budgetItems.map((x, j) => (j === i ? { ...x, category: e.target.value } : x)),
+                                )
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value="">— Chọn hạng mục —</option>
+                              {budgetCategories.map((c) => (
+                                <option key={c.id} value={c.name}>
+                                  {c.name}
+                                </option>
+                              ))}
+                              {b.category && !budgetCategories.some((c) => c.name === b.category) && (
+                                <option value={b.category}>{b.category}</option>
+                              )}
+                            </select>
+                          </div>
+                          <div className="md:col-span-3">
+                            <label className="block text-xs text-gray-500 mb-1">Số tiền (₫)</label>
+                            <input
+                              type="number"
+                              value={b.amount}
+                              onChange={(e) =>
+                                setBudgetItems(
+                                  budgetItems.map((x, j) => (j === i ? { ...x, amount: Number(e.target.value) } : x)),
+                                )
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div className="md:col-span-4">
+                            <label className="block text-xs text-gray-500 mb-1">Ghi chú</label>
+                            <input
+                              value={b.note}
+                              onChange={(e) =>
+                                setBudgetItems(
+                                  budgetItems.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)),
+                                )
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div className="md:col-span-1">
+                            <button
+                              onClick={() => setBudgetItems(budgetItems.filter((_, j) => j !== i))}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      <div
+                        className={`flex items-center justify-between p-4 rounded-lg ${overCap ? 'bg-red-50 border border-red-200' : 'bg-gray-50 border border-gray-200'}`}
+                      >
+                        <span className="font-medium text-gray-700">Tổng kinh phí</span>
+                        <span className={`font-bold ${overCap ? 'text-red-600' : 'text-gray-800'}`}>
+                          {formatVnd(totalBudget)} / hạn mức {formatVnd(fundingCap)}
+                        </span>
+                      </div>
+                      {overCap && (
+                        <p className="text-sm text-red-600">⚠️ Tổng kinh phí vượt hạn mức cho loại nghiên cứu này.</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Step 4 — Documents */}
+                  {currentStep === 4 && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h2 className="text-xl font-semibold text-gray-800">Đính kèm tài liệu</h2>
+                          <p className="text-sm text-gray-500 mt-0.5">
+                            Tài liệu sẽ được tải lên ngay sau khi lưu đề xuất. Có thể thêm sau ở mục "Đề xuất của tôi".
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={pendingDocType}
+                            onChange={(e) => setPendingDocType(e.target.value)}
+                            className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="Proposal">Thuyết minh</option>
+                            <option value="CV">Lý lịch khoa học</option>
+                            <option value="Other">Khác</option>
+                          </select>
+                          <Button type="button" size="sm" onClick={() => docFileRef.current?.click()}>
+                            <Upload className="w-4 h-4" /> Chọn file
+                          </Button>
+                          <input
+                            ref={docFileRef}
+                            type="file"
+                            className="hidden"
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) setPendingDocs((prev) => [...prev, { file, documentType: pendingDocType }])
+                              if (docFileRef.current) docFileRef.current.value = ''
+                            }}
+                          />
+                        </div>
+                      </div>
+                      {pendingDocs.length === 0 ? (
+                        <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center text-sm text-gray-400">
+                          Chưa có tài liệu. Có thể bỏ qua và tải lên sau.
+                        </div>
+                      ) : (
+                        <div className="border border-gray-200 rounded-lg divide-y">
+                          {pendingDocs.map((d, i) => (
+                            <div key={i} className="px-4 py-2.5 flex items-center justify-between text-sm">
+                              <div className="flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-gray-400" />
+                                <span className="text-gray-800">{d.file.name}</span>
+                                <span className="text-gray-400">
+                                  · {d.documentType} · {(d.file.size / 1024).toFixed(0)} KB
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => setPendingDocs((prev) => prev.filter((_, j) => j !== i))}
+                                className="p-1 text-red-500 hover:bg-red-50 rounded"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Step 5 — Review */}
+                  {currentStep === 5 && (
+                    <div className="space-y-5">
+                      <h2 className="text-xl font-semibold text-gray-800">Xem lại & lưu</h2>
+                      <div className="bg-gray-50 rounded-lg p-6 space-y-3 text-sm">
+                        <Row label="Tên đề tài (VI)" value={titleVI || '—'} />
+                        <Row label="Tên đề tài (EN)" value={titleEN || '—'} />
+                        <Row label="Track" value={activeTracks.find((t) => t.id === trackId)?.name || '—'} />
+                        <Row label="Loại nghiên cứu" value={researchType === 1 ? 'Applied' : 'Basic'} />
+                        <Row label="Thời gian" value={`${durationMonths} tháng`} />
+                        <Row label="Số thành viên" value={String(members.filter((m) => m.fullName.trim()).length)} />
+                        <Row
+                          label="Tổng kinh phí"
+                          value={`${formatVnd(totalBudget)} / hạn mức ${formatVnd(fundingCap)}`}
+                        />
+                        <Row
+                          label="Tài liệu đính kèm"
+                          value={pendingDocs.length ? `${pendingDocs.length} file` : 'Không có'}
+                        />
+                      </div>
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
+                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                        <p className="text-sm text-green-700">
+                          {editingId ? (
+                            <>
+                              Thay đổi sẽ được lưu vào đề xuất <b>nháp</b> hiện tại.
+                            </>
+                          ) : (
+                            <>
+                              Đề xuất sẽ được lưu ở trạng thái <b>Nháp</b>. Bạn có thể gửi duyệt sau ở mục "Đề xuất của
+                              tôi".
+                            </>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {error && (
+                    <div className="mt-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                      {error}
+                    </div>
+                  )}
+
+                  {/* Nav buttons */}
+                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => {
+                        setError('')
+                        if (currentStep > 1) setCurrentStep(currentStep - 1)
+                      }}
+                      disabled={currentStep === 1}
+                    >
+                      <ArrowLeft className="w-4 h-4" /> Trước
+                    </Button>
+                    {currentStep < 5 ? (
+                      <Button size="lg" onClick={handleNext}>
+                        Tiếp <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    ) : (
+                      <Button variant="success" size="lg" onClick={handleSaveDraft} disabled={saving || overCap}>
+                        <CheckCircle className="w-4 h-4" />{' '}
+                        {saving ? 'Đang lưu...' : editingId ? 'Cập nhật' : 'Lưu nháp'}
+                      </Button>
+                    )}
                   </div>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                    <p className="text-sm text-green-700">
-                      {editingId
-                        ? <>Thay đổi sẽ được lưu vào đề xuất <b>nháp</b> hiện tại.</>
-                        : <>Đề xuất sẽ được lưu ở trạng thái <b>Nháp</b>. Bạn có thể gửi duyệt sau ở mục "Đề xuất của tôi".</>}
-                    </p>
-                  </div>
                 </div>
-              )}
-
-              {error && (
-                <div className="mt-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
-              )}
-
-              {/* Nav buttons */}
-              <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
-                <Button variant="outline" size="lg" onClick={() => { setError(''); if (currentStep > 1) setCurrentStep(currentStep - 1) }}
-                  disabled={currentStep === 1}>
-                  <ArrowLeft className="w-4 h-4" /> Trước
-                </Button>
-                {currentStep < 5 ? (
-                  <Button size="lg" onClick={handleNext}>
-                    Tiếp <ArrowRight className="w-4 h-4" />
-                  </Button>
-                ) : (
-                  <Button variant="success" size="lg" onClick={handleSaveDraft} disabled={saving || overCap}>
-                    <CheckCircle className="w-4 h-4" /> {saving ? 'Đang lưu...' : editingId ? 'Cập nhật' : 'Lưu nháp'}
-                  </Button>
-                )}
-              </div>
-            </div>
-          </>
-        )}
+              </>
+            )}
           </>
         )}
       </div>
@@ -824,7 +1178,9 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
           <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 bg-white">
               <h3 className="text-xl font-bold text-gray-800">Chi tiết đề xuất</h3>
-              <button onClick={() => setViewProposal(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+              <button onClick={() => setViewProposal(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             <div className="p-6 space-y-4">
               {viewLoading || !viewProposal.titleVI ? (
@@ -835,27 +1191,39 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                     <Row label="Tên đề tài (VI)" value={viewProposal.titleVI || '—'} />
                     <Row label="Tên đề tài (EN)" value={viewProposal.titleEN || '—'} />
                     <Row label="Track" value={viewProposal.trackName || '—'} />
-                    <Row label="Loại nghiên cứu" value={viewProposal.researchType === 'Applied' ? 'Ứng dụng' : 'Cơ bản'} />
+                    <Row
+                      label="Loại nghiên cứu"
+                      value={viewProposal.researchType === 'Applied' ? 'Ứng dụng' : 'Cơ bản'}
+                    />
                     <Row label="Trạng thái" value={viewProposal.status} />
                     <Row label="Thời gian thực hiện" value={`${viewProposal.durationMonths} tháng`} />
                     <Row label="Tổng kinh phí" value={formatVnd(viewProposal.totalBudget)} />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-700 mb-1">Mục tiêu nghiên cứu</p>
-                    <p className="text-sm text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-lg p-3">{viewProposal.objectives || '—'}</p>
+                    <p className="text-sm text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-lg p-3">
+                      {viewProposal.objectives || '—'}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-700 mb-1">Phương pháp / nội dung</p>
-                    <p className="text-sm text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-lg p-3">{viewProposal.methodology || '—'}</p>
+                    <p className="text-sm text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-lg p-3">
+                      {viewProposal.methodology || '—'}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-700 mb-2">Thành viên ({viewProposal.members.length})</p>
+                    <p className="text-sm font-semibold text-gray-700 mb-2">
+                      Thành viên ({viewProposal.members.length})
+                    </p>
                     {viewProposal.members.length === 0 ? (
                       <p className="text-sm text-gray-400">Chưa có thành viên.</p>
                     ) : (
                       <div className="space-y-2">
                         {viewProposal.members.map((m) => (
-                          <div key={m.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm">
+                          <div
+                            key={m.id}
+                            className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm"
+                          >
                             <span className="text-gray-800">
                               {m.fullName} {m.role && <span className="text-gray-400">· {m.role}</span>}
                               {m.department && <span className="text-gray-400"> · {m.department}</span>}
@@ -874,8 +1242,14 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                     ) : (
                       <div className="space-y-2">
                         {viewProposal.budgetItems.map((b) => (
-                          <div key={b.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm">
-                            <span className="text-gray-800">{b.category}{b.note && <span className="text-gray-400"> · {b.note}</span>}</span>
+                          <div
+                            key={b.id}
+                            className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm"
+                          >
+                            <span className="text-gray-800">
+                              {b.category}
+                              {b.note && <span className="text-gray-400"> · {b.note}</span>}
+                            </span>
                             <span className="text-gray-700 font-medium">{formatVnd(b.amount)}</span>
                           </div>
                         ))}
@@ -893,8 +1267,14 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                   )}
                   {viewProposal.status === 'DRAFT' && (
                     <div className="pt-2 flex justify-end">
-                      <Button variant="success"
-                        onClick={() => { const p = viewProposal; setViewProposal(null); handleEdit({ id: p.id } as ProposalSummaryDto) }}>
+                      <Button
+                        variant="success"
+                        onClick={() => {
+                          const p = viewProposal
+                          setViewProposal(null)
+                          handleEdit({ id: p.id } as ProposalSummaryDto)
+                        }}
+                      >
                         <Pencil className="w-4 h-4" /> Chỉnh sửa đề xuất này
                       </Button>
                     </div>
@@ -912,7 +1292,9 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h3 className="text-xl font-bold text-gray-800">Tài liệu — {docProposal.titleVI}</h3>
-              <button onClick={() => setDocProposal(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+              <button onClick={() => setDocProposal(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             <div className="p-6">
               <ProposalDocuments proposalId={docProposal.id} />
@@ -923,12 +1305,20 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
 
       {/* Hồ sơ Word/Excel — xem trước + tải */}
       {previewProposal && (
-        <ProposalDocumentPreview proposalId={previewProposal.id} title={previewProposal.titleVI} onClose={() => setPreviewProposal(null)} />
+        <ProposalDocumentPreview
+          proposalId={previewProposal.id}
+          title={previewProposal.titleVI}
+          onClose={() => setPreviewProposal(null)}
+        />
       )}
 
       {/* Soạn chi tiết hồ sơ */}
       {dossierProposal && (
-        <ProposalDossierEditor proposalId={dossierProposal.id} title={dossierProposal.titleVI} onClose={() => setDossierProposal(null)} />
+        <ProposalDossierEditor
+          proposalId={dossierProposal.id}
+          title={dossierProposal.titleVI}
+          onClose={() => setDossierProposal(null)}
+        />
       )}
 
       {/* Kết quả phản biện modal (PI) */}
@@ -937,7 +1327,9 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
           <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 bg-white">
               <h3 className="text-xl font-bold text-gray-800">Kết quả phản biện — {resultsProposal.titleVI}</h3>
-              <button onClick={() => setResultsProposal(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+              <button onClick={() => setResultsProposal(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             <div className="p-6 space-y-4">
               {resultsLoading ? (
@@ -948,10 +1340,14 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                 resultsRounds.map((r) => (
                   <div key={r.id} className="border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-800">{ROUND_LABEL[r.roundType] || r.roundType} · Vòng {r.roundNumber}</span>
+                      <span className="font-medium text-gray-800">
+                        {ROUND_LABEL[r.roundType] || r.roundType} · Vòng {r.roundNumber}
+                      </span>
                       <div className="flex items-center gap-2">
                         {(r.status === 'PASSED' || r.status === 'FAILED') && r.result && (
-                          <span className={`px-2 py-0.5 rounded-full text-xs ${r.result === 'APPROVED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-xs ${r.result === 'APPROVED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                          >
                             {r.result === 'APPROVED' ? 'Đạt' : r.result === 'REJECTED' ? 'Từ chối' : r.result}
                           </span>
                         )}
@@ -973,14 +1369,21 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
             <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h3 className="text-xl font-bold text-gray-800">Yêu cầu thay đổi</h3>
-              <button onClick={() => setCrProposal(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+              <button onClick={() => setCrProposal(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             <div className="p-6 space-y-4">
-              <p className="text-sm text-gray-500">Đề tài: <b className="text-gray-800">{crProposal.titleVI}</b></p>
+              <p className="text-sm text-gray-500">
+                Đề tài: <b className="text-gray-800">{crProposal.titleVI}</b>
+              </p>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Loại yêu cầu</label>
-                <select value={crType} onChange={(e) => setCrType(Number(e.target.value))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                <select
+                  value={crType}
+                  onChange={(e) => setCrType(Number(e.target.value))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                >
                   <option value={CHANGE_TYPE.ExtendTime}>Gia hạn thời gian</option>
                   <option value={CHANGE_TYPE.ContentChange}>Thay đổi nội dung</option>
                   <option value={CHANGE_TYPE.PersonnelChange}>Thay đổi nhân sự</option>
@@ -991,19 +1394,29 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
               {crType === CHANGE_TYPE.ExtendTime && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Ngày kết thúc mới</label>
-                  <input type="date" value={crNewValue} onChange={(e) => setCrNewValue(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input
+                    type="date"
+                    value={crNewValue}
+                    onChange={(e) => setCrNewValue(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
               )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả / lý do *</label>
-                <textarea value={crDesc} onChange={(e) => setCrDesc(e.target.value)} rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+                <textarea
+                  value={crDesc}
+                  onChange={(e) => setCrDesc(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
               {crMsg && <div className="text-sm text-blue-600">{crMsg}</div>}
             </div>
             <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setCrProposal(null)}>Hủy</Button>
+              <Button variant="outline" onClick={() => setCrProposal(null)}>
+                Hủy
+              </Button>
               <Button onClick={submitCr} disabled={crBusy}>
                 {crBusy ? 'Đang gửi...' : 'Gửi yêu cầu'}
               </Button>
@@ -1034,7 +1447,15 @@ interface MySubmissionsProps {
   onResults: (p: ProposalSummaryDto) => void
 }
 
-function MySubmissions({ proposals, loading, rowBusy, onOpen, onWithdraw, onChangeRequest, onResults }: MySubmissionsProps) {
+function MySubmissions({
+  proposals,
+  loading,
+  rowBusy,
+  onOpen,
+  onWithdraw,
+  onChangeRequest,
+  onResults,
+}: MySubmissionsProps) {
   const navigate = useNavigate()
   return (
     <div className="space-y-6">
@@ -1069,7 +1490,9 @@ function MySubmissions({ proposals, loading, rowBusy, onOpen, onWithdraw, onChan
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(p.status)}`}>{p.status}</span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(p.status)}`}>
+                    {p.status}
+                  </span>
                   <Button size="sm" onClick={() => onOpen(p)} disabled={rowBusy === p.id}>
                     <FolderOpen className="w-4 h-4" /> Mở
                   </Button>
@@ -1079,14 +1502,22 @@ function MySubmissions({ proposals, loading, rowBusy, onOpen, onWithdraw, onChan
                     </Button>
                   )}
                   {p.status !== 'DRAFT' && (
-                    <Button variant="outline" size="sm" onClick={() => onResults(p)}
-                      className="border-blue-300 text-blue-700 hover:bg-blue-50">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onResults(p)}
+                      className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                    >
                       <BarChart3 className="w-4 h-4" /> Kết quả
                     </Button>
                   )}
                   {p.status !== 'DRAFT' && (
-                    <Button variant="outline" size="sm" onClick={() => onChangeRequest(p)}
-                      className="border-amber-300 text-amber-700 hover:bg-amber-50">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onChangeRequest(p)}
+                      className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                    >
                       <FileText className="w-4 h-4" /> Yêu cầu thay đổi
                     </Button>
                   )}

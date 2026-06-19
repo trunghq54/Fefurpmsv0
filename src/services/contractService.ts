@@ -33,38 +33,29 @@ export const contractService = {
   },
 
   getDisbursements: async (contractId: string) => {
-    const res = await api.get<ApiResponse<DisbursementResponse[]>>(
-      `/api/contracts/${contractId}/disbursements`
-    )
+    const res = await api.get<ApiResponse<DisbursementResponse[]>>(`/api/contracts/${contractId}/disbursements`)
     return res.data
   },
 
   generateDisbursements: async (contractId: string) => {
     const res = await api.post<ApiResponse<DisbursementResponse[]>>(
-      `/api/contracts/${contractId}/disbursements/generate`
+      `/api/contracts/${contractId}/disbursements/generate`,
     )
     return res.data
   },
 
   getDeliverables: async (contractId: string) => {
-    const res = await api.get<ApiResponse<DeliverableResponse[]>>(
-      `/api/contracts/${contractId}/deliverables`
-    )
+    const res = await api.get<ApiResponse<DeliverableResponse[]>>(`/api/contracts/${contractId}/deliverables`)
     return res.data
   },
 
   getAmendments: async (contractId: string) => {
-    const res = await api.get<ApiResponse<AmendmentListResponse[]>>(
-      `/api/contracts/${contractId}/amendments`
-    )
+    const res = await api.get<ApiResponse<AmendmentListResponse[]>>(`/api/contracts/${contractId}/amendments`)
     return res.data
   },
 
   createAmendment: async (contractId: string, data: CreateAmendmentRequest) => {
-    const res = await api.post<ApiResponse<AmendmentDetailResponse>>(
-      `/api/contracts/${contractId}/amendments`,
-      data
-    )
+    const res = await api.post<ApiResponse<AmendmentDetailResponse>>(`/api/contracts/${contractId}/amendments`, data)
     return res.data
   },
 }

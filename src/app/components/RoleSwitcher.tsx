@@ -36,7 +36,10 @@ export default function RoleSwitcher() {
           {roles.map((r) => (
             <button
               key={r}
-              onClick={() => { switchRole(r); setOpen(false) }}
+              onClick={() => {
+                switchRole(r)
+                setOpen(false)
+              }}
               className={`w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-gray-50 ${r === current ? 'text-blue-600 font-medium' : 'text-gray-700'}`}
             >
               {ROLE_LABEL[r] || r}

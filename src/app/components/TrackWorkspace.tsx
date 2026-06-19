@@ -127,9 +127,7 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
           </button>
           <div>
             <h2 className="text-2xl font-bold text-gray-800">{cycle.name}</h2>
-            <p className="text-gray-500 mt-1">
-              Năm học {cycle.academicYear} · Quản lý các Track (lĩnh vực)
-            </p>
+            <p className="text-gray-500 mt-1">Năm học {cycle.academicYear} · Quản lý các Track (lĩnh vực)</p>
           </div>
         </div>
         <Button onClick={() => handleOpenModal()}>
@@ -167,9 +165,7 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
                         </div>
                         <div>
                           <p className="font-medium text-gray-800">{track.name}</p>
-                          {track.description && (
-                            <p className="text-sm text-gray-500">{track.description}</p>
-                          )}
+                          {track.description && <p className="text-sm text-gray-500">{track.description}</p>}
                         </div>
                       </div>
                     </td>
@@ -234,24 +230,43 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
           title={editingTrack ? 'Chỉnh sửa track' : 'Thêm track mới'}
           onClose={() => setShowModal(false)}
           className="max-w-lg"
-          footer={<>
-            <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? 'Đang lưu...' : editingTrack ? 'Cập nhật' : 'Thêm mới'}</Button>
-          </>}
+          footer={
+            <>
+              <Button variant="outline" onClick={() => setShowModal(false)}>
+                Hủy
+              </Button>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? 'Đang lưu...' : editingTrack ? 'Cập nhật' : 'Thêm mới'}
+              </Button>
+            </>
+          }
         >
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Tên track *</label>
-            <Input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="vd: Công nghệ thông tin" />
+            <Input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="vd: Công nghệ thông tin"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
-            <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} />
+            <Textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={3}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Người phụ trách</label>
             <Select value={formData.ownerId} onChange={(e) => setFormData({ ...formData, ownerId: e.target.value })}>
               <option value="">— Chưa gán —</option>
-              {users.map((u) => (<option key={u.id} value={u.id}>{u.fullName}</option>))}
+              {users.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.fullName}
+                </option>
+              ))}
             </Select>
           </div>
           {formError && (

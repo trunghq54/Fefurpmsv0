@@ -4,8 +4,12 @@ import { meetingService } from '../../services/meetingService'
 import type { MeetingDto } from '../../types/meeting'
 
 const ROUND_LABEL: Record<string, string> = {
-  SCREENING: 'Sàng lọc', REVIEW: 'Xét duyệt', ACCEPTANCE: 'Nghiệm thu',
-  ProposalReview: 'Xét duyệt', ProgressCheck: 'Kiểm tra tiến độ', Acceptance: 'Nghiệm thu',
+  SCREENING: 'Sàng lọc',
+  REVIEW: 'Xét duyệt',
+  ACCEPTANCE: 'Nghiệm thu',
+  ProposalReview: 'Xét duyệt',
+  ProgressCheck: 'Kiểm tra tiến độ',
+  Acceptance: 'Nghiệm thu',
 }
 
 export default function MeetingsOverview() {
@@ -33,8 +37,8 @@ export default function MeetingsOverview() {
       <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
         <Info className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
         <p className="text-sm text-blue-800">
-          Để đặt lịch họp mới: vào <strong>Đề xuất &amp; Phân công</strong> → mở một đề xuất →
-          mục <strong>Vòng phản biện</strong> → <strong>Đặt lịch</strong>. Cuộc họp gắn với từng vòng và sẽ hiện ở đây.
+          Để đặt lịch họp mới: vào <strong>Đề xuất &amp; Phân công</strong> → mở một đề xuất → mục{' '}
+          <strong>Vòng phản biện</strong> → <strong>Đặt lịch</strong>. Cuộc họp gắn với từng vòng và sẽ hiện ở đây.
         </p>
       </div>
 
@@ -89,7 +93,9 @@ export default function MeetingsOverview() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-gray-600">
                           <Calendar className="w-4 h-4" />
-                          <span className={past ? 'text-gray-400' : ''}>{new Date(m.scheduledAt).toLocaleString('vi-VN')}</span>
+                          <span className={past ? 'text-gray-400' : ''}>
+                            {new Date(m.scheduledAt).toLocaleString('vi-VN')}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1 text-xs text-gray-400 mt-0.5">
                           <Clock className="w-3 h-3" /> {m.durationMinutes} phút
@@ -100,8 +106,12 @@ export default function MeetingsOverview() {
                       </td>
                       <td className="px-6 py-4">
                         {m.meetingLink ? (
-                          <a href={m.meetingLink} target="_blank" rel="noreferrer"
-                            className="flex items-center gap-1 text-blue-600 hover:underline font-medium">
+                          <a
+                            href={m.meetingLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
+                          >
                             <Video className="w-4 h-4" /> Tham gia <ExternalLink className="w-3 h-3" />
                           </a>
                         ) : (

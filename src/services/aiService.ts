@@ -17,11 +17,16 @@ export const aiService = {
     return res.data
   },
   aiFeedback: async (assignmentId: string, criterionName: string, maxScore: number) => {
-    const res = await api.post<ApiResponse<{ feedbackDraft: string }>>(`/api/assignments/${assignmentId}/ai-feedback`, { criterionName, maxScore })
+    const res = await api.post<ApiResponse<{ feedbackDraft: string }>>(`/api/assignments/${assignmentId}/ai-feedback`, {
+      criterionName,
+      maxScore,
+    })
     return res.data
   },
   aiRubricAssessment: async (assignmentId: string) => {
-    const res = await api.post<ApiResponse<{ assessment: string }>>(`/api/assignments/${assignmentId}/ai-rubric-assessment`)
+    const res = await api.post<ApiResponse<{ assessment: string }>>(
+      `/api/assignments/${assignmentId}/ai-rubric-assessment`,
+    )
     return res.data
   },
   search: async (q: string) => {

@@ -34,5 +34,8 @@ export interface UpdateUserRequest {
 // Backend Role.Id values (NOT zero-based) — must match seeded roles in DatabaseSeeder
 export const ROLE_VALUE = { Admin: 1, Staff: 2, Faculty: 3, ReviewCommittee: 4 } as const
 export const ROLE_LABEL: Record<string, string> = {
-  Admin: 'Quản trị', Staff: 'Phòng QLKH', Faculty: 'Giảng viên', ReviewCommittee: 'Hội đồng',
+  Admin: 'Quản trị',
+  Staff: 'Phòng QLKH',
+  Faculty: 'Giảng viên',
+  ReviewCommittee: 'Hội đồng',
 }

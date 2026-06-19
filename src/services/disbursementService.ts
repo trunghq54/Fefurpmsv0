@@ -4,10 +4,7 @@ import type { DisbursementResponse, ConfirmDisbursementRequest } from '../types/
 
 export const disbursementService = {
   confirm: async (id: number, data: ConfirmDisbursementRequest) => {
-    const res = await api.post<ApiResponse<DisbursementResponse>>(
-      `/api/disbursements/${id}/confirm`,
-      data
-    )
+    const res = await api.post<ApiResponse<DisbursementResponse>>(`/api/disbursements/${id}/confirm`, data)
     return res.data
   },
 }

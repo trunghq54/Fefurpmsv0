@@ -13,10 +13,13 @@ export default function CycleSelection({ onSelect }: { onSelect: (cycle: CycleDt
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    cycleService.getAll().then((res) => {
-      if (res.success && res.data) setCycles(res.data.filter((c) => c.status === 'Open' || c.status === 'OPEN'))
-      setLoading(false)
-    }).catch(() => setLoading(false))
+    cycleService
+      .getAll()
+      .then((res) => {
+        if (res.success && res.data) setCycles(res.data.filter((c) => c.status === 'Open' || c.status === 'OPEN'))
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   if (loading) return <Spinner text="Đang tải đợt nộp..." />
@@ -39,7 +42,9 @@ export default function CycleSelection({ onSelect }: { onSelect: (cycle: CycleDt
                   <CalendarRange className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800">{c.name} <span className="text-gray-400 font-normal">· Năm học {c.academicYear}</span></h3>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {c.name} <span className="text-gray-400 font-normal">· Năm học {c.academicYear}</span>
+                  </h3>
                   <p className="text-sm text-gray-600 mt-1">
                     Cửa sổ nộp: <b>{fmtDate(c.submissionStartDate)}</b> – <b>{fmtDate(c.submissionEndDateApplied)}</b>
                   </p>

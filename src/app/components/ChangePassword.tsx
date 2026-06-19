@@ -17,8 +17,14 @@ export default function ChangePassword() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (next !== confirm) { setError('Mật khẩu xác nhận không khớp'); return }
-    if (next.length < 8) { setError('Mật khẩu mới tối thiểu 8 ký tự'); return }
+    if (next !== confirm) {
+      setError('Mật khẩu xác nhận không khớp')
+      return
+    }
+    if (next.length < 8) {
+      setError('Mật khẩu mới tối thiểu 8 ký tự')
+      return
+    }
     setSaving(true)
     try {
       await authService.changePassword(current, next, confirm)
@@ -46,23 +52,46 @@ export default function ChangePassword() {
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu hiện tại</label>
-            <Input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} required className="px-4 py-2.5" />
+            <Input
+              type="password"
+              value={current}
+              onChange={(e) => setCurrent(e.target.value)}
+              required
+              className="px-4 py-2.5"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu mới</label>
-            <Input type="password" value={next} onChange={(e) => setNext(e.target.value)} required className="px-4 py-2.5" />
+            <Input
+              type="password"
+              value={next}
+              onChange={(e) => setNext(e.target.value)}
+              required
+              className="px-4 py-2.5"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Xác nhận mật khẩu mới</label>
-            <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required className="px-4 py-2.5" />
+            <Input
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+              className="px-4 py-2.5"
+            />
           </div>
-          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
+          )}
           <Button type="submit" disabled={saving} className="w-full py-2.5 font-semibold">
             {saving ? 'Đang lưu...' : 'Đổi mật khẩu'}
           </Button>
         </form>
 
-        <button onClick={logout} className="mt-4 w-full inline-flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-red-600">
+        <button
+          onClick={logout}
+          className="mt-4 w-full inline-flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-red-600"
+        >
           <LogOut className="w-4 h-4" /> Đăng xuất
         </button>
       </div>

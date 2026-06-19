@@ -11,7 +11,7 @@ interface BeCouncilMember {
   reviewerEmail?: string
   memberRole: string
   isExternal: boolean
-  status: string  // INVITED | CONFIRMED | DECLINED
+  status: string // INVITED | CONFIRMED | DECLINED
   invitationSentAt?: string
   confirmedAt?: string
   declinedAt?: string
@@ -40,7 +40,7 @@ interface BeMyMembership {
   roundType: string
   roundStatus: string
   memberRole: string
-  status: string  // INVITED | CONFIRMED | DECLINED
+  status: string // INVITED | CONFIRMED | DECLINED
   proposalId: string
   proposalTitleVI: string
   proposalStatus: string

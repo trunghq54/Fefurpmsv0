@@ -34,11 +34,18 @@ export default function RoundMeetings({ roundId, councilId }: { roundId: string;
     setBusy(true)
     try {
       const res = await meetingService.create(id, {
-        title, platform, scheduledAt: toIso(scheduledAt), durationMinutes: duration, meetingLink: link || undefined,
+        title,
+        platform,
+        scheduledAt: toIso(scheduledAt),
+        durationMinutes: duration,
+        meetingLink: link || undefined,
       })
       if (res.success && res.data) {
         setMeetings((prev) => [...prev, res.data!])
-        setTitle(''); setScheduledAt(''); setLink(''); setShowForm(false)
+        setTitle('')
+        setScheduledAt('')
+        setLink('')
+        setShowForm(false)
       }
     } finally {
       setBusy(false)
@@ -48,8 +55,13 @@ export default function RoundMeetings({ roundId, councilId }: { roundId: string;
   return (
     <div className="mt-3 pt-3 border-t border-gray-100">
       <div className="flex items-center justify-between mb-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-gray-600"><Video className="w-4 h-4" /> Lịch họp ({meetings.length})</span>
-        <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800">
+        <span className="flex items-center gap-2 text-sm font-medium text-gray-600">
+          <Video className="w-4 h-4" /> Lịch họp ({meetings.length})
+        </span>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+        >
           <Plus className="w-4 h-4" /> Đặt lịch
         </button>
       </div>
@@ -59,10 +71,17 @@ export default function RoundMeetings({ roundId, councilId }: { roundId: string;
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-indigo-500" />
             <span className="text-gray-800 font-medium">{m.title || m.agenda || 'Họp hội đồng'}</span>
-            <span className="text-gray-500">· {new Date(m.scheduledAt).toLocaleString('vi-VN')} · {PLATFORM_LABEL[m.platform] ?? m.platform}</span>
+            <span className="text-gray-500">
+              · {new Date(m.scheduledAt).toLocaleString('vi-VN')} · {PLATFORM_LABEL[m.platform] ?? m.platform}
+            </span>
           </div>
           {m.meetingLink && (
-            <a href={m.meetingLink} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-indigo-600 hover:underline">
+            <a
+              href={m.meetingLink}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1 text-indigo-600 hover:underline"
+            >
               Link <ExternalLink className="w-3 h-3" />
             </a>
           )}
@@ -71,19 +90,38 @@ export default function RoundMeetings({ roundId, councilId }: { roundId: string;
 
       {showForm && (
         <div className="grid md:grid-cols-2 gap-2 mt-2 bg-gray-50 rounded-lg p-3">
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Tiêu đề cuộc họp *" className="py-1.5" />
-          <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} className="py-1.5" />
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Tiêu đề cuộc họp *"
+            className="py-1.5"
+          />
+          <Input
+            type="datetime-local"
+            value={scheduledAt}
+            onChange={(e) => setScheduledAt(e.target.value)}
+            className="py-1.5"
+          />
           <Select value={platform} onChange={(e) => setPlatform(e.target.value)} className="py-1.5">
             <option value="GOOGLE_MEET">Google Meet</option>
             <option value="TEAMS">Teams</option>
             <option value="IN_PERSON">Trực tiếp</option>
           </Select>
           <div className="flex gap-1">
-            <Input value={link} onChange={(e) => setLink(e.target.value)} placeholder="Dán link họp vào đây" className="flex-1 py-1.5" />
+            <Input
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+              placeholder="Dán link họp vào đây"
+              className="flex-1 py-1.5"
+            />
             {platform === 'GOOGLE_MEET' && (
-              <a href="https://meet.google.com/new" target="_blank" rel="noreferrer"
+              <a
+                href="https://meet.google.com/new"
+                target="_blank"
+                rel="noreferrer"
                 title="Tạo Google Meet mới rồi sao chép link dán vào ô bên trái"
-                className="px-2 py-1.5 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap flex items-center gap-1">
+                className="px-2 py-1.5 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap flex items-center gap-1"
+              >
                 <Video className="w-3 h-3" /> Tạo Meet
               </a>
             )}

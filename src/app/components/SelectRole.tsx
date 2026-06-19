@@ -4,7 +4,10 @@ import type { RoleName } from '../../types/auth'
 import { ROLE_LABEL } from '../../types/user'
 
 const ROLE_ICON: Record<string, any> = {
-  Admin: ShieldCheck, Staff: Briefcase, Faculty: GraduationCap, ReviewCommittee: Gavel,
+  Admin: ShieldCheck,
+  Staff: Briefcase,
+  Faculty: GraduationCap,
+  ReviewCommittee: Gavel,
 }
 const ROLE_DESC: Record<string, string> = {
   Admin: 'Quản trị hệ thống, người dùng, đợt nộp',

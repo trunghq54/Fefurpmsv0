@@ -52,17 +52,29 @@ export default function ChangeRequestQueue() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <FileEdit className="w-5 h-5 text-blue-500" />
-                    <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-sm">{CHANGE_TYPE_LABEL[cr.type] || cr.type}</span>
+                    <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-sm">
+                      {CHANGE_TYPE_LABEL[cr.type] || cr.type}
+                    </span>
                   </div>
                   <h3 className="font-semibold text-gray-800">{cr.proposalTitleVI}</h3>
                   <p className="text-sm text-gray-600 mt-1">{cr.description}</p>
-                  {cr.newValue && <p className="text-sm text-gray-500 mt-1">Giá trị mới: <b>{cr.newValue}</b></p>}
-                  <p className="text-xs text-gray-400 mt-1">Yêu cầu: {new Date(cr.requestedAt).toLocaleString('vi-VN')}</p>
+                  {cr.newValue && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Giá trị mới: <b>{cr.newValue}</b>
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-1">
+                    Yêu cầu: {new Date(cr.requestedAt).toLocaleString('vi-VN')}
+                  </p>
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Input value={notes[cr.id] || ''} onChange={(e) => setNotes({ ...notes, [cr.id]: e.target.value })}
-                  placeholder="Ghi chú của admin (tùy chọn)" className="flex-1 min-w-[220px] py-1.5" />
+                <Input
+                  value={notes[cr.id] || ''}
+                  onChange={(e) => setNotes({ ...notes, [cr.id]: e.target.value })}
+                  placeholder="Ghi chú của admin (tùy chọn)"
+                  className="flex-1 min-w-[220px] py-1.5"
+                />
                 <Button variant="success" size="sm" onClick={() => review(cr.id, true)} disabled={busy === cr.id}>
                   <Check className="w-4 h-4" /> Duyệt
                 </Button>

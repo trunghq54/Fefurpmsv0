@@ -5,7 +5,12 @@ import { disbursementService } from '../../services/disbursementService'
 import { deliverableService } from '../../services/deliverableService'
 import { amendmentService } from '../../services/amendmentService'
 import { progressReportService } from '../../services/progressReportService'
-import type { ProgressReportSummaryDto, ProgressReportDto, CreateProgressReportRequest, EvaluateProgressReportRequest } from '../../services/progressReportService'
+import type {
+  ProgressReportSummaryDto,
+  ProgressReportDto,
+  CreateProgressReportRequest,
+  EvaluateProgressReportRequest,
+} from '../../services/progressReportService'
 import { finalReportService } from '../../services/finalReportService'
 import type { FinalReportDto, SubmitFinalReportRequest } from '../../services/finalReportService'
 import { settlementService } from '../../services/settlementService'
@@ -86,7 +91,9 @@ function DisbursementsTab({
     }
   }, [contractId])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   const handleGenerate = async () => {
     await contractService.generateDisbursements(contractId)
@@ -133,8 +140,12 @@ function DisbursementsTab({
                   <td className="px-3 py-2">{d.percentage}%</td>
                   <td className="px-3 py-2">{fmtMoney(d.plannedAmount)}</td>
                   <td className="px-3 py-2">{d.actualAmount != null ? fmtMoney(d.actualAmount) : '—'}</td>
-                  <td className="px-3 py-2 max-w-xs truncate" title={d.conditionDescription}>{d.conditionDescription}</td>
-                  <td className="px-3 py-2"><StatusBadge status={d.status} /></td>
+                  <td className="px-3 py-2 max-w-xs truncate" title={d.conditionDescription}>
+                    {d.conditionDescription}
+                  </td>
+                  <td className="px-3 py-2">
+                    <StatusBadge status={d.status} />
+                  </td>
                   {isStaff && (
                     <td className="px-3 py-2">
                       {d.status === 'PENDING' && d.conditionMetAt && (
@@ -164,23 +175,39 @@ function DisbursementsTab({
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Số tiền thực tế (VNĐ)</label>
-                <Input type="number" className="mt-1" value={confirmForm.actualAmount}
-                  onChange={(e) => setConfirmForm({ ...confirmForm, actualAmount: Number(e.target.value) })} />
+                <Input
+                  type="number"
+                  className="mt-1"
+                  value={confirmForm.actualAmount}
+                  onChange={(e) => setConfirmForm({ ...confirmForm, actualAmount: Number(e.target.value) })}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Mã tham chiếu ngân hàng</label>
-                <Input type="text" className="mt-1" value={confirmForm.bankReference}
-                  onChange={(e) => setConfirmForm({ ...confirmForm, bankReference: e.target.value })} />
+                <Input
+                  type="text"
+                  className="mt-1"
+                  value={confirmForm.bankReference}
+                  onChange={(e) => setConfirmForm({ ...confirmForm, bankReference: e.target.value })}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Ghi chú</label>
-                <Textarea className="mt-1" rows={2} value={confirmForm.notes ?? ''}
-                  onChange={(e) => setConfirmForm({ ...confirmForm, notes: e.target.value })} />
+                <Textarea
+                  className="mt-1"
+                  rows={2}
+                  value={confirmForm.notes ?? ''}
+                  onChange={(e) => setConfirmForm({ ...confirmForm, notes: e.target.value })}
+                />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <Button variant="outline" onClick={() => setConfirmTarget(null)}>Hủy</Button>
-              <Button variant="success" onClick={handleConfirm}>Xác nhận</Button>
+              <Button variant="outline" onClick={() => setConfirmTarget(null)}>
+                Hủy
+              </Button>
+              <Button variant="success" onClick={handleConfirm}>
+                Xác nhận
+              </Button>
             </div>
           </div>
         </div>
@@ -189,15 +216,7 @@ function DisbursementsTab({
   )
 }
 
-function DeliverablesTab({
-  contractId,
-  isStaff,
-  isPi,
-}: {
-  contractId: string
-  isStaff: boolean
-  isPi: boolean
-}) {
+function DeliverablesTab({ contractId, isStaff, isPi }: { contractId: string; isStaff: boolean; isPi: boolean }) {
   const [items, setItems] = useState<DeliverableResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [submitTarget, setSubmitTarget] = useState<number | null>(null)
@@ -215,7 +234,9 @@ function DeliverablesTab({
     }
   }, [contractId])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   const handleSubmit = async () => {
     if (submitTarget == null) return
@@ -252,7 +273,10 @@ function DeliverablesTab({
               {d.acceptanceStatus && <StatusBadge status={d.acceptanceStatus} />}
               {!d.submittedAt && isPi && (
                 <button
-                  onClick={() => { setSubmitTarget(d.id); setSubmitForm({ fileUrl: '' }) }}
+                  onClick={() => {
+                    setSubmitTarget(d.id)
+                    setSubmitForm({ fileUrl: '' })
+                  }}
                   className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
                   Nộp sản phẩm
@@ -260,7 +284,10 @@ function DeliverablesTab({
               )}
               {d.submittedAt && !d.acceptanceStatus && isStaff && (
                 <button
-                  onClick={() => { setEvalTarget(d.id); setEvalForm({ acceptanceStatus: 'PASSED' }) }}
+                  onClick={() => {
+                    setEvalTarget(d.id)
+                    setEvalForm({ acceptanceStatus: 'PASSED' })
+                  }}
                   className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
                 >
                   Đánh giá
@@ -278,17 +305,28 @@ function DeliverablesTab({
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">URL file sản phẩm</label>
-                <Input type="text" className="mt-1" value={submitForm.fileUrl}
-                  onChange={(e) => setSubmitForm({ ...submitForm, fileUrl: e.target.value })} placeholder="https://..." />
+                <Input
+                  type="text"
+                  className="mt-1"
+                  value={submitForm.fileUrl}
+                  onChange={(e) => setSubmitForm({ ...submitForm, fileUrl: e.target.value })}
+                  placeholder="https://..."
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Mô tả</label>
-                <Textarea className="mt-1" rows={3} value={submitForm.description ?? ''}
-                  onChange={(e) => setSubmitForm({ ...submitForm, description: e.target.value })} />
+                <Textarea
+                  className="mt-1"
+                  rows={3}
+                  value={submitForm.description ?? ''}
+                  onChange={(e) => setSubmitForm({ ...submitForm, description: e.target.value })}
+                />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <Button variant="outline" onClick={() => setSubmitTarget(null)}>Hủy</Button>
+              <Button variant="outline" onClick={() => setSubmitTarget(null)}>
+                Hủy
+              </Button>
               <Button onClick={handleSubmit}>Nộp</Button>
             </div>
           </div>
@@ -302,21 +340,34 @@ function DeliverablesTab({
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Kết quả đánh giá</label>
-                <Select className="mt-1" value={evalForm.acceptanceStatus}
-                  onChange={(e) => setEvalForm({ ...evalForm, acceptanceStatus: e.target.value as 'PASSED' | 'FAILED' })}>
+                <Select
+                  className="mt-1"
+                  value={evalForm.acceptanceStatus}
+                  onChange={(e) =>
+                    setEvalForm({ ...evalForm, acceptanceStatus: e.target.value as 'PASSED' | 'FAILED' })
+                  }
+                >
                   <option value="PASSED">Đạt (PASSED)</option>
                   <option value="FAILED">Không đạt (FAILED)</option>
                 </Select>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Nhận xét chất lượng</label>
-                <Textarea className="mt-1" rows={3} value={evalForm.qualityAssessment ?? ''}
-                  onChange={(e) => setEvalForm({ ...evalForm, qualityAssessment: e.target.value })} />
+                <Textarea
+                  className="mt-1"
+                  rows={3}
+                  value={evalForm.qualityAssessment ?? ''}
+                  onChange={(e) => setEvalForm({ ...evalForm, qualityAssessment: e.target.value })}
+                />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <Button variant="outline" onClick={() => setEvalTarget(null)}>Hủy</Button>
-              <Button onClick={handleEvaluate} className="bg-purple-600 hover:bg-purple-700">Lưu đánh giá</Button>
+              <Button variant="outline" onClick={() => setEvalTarget(null)}>
+                Hủy
+              </Button>
+              <Button onClick={handleEvaluate} className="bg-purple-600 hover:bg-purple-700">
+                Lưu đánh giá
+              </Button>
             </div>
           </div>
         </div>
@@ -325,15 +376,7 @@ function DeliverablesTab({
   )
 }
 
-function AmendmentsTab({
-  contractId,
-  isStaff,
-  isPi,
-}: {
-  contractId: string
-  isStaff: boolean
-  isPi: boolean
-}) {
+function AmendmentsTab({ contractId, isStaff, isPi }: { contractId: string; isStaff: boolean; isPi: boolean }) {
   const [items, setItems] = useState<AmendmentListResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
@@ -356,7 +399,9 @@ function AmendmentsTab({
     }
   }, [contractId])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   const handleCreate = async () => {
     await contractService.createAmendment(contractId, createForm)
@@ -401,8 +446,16 @@ function AmendmentsTab({
                   </div>
                   {(a.oldValue || a.newValue) && (
                     <p className="text-xs text-gray-500 mt-1">
-                      {a.oldValue && <>Cũ: <span className="font-mono">{a.oldValue}</span>&nbsp;</>}
-                      {a.newValue && <>Mới: <span className="font-mono">{a.newValue}</span></>}
+                      {a.oldValue && (
+                        <>
+                          Cũ: <span className="font-mono">{a.oldValue}</span>&nbsp;
+                        </>
+                      )}
+                      {a.newValue && (
+                        <>
+                          Mới: <span className="font-mono">{a.newValue}</span>
+                        </>
+                      )}
                     </p>
                   )}
                 </div>
@@ -411,13 +464,23 @@ function AmendmentsTab({
                   {isStaff && a.status === 'PENDING' && (
                     <div className="flex gap-1">
                       <button
-                        onClick={() => { setReviewTarget({ id: a.id, action: 'approve' }); setReviewForm({ reviewerComments: '' }) }}
+                        onClick={() => {
+                          setReviewTarget({ id: a.id, action: 'approve' })
+                          setReviewForm({ reviewerComments: '' })
+                        }}
                         className="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                      >Duyệt</button>
+                      >
+                        Duyệt
+                      </button>
                       <button
-                        onClick={() => { setReviewTarget({ id: a.id, action: 'reject' }); setReviewForm({ reviewerComments: '' }) }}
+                        onClick={() => {
+                          setReviewTarget({ id: a.id, action: 'reject' })
+                          setReviewForm({ reviewerComments: '' })
+                        }}
                         className="text-xs px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                      >Từ chối</button>
+                      >
+                        Từ chối
+                      </button>
                     </div>
                   )}
                 </div>
@@ -434,29 +497,49 @@ function AmendmentsTab({
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">ID danh mục điều chỉnh</label>
-                <Input type="number" className="mt-1" value={createForm.categoryId}
-                  onChange={(e) => setCreateForm({ ...createForm, categoryId: Number(e.target.value) })} />
+                <Input
+                  type="number"
+                  className="mt-1"
+                  value={createForm.categoryId}
+                  onChange={(e) => setCreateForm({ ...createForm, categoryId: Number(e.target.value) })}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Mô tả thay đổi</label>
-                <Textarea className="mt-1" rows={3} value={createForm.changeDescription}
-                  onChange={(e) => setCreateForm({ ...createForm, changeDescription: e.target.value })} />
+                <Textarea
+                  className="mt-1"
+                  rows={3}
+                  value={createForm.changeDescription}
+                  onChange={(e) => setCreateForm({ ...createForm, changeDescription: e.target.value })}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Lý do</label>
-                <Textarea className="mt-1" rows={3} value={createForm.justification}
-                  onChange={(e) => setCreateForm({ ...createForm, justification: e.target.value })} />
+                <Textarea
+                  className="mt-1"
+                  rows={3}
+                  value={createForm.justification}
+                  onChange={(e) => setCreateForm({ ...createForm, justification: e.target.value })}
+                />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Giá trị cũ</label>
-                  <Input type="text" className="mt-1" value={createForm.oldValue ?? ''}
-                    onChange={(e) => setCreateForm({ ...createForm, oldValue: e.target.value })} />
+                  <Input
+                    type="text"
+                    className="mt-1"
+                    value={createForm.oldValue ?? ''}
+                    onChange={(e) => setCreateForm({ ...createForm, oldValue: e.target.value })}
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Giá trị mới</label>
-                  <Input type="text" className="mt-1" value={createForm.newValue ?? ''}
-                    onChange={(e) => setCreateForm({ ...createForm, newValue: e.target.value })} />
+                  <Input
+                    type="text"
+                    className="mt-1"
+                    value={createForm.newValue ?? ''}
+                    onChange={(e) => setCreateForm({ ...createForm, newValue: e.target.value })}
+                  />
                 </div>
               </div>
               <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -469,7 +552,9 @@ function AmendmentsTab({
               </label>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <Button variant="outline" onClick={() => setShowCreate(false)}>Hủy</Button>
+              <Button variant="outline" onClick={() => setShowCreate(false)}>
+                Hủy
+              </Button>
               <Button onClick={handleCreate}>Tạo yêu cầu</Button>
             </div>
           </div>
@@ -484,11 +569,17 @@ function AmendmentsTab({
             </h3>
             <div>
               <label className="text-sm font-medium text-gray-700">Nhận xét</label>
-              <Textarea className="mt-1" rows={3} value={reviewForm.reviewerComments ?? ''}
-                onChange={(e) => setReviewForm({ reviewerComments: e.target.value })} />
+              <Textarea
+                className="mt-1"
+                rows={3}
+                value={reviewForm.reviewerComments ?? ''}
+                onChange={(e) => setReviewForm({ reviewerComments: e.target.value })}
+              />
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <Button variant="outline" onClick={() => setReviewTarget(null)}>Hủy</Button>
+              <Button variant="outline" onClick={() => setReviewTarget(null)}>
+                Hủy
+              </Button>
               <Button variant={reviewTarget.action === 'approve' ? 'success' : 'danger'} onClick={handleReview}>
                 {reviewTarget.action === 'approve' ? 'Xác nhận duyệt' : 'Xác nhận từ chối'}
               </Button>
@@ -510,8 +601,12 @@ function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string;
   const [evalTarget, setEvalTarget] = useState<string | null>(null)
   const [evalForm, setEvalForm] = useState<EvaluateProgressReportRequest>({ evaluationResult: 'SATISFACTORY' })
   const [createForm, setCreateForm] = useState<CreateProgressReportRequest>({
-    reportingPeriodStart: '', reportingPeriodEnd: '', completedContent: '',
-    overallCompletionPct: 0, expenditureToDate: 0, items: [],
+    reportingPeriodStart: '',
+    reportingPeriodEnd: '',
+    completedContent: '',
+    overallCompletionPct: 0,
+    expenditureToDate: 0,
+    items: [],
   })
 
   const load = useCallback(async () => {
@@ -519,10 +614,14 @@ function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string;
     try {
       const r = await progressReportService.getByContract(contractId)
       if (r.success && r.data) setReports(r.data)
-    } finally { setLoading(false) }
+    } finally {
+      setLoading(false)
+    }
   }, [contractId])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   const openDetail = async (id: string) => {
     const r = await progressReportService.getById(id)
@@ -556,48 +655,97 @@ function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string;
   }
 
   const EVAL_LABEL: Record<string, string> = {
-    SATISFACTORY: 'Đạt yêu cầu', UNSATISFACTORY: 'Không đạt', NEEDS_IMPROVEMENT: 'Cần cải thiện',
+    SATISFACTORY: 'Đạt yêu cầu',
+    UNSATISFACTORY: 'Không đạt',
+    NEEDS_IMPROVEMENT: 'Cần cải thiện',
   }
   const evalColor: Record<string, string> = {
-    SATISFACTORY: 'bg-green-100 text-green-700', UNSATISFACTORY: 'bg-red-100 text-red-700',
+    SATISFACTORY: 'bg-green-100 text-green-700',
+    UNSATISFACTORY: 'bg-red-100 text-red-700',
     NEEDS_IMPROVEMENT: 'bg-yellow-100 text-yellow-700',
   }
 
   if (loading) return <p className="text-gray-400 py-4">Đang tải...</p>
 
-  if (detail) return (
-    <div className="space-y-4">
-      <button onClick={() => setDetail(null)} className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
-        <ChevronLeft size={14} /> Danh sách
-      </button>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-        <div><p className="text-gray-500">Kỳ báo cáo</p><p className="font-medium">{fmtDate(detail.reportingPeriodStart)} – {fmtDate(detail.reportingPeriodEnd)}</p></div>
-        <div><p className="text-gray-500">Hoàn thành</p><p className="font-bold text-blue-600">{detail.overallCompletionPct}%</p></div>
-        <div><p className="text-gray-500">Chi tiêu đến nay</p><p className="font-medium">{fmtMoney(detail.expenditureToDate)}</p></div>
-        <div><p className="text-gray-500">Trạng thái</p><StatusBadge status={detail.status} /></div>
-      </div>
-      <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-3">
-        <div><p className="font-medium text-gray-700 mb-1">Nội dung đã hoàn thành</p><p className="text-gray-600 whitespace-pre-wrap">{detail.completedContent}</p></div>
-        {detail.pendingContent && <div><p className="font-medium text-gray-700 mb-1">Nội dung chưa hoàn thành</p><p className="text-gray-600 whitespace-pre-wrap">{detail.pendingContent}</p></div>}
-        {detail.nextPeriodPlan && <div><p className="font-medium text-gray-700 mb-1">Kế hoạch kỳ tiếp</p><p className="text-gray-600 whitespace-pre-wrap">{detail.nextPeriodPlan}</p></div>}
-      </div>
-      {detail.evaluationResult && (
-        <div className="border rounded-lg p-4 text-sm">
-          <p className="font-medium text-gray-700 mb-2">Kết quả đánh giá</p>
-          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${evalColor[detail.evaluationResult] ?? 'bg-gray-100 text-gray-700'}`}>{EVAL_LABEL[detail.evaluationResult] ?? detail.evaluationResult}</span>
-          {detail.evaluationComments && <p className="text-gray-600 mt-2">{detail.evaluationComments}</p>}
+  if (detail)
+    return (
+      <div className="space-y-4">
+        <button
+          onClick={() => setDetail(null)}
+          className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
+        >
+          <ChevronLeft size={14} /> Danh sách
+        </button>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+          <div>
+            <p className="text-gray-500">Kỳ báo cáo</p>
+            <p className="font-medium">
+              {fmtDate(detail.reportingPeriodStart)} – {fmtDate(detail.reportingPeriodEnd)}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-500">Hoàn thành</p>
+            <p className="font-bold text-blue-600">{detail.overallCompletionPct}%</p>
+          </div>
+          <div>
+            <p className="text-gray-500">Chi tiêu đến nay</p>
+            <p className="font-medium">{fmtMoney(detail.expenditureToDate)}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">Trạng thái</p>
+            <StatusBadge status={detail.status} />
+          </div>
         </div>
-      )}
-      <div className="flex gap-2">
-        {isPi && detail.status === 'DRAFT' && (
-          <Button size="sm" onClick={() => handleSubmit(detail.id)}>Nộp báo cáo</Button>
+        <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-3">
+          <div>
+            <p className="font-medium text-gray-700 mb-1">Nội dung đã hoàn thành</p>
+            <p className="text-gray-600 whitespace-pre-wrap">{detail.completedContent}</p>
+          </div>
+          {detail.pendingContent && (
+            <div>
+              <p className="font-medium text-gray-700 mb-1">Nội dung chưa hoàn thành</p>
+              <p className="text-gray-600 whitespace-pre-wrap">{detail.pendingContent}</p>
+            </div>
+          )}
+          {detail.nextPeriodPlan && (
+            <div>
+              <p className="font-medium text-gray-700 mb-1">Kế hoạch kỳ tiếp</p>
+              <p className="text-gray-600 whitespace-pre-wrap">{detail.nextPeriodPlan}</p>
+            </div>
+          )}
+        </div>
+        {detail.evaluationResult && (
+          <div className="border rounded-lg p-4 text-sm">
+            <p className="font-medium text-gray-700 mb-2">Kết quả đánh giá</p>
+            <span
+              className={`px-2 py-0.5 rounded-full text-xs font-medium ${evalColor[detail.evaluationResult] ?? 'bg-gray-100 text-gray-700'}`}
+            >
+              {EVAL_LABEL[detail.evaluationResult] ?? detail.evaluationResult}
+            </span>
+            {detail.evaluationComments && <p className="text-gray-600 mt-2">{detail.evaluationComments}</p>}
+          </div>
         )}
-        {isStaff && detail.status === 'SUBMITTED' && (
-          <Button size="sm" onClick={() => { setEvalTarget(detail.id); setEvalForm({ evaluationResult: 'SATISFACTORY' }) }} className="bg-purple-600 hover:bg-purple-700">Đánh giá</Button>
-        )}
+        <div className="flex gap-2">
+          {isPi && detail.status === 'DRAFT' && (
+            <Button size="sm" onClick={() => handleSubmit(detail.id)}>
+              Nộp báo cáo
+            </Button>
+          )}
+          {isStaff && detail.status === 'SUBMITTED' && (
+            <Button
+              size="sm"
+              onClick={() => {
+                setEvalTarget(detail.id)
+                setEvalForm({ evaluationResult: 'SATISFACTORY' })
+              }}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Đánh giá
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
-  )
+    )
 
   return (
     <div className="space-y-4">
@@ -613,19 +761,38 @@ function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string;
           {reports.map((r) => (
             <div key={r.id} className="border rounded-lg p-4 flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-800">Kỳ {r.reportRound}: {fmtDate(r.reportingPeriodStart)} – {fmtDate(r.reportingPeriodEnd)}</p>
+                <p className="font-medium text-gray-800">
+                  Kỳ {r.reportRound}: {fmtDate(r.reportingPeriodStart)} – {fmtDate(r.reportingPeriodEnd)}
+                </p>
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                  <span>Hoàn thành: <b>{r.overallCompletionPct}%</b></span>
+                  <span>
+                    Hoàn thành: <b>{r.overallCompletionPct}%</b>
+                  </span>
                   <StatusBadge status={r.status} />
                 </div>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => openDetail(r.id)} className="text-xs px-2 py-1 border rounded hover:bg-gray-50">Chi tiết</button>
+                <button onClick={() => openDetail(r.id)} className="text-xs px-2 py-1 border rounded hover:bg-gray-50">
+                  Chi tiết
+                </button>
                 {isPi && r.status === 'DRAFT' && (
-                  <button onClick={() => handleSubmit(r.id)} className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Nộp</button>
+                  <button
+                    onClick={() => handleSubmit(r.id)}
+                    className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Nộp
+                  </button>
                 )}
                 {isStaff && r.status === 'SUBMITTED' && (
-                  <button onClick={() => { setEvalTarget(r.id); setEvalForm({ evaluationResult: 'SATISFACTORY' }) }} className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700">Đánh giá</button>
+                  <button
+                    onClick={() => {
+                      setEvalTarget(r.id)
+                      setEvalForm({ evaluationResult: 'SATISFACTORY' })
+                    }}
+                    className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+                  >
+                    Đánh giá
+                  </button>
                 )}
               </div>
             </div>
@@ -641,45 +808,77 @@ function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string;
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Từ ngày</label>
-                  <Input type="date" className="mt-1" value={createForm.reportingPeriodStart}
-                    onChange={(e) => setCreateForm({ ...createForm, reportingPeriodStart: e.target.value })} />
+                  <Input
+                    type="date"
+                    className="mt-1"
+                    value={createForm.reportingPeriodStart}
+                    onChange={(e) => setCreateForm({ ...createForm, reportingPeriodStart: e.target.value })}
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Đến ngày</label>
-                  <Input type="date" className="mt-1" value={createForm.reportingPeriodEnd}
-                    onChange={(e) => setCreateForm({ ...createForm, reportingPeriodEnd: e.target.value })} />
+                  <Input
+                    type="date"
+                    className="mt-1"
+                    value={createForm.reportingPeriodEnd}
+                    onChange={(e) => setCreateForm({ ...createForm, reportingPeriodEnd: e.target.value })}
+                  />
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Nội dung đã hoàn thành *</label>
-                <Textarea rows={3} className="mt-1" value={createForm.completedContent}
-                  onChange={(e) => setCreateForm({ ...createForm, completedContent: e.target.value })} />
+                <Textarea
+                  rows={3}
+                  className="mt-1"
+                  value={createForm.completedContent}
+                  onChange={(e) => setCreateForm({ ...createForm, completedContent: e.target.value })}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Nội dung chưa hoàn thành</label>
-                <Textarea rows={2} className="mt-1" value={createForm.pendingContent ?? ''}
-                  onChange={(e) => setCreateForm({ ...createForm, pendingContent: e.target.value })} />
+                <Textarea
+                  rows={2}
+                  className="mt-1"
+                  value={createForm.pendingContent ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, pendingContent: e.target.value })}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Kế hoạch kỳ tiếp</label>
-                <Textarea rows={2} className="mt-1" value={createForm.nextPeriodPlan ?? ''}
-                  onChange={(e) => setCreateForm({ ...createForm, nextPeriodPlan: e.target.value })} />
+                <Textarea
+                  rows={2}
+                  className="mt-1"
+                  value={createForm.nextPeriodPlan ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, nextPeriodPlan: e.target.value })}
+                />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Tiến độ tổng thể (%)</label>
-                  <Input type="number" min={0} max={100} className="mt-1" value={createForm.overallCompletionPct}
-                    onChange={(e) => setCreateForm({ ...createForm, overallCompletionPct: Number(e.target.value) })} />
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    className="mt-1"
+                    value={createForm.overallCompletionPct}
+                    onChange={(e) => setCreateForm({ ...createForm, overallCompletionPct: Number(e.target.value) })}
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Chi tiêu đến nay (₫)</label>
-                  <Input type="number" className="mt-1" value={createForm.expenditureToDate}
-                    onChange={(e) => setCreateForm({ ...createForm, expenditureToDate: Number(e.target.value) })} />
+                  <Input
+                    type="number"
+                    className="mt-1"
+                    value={createForm.expenditureToDate}
+                    onChange={(e) => setCreateForm({ ...createForm, expenditureToDate: Number(e.target.value) })}
+                  />
                 </div>
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <Button variant="outline" onClick={() => setShowCreate(false)}>Hủy</Button>
+              <Button variant="outline" onClick={() => setShowCreate(false)}>
+                Hủy
+              </Button>
               <Button onClick={handleCreate}>Tạo báo cáo</Button>
             </div>
           </div>
@@ -693,8 +892,16 @@ function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string;
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Kết quả đánh giá</label>
-                <Select className="mt-1" value={evalForm.evaluationResult}
-                  onChange={(e) => setEvalForm({ ...evalForm, evaluationResult: e.target.value as EvaluateProgressReportRequest['evaluationResult'] })}>
+                <Select
+                  className="mt-1"
+                  value={evalForm.evaluationResult}
+                  onChange={(e) =>
+                    setEvalForm({
+                      ...evalForm,
+                      evaluationResult: e.target.value as EvaluateProgressReportRequest['evaluationResult'],
+                    })
+                  }
+                >
                   <option value="SATISFACTORY">Đạt yêu cầu</option>
                   <option value="UNSATISFACTORY">Không đạt</option>
                   <option value="NEEDS_IMPROVEMENT">Cần cải thiện</option>
@@ -702,13 +909,21 @@ function ProgressReportsTab({ contractId, isStaff, isPi }: { contractId: string;
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Nhận xét</label>
-                <Textarea rows={3} className="mt-1" value={evalForm.evaluationComments ?? ''}
-                  onChange={(e) => setEvalForm({ ...evalForm, evaluationComments: e.target.value })} />
+                <Textarea
+                  rows={3}
+                  className="mt-1"
+                  value={evalForm.evaluationComments ?? ''}
+                  onChange={(e) => setEvalForm({ ...evalForm, evaluationComments: e.target.value })}
+                />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <Button variant="outline" onClick={() => setEvalTarget(null)}>Hủy</Button>
-              <Button onClick={handleEvaluate} className="bg-purple-600 hover:bg-purple-700">Lưu đánh giá</Button>
+              <Button variant="outline" onClick={() => setEvalTarget(null)}>
+                Hủy
+              </Button>
+              <Button onClick={handleEvaluate} className="bg-purple-600 hover:bg-purple-700">
+                Lưu đánh giá
+              </Button>
             </div>
           </div>
         </div>
@@ -732,10 +947,14 @@ function FinalReportTab({ contractId, isStaff, isPi }: { contractId: string; isS
     try {
       const r = await finalReportService.getByContract(contractId)
       setReport(r.success ? r.data : null)
-    } finally { setLoading(false) }
+    } finally {
+      setLoading(false)
+    }
   }, [contractId])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   const handleSubmit = async () => {
     await finalReportService.submit(contractId, submitForm)
@@ -765,8 +984,12 @@ function FinalReportTab({ contractId, isStaff, isPi }: { contractId: string; isS
   if (loading) return <p className="text-gray-400 py-4">Đang tải...</p>
 
   const STATUS_LABEL: Record<string, string> = {
-    NOT_SUBMITTED: 'Chưa nộp', SUBMITTED: 'Đã nộp', UNDER_REVIEW: 'Đang xét',
-    ACCEPTED: 'Chấp nhận', REVISION_REQUIRED: 'Yêu cầu chỉnh sửa', ARCHIVED: 'Đã lưu trữ',
+    NOT_SUBMITTED: 'Chưa nộp',
+    SUBMITTED: 'Đã nộp',
+    UNDER_REVIEW: 'Đang xét',
+    ACCEPTED: 'Chấp nhận',
+    REVISION_REQUIRED: 'Yêu cầu chỉnh sửa',
+    ARCHIVED: 'Đã lưu trữ',
   }
 
   return (
@@ -784,16 +1007,44 @@ function FinalReportTab({ contractId, isStaff, isPi }: { contractId: string; isS
       ) : (
         <div className="space-y-4">
           <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-            <div><p className="text-gray-500">Trạng thái</p><StatusBadge status={report.status} /></div>
-            <div><p className="text-gray-500">Ngôn ngữ</p><p className="font-medium">{report.language === 'vi' ? 'Tiếng Việt' : 'English'}</p></div>
-            {report.submittedAt && <div><p className="text-gray-500">Ngày nộp</p><p className="font-medium">{fmtDate(report.submittedAt)}</p></div>}
-            {report.deadline && <div><p className="text-gray-500">Hạn nộp</p><p className="font-medium">{fmtDate(report.deadline)}</p></div>}
-            {report.archivedAt && <div><p className="text-gray-500">Lưu trữ</p><p className="font-medium">{fmtDate(report.archivedAt)}</p></div>}
+            <div>
+              <p className="text-gray-500">Trạng thái</p>
+              <StatusBadge status={report.status} />
+            </div>
+            <div>
+              <p className="text-gray-500">Ngôn ngữ</p>
+              <p className="font-medium">{report.language === 'vi' ? 'Tiếng Việt' : 'English'}</p>
+            </div>
+            {report.submittedAt && (
+              <div>
+                <p className="text-gray-500">Ngày nộp</p>
+                <p className="font-medium">{fmtDate(report.submittedAt)}</p>
+              </div>
+            )}
+            {report.deadline && (
+              <div>
+                <p className="text-gray-500">Hạn nộp</p>
+                <p className="font-medium">{fmtDate(report.deadline)}</p>
+              </div>
+            )}
+            {report.archivedAt && (
+              <div>
+                <p className="text-gray-500">Lưu trữ</p>
+                <p className="font-medium">{fmtDate(report.archivedAt)}</p>
+              </div>
+            )}
           </div>
           {report.reportFileUrl && (
             <div className="border rounded-lg p-3 text-sm">
               <p className="text-gray-500 mb-1">File báo cáo</p>
-              <a href={report.reportFileUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all">{report.reportFileUrl}</a>
+              <a
+                href={report.reportFileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 hover:underline break-all"
+              >
+                {report.reportFileUrl}
+              </a>
             </div>
           )}
           {report.revisionNotes && (
@@ -810,12 +1061,18 @@ function FinalReportTab({ contractId, isStaff, isPi }: { contractId: string; isS
             )}
             {isStaff && report.status === 'SUBMITTED' && (
               <>
-                <Button variant="success" size="sm" onClick={handleAccept}>Chấp nhận</Button>
-                <Button size="sm" onClick={() => setShowRevision(true)} className="bg-yellow-500 hover:bg-yellow-600">Yêu cầu chỉnh sửa</Button>
+                <Button variant="success" size="sm" onClick={handleAccept}>
+                  Chấp nhận
+                </Button>
+                <Button size="sm" onClick={() => setShowRevision(true)} className="bg-yellow-500 hover:bg-yellow-600">
+                  Yêu cầu chỉnh sửa
+                </Button>
               </>
             )}
             {isStaff && report.status === 'ACCEPTED' && !report.archivedAt && (
-              <Button size="sm" onClick={handleArchive} className="bg-gray-600 hover:bg-gray-700">Lưu trữ</Button>
+              <Button size="sm" onClick={handleArchive} className="bg-gray-600 hover:bg-gray-700">
+                Lưu trữ
+              </Button>
             )}
           </div>
         </div>
@@ -828,25 +1085,40 @@ function FinalReportTab({ contractId, isStaff, isPi }: { contractId: string; isS
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">URL file báo cáo *</label>
-                <Input type="text" className="mt-1" value={submitForm.reportFileUrl} placeholder="https://..."
-                  onChange={(e) => setSubmitForm({ ...submitForm, reportFileUrl: e.target.value })} />
+                <Input
+                  type="text"
+                  className="mt-1"
+                  value={submitForm.reportFileUrl}
+                  placeholder="https://..."
+                  onChange={(e) => setSubmitForm({ ...submitForm, reportFileUrl: e.target.value })}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">URL tóm tắt (tùy chọn)</label>
-                <Input type="text" className="mt-1" value={submitForm.summaryFileUrl ?? ''} placeholder="https://..."
-                  onChange={(e) => setSubmitForm({ ...submitForm, summaryFileUrl: e.target.value })} />
+                <Input
+                  type="text"
+                  className="mt-1"
+                  value={submitForm.summaryFileUrl ?? ''}
+                  placeholder="https://..."
+                  onChange={(e) => setSubmitForm({ ...submitForm, summaryFileUrl: e.target.value })}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Ngôn ngữ báo cáo</label>
-                <Select className="mt-1" value={submitForm.language}
-                  onChange={(e) => setSubmitForm({ ...submitForm, language: e.target.value })}>
+                <Select
+                  className="mt-1"
+                  value={submitForm.language}
+                  onChange={(e) => setSubmitForm({ ...submitForm, language: e.target.value })}
+                >
                   <option value="vi">Tiếng Việt</option>
                   <option value="en">English</option>
                 </Select>
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <Button variant="outline" onClick={() => setShowSubmit(false)}>Hủy</Button>
+              <Button variant="outline" onClick={() => setShowSubmit(false)}>
+                Hủy
+              </Button>
               <Button onClick={handleSubmit}>Nộp</Button>
             </div>
           </div>
@@ -859,11 +1131,20 @@ function FinalReportTab({ contractId, isStaff, isPi }: { contractId: string; isS
             <h3 className="text-lg font-semibold mb-4">Yêu cầu chỉnh sửa</h3>
             <div>
               <label className="text-sm font-medium text-gray-700">Nội dung yêu cầu</label>
-              <Textarea rows={4} className="mt-1" value={revisionNotes} onChange={(e) => setRevisionNotes(e.target.value)} />
+              <Textarea
+                rows={4}
+                className="mt-1"
+                value={revisionNotes}
+                onChange={(e) => setRevisionNotes(e.target.value)}
+              />
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <Button variant="outline" onClick={() => setShowRevision(false)}>Hủy</Button>
-              <Button onClick={handleRevision} className="bg-yellow-500 hover:bg-yellow-600">Gửi yêu cầu</Button>
+              <Button variant="outline" onClick={() => setShowRevision(false)}>
+                Hủy
+              </Button>
+              <Button onClick={handleRevision} className="bg-yellow-500 hover:bg-yellow-600">
+                Gửi yêu cầu
+              </Button>
             </div>
           </div>
         </div>
@@ -879,7 +1160,9 @@ function SettlementTab({ contractId, isStaff }: { contractId: string; isStaff: b
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
   const [createForm, setCreateForm] = useState<CreateSettlementRequest>({
-    totalContractedAmount: 0, totalDisbursedAmount: 0, totalReturnedAmount: 0,
+    totalContractedAmount: 0,
+    totalDisbursedAmount: 0,
+    totalReturnedAmount: 0,
   })
   const [signeeId, setSigneeId] = useState('')
   const [clearedDate, setClearedDate] = useState('')
@@ -889,10 +1172,14 @@ function SettlementTab({ contractId, isStaff }: { contractId: string; isStaff: b
     try {
       const r = await settlementService.getByContract(contractId)
       setSettlement(r.success ? r.data : null)
-    } finally { setLoading(false) }
+    } finally {
+      setLoading(false)
+    }
   }, [contractId])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   const handleCreate = async () => {
     await settlementService.create(contractId, createForm)
@@ -935,11 +1222,30 @@ function SettlementTab({ contractId, isStaff }: { contractId: string; isStaff: b
       ) : (
         <div className="space-y-4">
           <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-            <div><p className="text-gray-500">Tổng HĐ</p><p className="font-semibold">{fmtMoney(settlement.totalContractedAmount)}</p></div>
-            <div><p className="text-gray-500">Đã giải ngân</p><p className="font-semibold">{fmtMoney(settlement.totalDisbursedAmount)}</p></div>
-            <div><p className="text-gray-500">Hoàn trả</p><p className="font-semibold text-orange-600">{fmtMoney(settlement.totalReturnedAmount)}</p></div>
-            {settlement.settlementDeadline && <div><p className="text-gray-500">Hạn thanh lý</p><p className="font-medium">{fmtDate(settlement.settlementDeadline)}</p></div>}
-            {settlement.sideASigneeName && <div><p className="text-gray-500">Người ký Bên A</p><p className="font-medium">{settlement.sideASigneeName}</p></div>}
+            <div>
+              <p className="text-gray-500">Tổng HĐ</p>
+              <p className="font-semibold">{fmtMoney(settlement.totalContractedAmount)}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Đã giải ngân</p>
+              <p className="font-semibold">{fmtMoney(settlement.totalDisbursedAmount)}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Hoàn trả</p>
+              <p className="font-semibold text-orange-600">{fmtMoney(settlement.totalReturnedAmount)}</p>
+            </div>
+            {settlement.settlementDeadline && (
+              <div>
+                <p className="text-gray-500">Hạn thanh lý</p>
+                <p className="font-medium">{fmtDate(settlement.settlementDeadline)}</p>
+              </div>
+            )}
+            {settlement.sideASigneeName && (
+              <div>
+                <p className="text-gray-500">Người ký Bên A</p>
+                <p className="font-medium">{settlement.sideASigneeName}</p>
+              </div>
+            )}
           </div>
 
           {settlement.productsSubmittedSummary && (
@@ -950,17 +1256,29 @@ function SettlementTab({ contractId, isStaff }: { contractId: string; isStaff: b
           )}
 
           <div className="grid grid-cols-3 gap-3 text-sm">
-            <div className={`border rounded-lg p-3 ${settlement.settlementSignedAt ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}>
+            <div
+              className={`border rounded-lg p-3 ${settlement.settlementSignedAt ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}
+            >
               <p className="text-gray-500 text-xs">Ký thanh lý</p>
-              <p className="font-medium mt-1">{settlement.settlementSignedAt ? fmtDate(settlement.settlementSignedAt) : '—'}</p>
+              <p className="font-medium mt-1">
+                {settlement.settlementSignedAt ? fmtDate(settlement.settlementSignedAt) : '—'}
+              </p>
             </div>
-            <div className={`border rounded-lg p-3 ${settlement.accountingClearedAt ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}>
+            <div
+              className={`border rounded-lg p-3 ${settlement.accountingClearedAt ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}
+            >
               <p className="text-gray-500 text-xs">Kế toán xác nhận</p>
-              <p className="font-medium mt-1">{settlement.accountingClearedAt ? fmtDate(settlement.accountingClearedAt) : '—'}</p>
+              <p className="font-medium mt-1">
+                {settlement.accountingClearedAt ? fmtDate(settlement.accountingClearedAt) : '—'}
+              </p>
             </div>
-            <div className={`border rounded-lg p-3 ${settlement.assetsClearedAt ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}>
+            <div
+              className={`border rounded-lg p-3 ${settlement.assetsClearedAt ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}
+            >
               <p className="text-gray-500 text-xs">Tài sản xác nhận</p>
-              <p className="font-medium mt-1">{settlement.assetsClearedAt ? fmtDate(settlement.assetsClearedAt) : '—'}</p>
+              <p className="font-medium mt-1">
+                {settlement.assetsClearedAt ? fmtDate(settlement.assetsClearedAt) : '—'}
+              </p>
             </div>
           </div>
 
@@ -971,23 +1289,42 @@ function SettlementTab({ contractId, isStaff }: { contractId: string; isStaff: b
                 <div className="flex gap-2 items-end">
                   <div className="flex-1">
                     <label className="text-xs text-gray-500">ID người ký Bên A (GUID)</label>
-                    <Input type="text" className="mt-1 py-1.5 font-mono" value={signeeId} placeholder="xxxxxxxx-xxxx-..."
-                      onChange={(e) => setSigneeId(e.target.value)} />
+                    <Input
+                      type="text"
+                      className="mt-1 py-1.5 font-mono"
+                      value={signeeId}
+                      placeholder="xxxxxxxx-xxxx-..."
+                      onChange={(e) => setSigneeId(e.target.value)}
+                    />
                   </div>
-                  <Button variant="success" onClick={handleSign} className="py-2 whitespace-nowrap">Ký thanh lý</Button>
+                  <Button variant="success" onClick={handleSign} className="py-2 whitespace-nowrap">
+                    Ký thanh lý
+                  </Button>
                 </div>
               )}
               {(!settlement.accountingClearedAt || !settlement.assetsClearedAt) && (
                 <div className="flex gap-2 items-end">
                   <div className="flex-1">
                     <label className="text-xs text-gray-500">Ngày xác nhận</label>
-                    <Input type="date" className="mt-1 py-1.5" value={clearedDate} onChange={(e) => setClearedDate(e.target.value)} />
+                    <Input
+                      type="date"
+                      className="mt-1 py-1.5"
+                      value={clearedDate}
+                      onChange={(e) => setClearedDate(e.target.value)}
+                    />
                   </div>
                   {!settlement.accountingClearedAt && (
-                    <Button onClick={handleAccountingCleared} className="py-2 whitespace-nowrap">Kế toán ✓</Button>
+                    <Button onClick={handleAccountingCleared} className="py-2 whitespace-nowrap">
+                      Kế toán ✓
+                    </Button>
                   )}
                   {!settlement.assetsClearedAt && (
-                    <Button onClick={handleAssetsCleared} className="py-2 whitespace-nowrap bg-purple-600 hover:bg-purple-700">Tài sản ✓</Button>
+                    <Button
+                      onClick={handleAssetsCleared}
+                      className="py-2 whitespace-nowrap bg-purple-600 hover:bg-purple-700"
+                    >
+                      Tài sản ✓
+                    </Button>
                   )}
                 </div>
               )}
@@ -1004,38 +1341,64 @@ function SettlementTab({ contractId, isStaff }: { contractId: string; isStaff: b
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Tổng HĐ (₫)</label>
-                  <Input type="number" className="mt-1" value={createForm.totalContractedAmount}
-                    onChange={(e) => setCreateForm({ ...createForm, totalContractedAmount: Number(e.target.value) })} />
+                  <Input
+                    type="number"
+                    className="mt-1"
+                    value={createForm.totalContractedAmount}
+                    onChange={(e) => setCreateForm({ ...createForm, totalContractedAmount: Number(e.target.value) })}
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Đã giải ngân (₫)</label>
-                  <Input type="number" className="mt-1" value={createForm.totalDisbursedAmount}
-                    onChange={(e) => setCreateForm({ ...createForm, totalDisbursedAmount: Number(e.target.value) })} />
+                  <Input
+                    type="number"
+                    className="mt-1"
+                    value={createForm.totalDisbursedAmount}
+                    onChange={(e) => setCreateForm({ ...createForm, totalDisbursedAmount: Number(e.target.value) })}
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Hoàn trả (₫)</label>
-                  <Input type="number" className="mt-1" value={createForm.totalReturnedAmount}
-                    onChange={(e) => setCreateForm({ ...createForm, totalReturnedAmount: Number(e.target.value) })} />
+                  <Input
+                    type="number"
+                    className="mt-1"
+                    value={createForm.totalReturnedAmount}
+                    onChange={(e) => setCreateForm({ ...createForm, totalReturnedAmount: Number(e.target.value) })}
+                  />
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Tóm tắt sản phẩm đã nộp</label>
-                <Textarea rows={2} className="mt-1" value={createForm.productsSubmittedSummary ?? ''}
-                  onChange={(e) => setCreateForm({ ...createForm, productsSubmittedSummary: e.target.value })} />
+                <Textarea
+                  rows={2}
+                  className="mt-1"
+                  value={createForm.productsSubmittedSummary ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, productsSubmittedSummary: e.target.value })}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Hạn thanh lý</label>
-                <Input type="date" className="mt-1" value={createForm.settlementDeadline ?? ''}
-                  onChange={(e) => setCreateForm({ ...createForm, settlementDeadline: e.target.value })} />
+                <Input
+                  type="date"
+                  className="mt-1"
+                  value={createForm.settlementDeadline ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, settlementDeadline: e.target.value })}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Ghi chú</label>
-                <Textarea rows={2} className="mt-1" value={createForm.notes ?? ''}
-                  onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })} />
+                <Textarea
+                  rows={2}
+                  className="mt-1"
+                  value={createForm.notes ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
+                />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <Button variant="outline" onClick={() => setShowCreate(false)}>Hủy</Button>
+              <Button variant="outline" onClick={() => setShowCreate(false)}>
+                Hủy
+              </Button>
               <Button onClick={handleCreate}>Tạo hồ sơ</Button>
             </div>
           </div>
@@ -1058,7 +1421,9 @@ function ContractDetail({
   isStaff: boolean
   isPi: boolean
 }) {
-  const [tab, setTab] = useState<'disbursements' | 'deliverables' | 'amendments' | 'progress' | 'final' | 'settlement'>('disbursements')
+  const [tab, setTab] = useState<'disbursements' | 'deliverables' | 'amendments' | 'progress' | 'final' | 'settlement'>(
+    'disbursements',
+  )
 
   const tabs = [
     { id: 'disbursements' as const, label: 'Giải ngân' },
@@ -1079,7 +1444,9 @@ function ContractDetail({
           <h2 className="text-xl font-bold text-gray-800">{contract.contractNumber}</h2>
           <p className="text-sm text-gray-500">{contract.proposalTitle}</p>
         </div>
-        <div className="ml-auto"><StatusBadge status={contract.status} /></div>
+        <div className="ml-auto">
+          <StatusBadge status={contract.status} />
+        </div>
       </div>
 
       <div className="bg-white border rounded-xl p-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -1108,9 +1475,7 @@ function ContractDetail({
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`px-5 py-3 text-sm font-medium transition-colors ${
-                tab === t.id
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-800'
+                tab === t.id ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-800'
               }`}
             >
               {t.label}
@@ -1121,21 +1486,11 @@ function ContractDetail({
           {tab === 'disbursements' && (
             <DisbursementsTab contractId={contract.id} isStaff={isStaff} contractStatus={contract.status} />
           )}
-          {tab === 'deliverables' && (
-            <DeliverablesTab contractId={contract.id} isStaff={isStaff} isPi={isPi} />
-          )}
-          {tab === 'amendments' && (
-            <AmendmentsTab contractId={contract.id} isStaff={isStaff} isPi={isPi} />
-          )}
-          {tab === 'progress' && (
-            <ProgressReportsTab contractId={contract.id} isStaff={isStaff} isPi={isPi} />
-          )}
-          {tab === 'final' && (
-            <FinalReportTab contractId={contract.id} isStaff={isStaff} isPi={isPi} />
-          )}
-          {tab === 'settlement' && (
-            <SettlementTab contractId={contract.id} isStaff={isStaff} />
-          )}
+          {tab === 'deliverables' && <DeliverablesTab contractId={contract.id} isStaff={isStaff} isPi={isPi} />}
+          {tab === 'amendments' && <AmendmentsTab contractId={contract.id} isStaff={isStaff} isPi={isPi} />}
+          {tab === 'progress' && <ProgressReportsTab contractId={contract.id} isStaff={isStaff} isPi={isPi} />}
+          {tab === 'final' && <FinalReportTab contractId={contract.id} isStaff={isStaff} isPi={isPi} />}
+          {tab === 'settlement' && <SettlementTab contractId={contract.id} isStaff={isStaff} />}
         </div>
       </div>
     </div>
@@ -1176,7 +1531,9 @@ export default function ContractManagement() {
     }
   }, [])
 
-  useEffect(() => { loadList() }, [loadList])
+  useEffect(() => {
+    loadList()
+  }, [loadList])
 
   const openDetail = async (id: string) => {
     setSelectedId(id)
@@ -1203,7 +1560,10 @@ export default function ContractManagement() {
     return (
       <ContractDetail
         contract={detail}
-        onBack={() => { setSelectedId(null); setDetail(null) }}
+        onBack={() => {
+          setSelectedId(null)
+          setDetail(null)
+        }}
         isStaff={isStaff}
         isPi={isPi}
       />
@@ -1218,11 +1578,7 @@ export default function ContractManagement() {
           <p className="text-sm text-gray-500 mt-1">Danh sách hợp đồng nghiên cứu khoa học</p>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={loadList}
-            className="p-2 border rounded-lg hover:bg-gray-50"
-            title="Làm mới"
-          >
+          <button onClick={loadList} className="p-2 border rounded-lg hover:bg-gray-50" title="Làm mới">
             <RefreshCw size={16} />
           </button>
           {isStaff && (
@@ -1233,9 +1589,7 @@ export default function ContractManagement() {
         </div>
       </div>
 
-      {loading && (
-        <div className="text-center py-10 text-gray-400">Đang tải...</div>
-      )}
+      {loading && <div className="text-center py-10 text-gray-400">Đang tải...</div>}
 
       {error && (
         <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
@@ -1276,7 +1630,9 @@ export default function ContractManagement() {
                   <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-600">
                     {fmtDate(c.startDate)} – {fmtDate(c.endDate)}
                   </td>
-                  <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={c.status} />
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button
@@ -1309,40 +1665,66 @@ export default function ContractManagement() {
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">ID đề xuất (APPROVED)</label>
-                <Input type="text" className="mt-1 font-mono" value={createForm.proposalId}
+                <Input
+                  type="text"
+                  className="mt-1 font-mono"
+                  value={createForm.proposalId}
                   onChange={(e) => setCreateForm({ ...createForm, proposalId: e.target.value })}
-                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Số hợp đồng</label>
-                <Input type="text" className="mt-1" value={createForm.contractNumber}
-                  onChange={(e) => setCreateForm({ ...createForm, contractNumber: e.target.value })} />
+                <Input
+                  type="text"
+                  className="mt-1"
+                  value={createForm.contractNumber}
+                  onChange={(e) => setCreateForm({ ...createForm, contractNumber: e.target.value })}
+                />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Ngày bắt đầu</label>
-                  <Input type="date" className="mt-1" value={createForm.startDate}
-                    onChange={(e) => setCreateForm({ ...createForm, startDate: e.target.value })} />
+                  <Input
+                    type="date"
+                    className="mt-1"
+                    value={createForm.startDate}
+                    onChange={(e) => setCreateForm({ ...createForm, startDate: e.target.value })}
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Ngày kết thúc</label>
-                  <Input type="date" className="mt-1" value={createForm.endDate}
-                    onChange={(e) => setCreateForm({ ...createForm, endDate: e.target.value })} />
+                  <Input
+                    type="date"
+                    className="mt-1"
+                    value={createForm.endDate}
+                    onChange={(e) => setCreateForm({ ...createForm, endDate: e.target.value })}
+                  />
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Số tháng gia hạn tối đa</label>
-                <Input type="number" className="mt-1" value={createForm.maxExtensionMonths ?? 6}
-                  onChange={(e) => setCreateForm({ ...createForm, maxExtensionMonths: Number(e.target.value) })} />
+                <Input
+                  type="number"
+                  className="mt-1"
+                  value={createForm.maxExtensionMonths ?? 6}
+                  onChange={(e) => setCreateForm({ ...createForm, maxExtensionMonths: Number(e.target.value) })}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Đại diện bên A</label>
-                <Input type="text" className="mt-1" value={createForm.sideARepresentative ?? ''}
-                  onChange={(e) => setCreateForm({ ...createForm, sideARepresentative: e.target.value })} />
+                <Input
+                  type="text"
+                  className="mt-1"
+                  value={createForm.sideARepresentative ?? ''}
+                  onChange={(e) => setCreateForm({ ...createForm, sideARepresentative: e.target.value })}
+                />
               </div>
             </div>
             <div className="flex gap-2 mt-4 justify-end">
-              <Button variant="outline" onClick={() => setShowCreate(false)}>Hủy</Button>
+              <Button variant="outline" onClick={() => setShowCreate(false)}>
+                Hủy
+              </Button>
               <Button onClick={handleCreate}>Tạo hợp đồng</Button>
             </div>
           </div>

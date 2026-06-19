@@ -18,7 +18,7 @@ export interface MeetingDto {
 
 export interface CreateMeetingRequest {
   title?: string
-  platform: string   // string: "GOOGLE_MEET" | "TEAMS" | "IN_PERSON"
+  platform: string // string: "GOOGLE_MEET" | "TEAMS" | "IN_PERSON"
   scheduledAt: string
   durationMinutes: number
   meetingLink?: string

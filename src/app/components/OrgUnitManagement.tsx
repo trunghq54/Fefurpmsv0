@@ -26,25 +26,46 @@ export default function OrgUnitManagement() {
   }
   useEffect(load, [])
 
-  const openAdd = () => { setEditing(null); setForm(emptyForm); setError(''); setShowModal(true) }
+  const openAdd = () => {
+    setEditing(null)
+    setForm(emptyForm)
+    setError('')
+    setShowModal(true)
+  }
   const openEdit = (u: OrgUnitDto) => {
     setEditing(u)
-    setForm({ code: u.code, name: u.name, unitType: u.unitType, parentId: u.parentId, headUserId: u.headUserId, sortOrder: u.sortOrder })
-    setError(''); setShowModal(true)
+    setForm({
+      code: u.code,
+      name: u.name,
+      unitType: u.unitType,
+      parentId: u.parentId,
+      headUserId: u.headUserId,
+      sortOrder: u.sortOrder,
+    })
+    setError('')
+    setShowModal(true)
   }
 
   const save = async () => {
-    if (!form.code.trim() || !form.name.trim()) { setError('Nhập mã và tên đơn vị'); return }
-    setSaving(true); setError('')
+    if (!form.code.trim() || !form.name.trim()) {
+      setError('Nhập mã và tên đơn vị')
+      return
+    }
+    setSaving(true)
+    setError('')
     try {
       const res = editing
         ? await organizationalUnitService.update(editing.id, form)
         : await organizationalUnitService.create(form)
-      if (res.success) { setShowModal(false); load() }
-      else setError(res.message || 'Lưu thất bại')
+      if (res.success) {
+        setShowModal(false)
+        load()
+      } else setError(res.message || 'Lưu thất bại')
     } catch (e: any) {
       setError(e.response?.data?.message || 'Có lỗi xảy ra')
-    } finally { setSaving(false) }
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -54,7 +75,9 @@ export default function OrgUnitManagement() {
           <h2 className="text-2xl font-bold text-gray-800">Đơn vị tổ chức</h2>
           <p className="text-gray-500 mt-1">Quản lý khoa, bộ môn, trung tâm nghiên cứu</p>
         </div>
-        <Button onClick={openAdd}><Plus className="w-4 h-4" /> Thêm đơn vị</Button>
+        <Button onClick={openAdd}>
+          <Plus className="w-4 h-4" /> Thêm đơn vị
+        </Button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -101,32 +124,57 @@ export default function OrgUnitManagement() {
           title={editing ? 'Sửa đơn vị' : 'Thêm đơn vị'}
           onClose={() => setShowModal(false)}
           className="max-w-lg"
-          footer={<>
-            <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
-            <Button onClick={save} disabled={saving}>{saving ? 'Đang lưu...' : editing ? 'Cập nhật' : 'Thêm'}</Button>
-          </>}
+          footer={
+            <>
+              <Button variant="outline" onClick={() => setShowModal(false)}>
+                Hủy
+              </Button>
+              <Button onClick={save} disabled={saving}>
+                {saving ? 'Đang lưu...' : editing ? 'Cập nhật' : 'Thêm'}
+              </Button>
+            </>
+          }
         >
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Mã đơn vị *</label>
-              <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="VD: FITHOU, DEPT_CS" />
+              <Input
+                value={form.code}
+                onChange={(e) => setForm({ ...form, code: e.target.value })}
+                placeholder="VD: FITHOU, DEPT_CS"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Loại đơn vị *</label>
               <Select value={form.unitType} onChange={(e) => setForm({ ...form, unitType: e.target.value })}>
-                {UNIT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                {UNIT_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
               </Select>
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Tên đơn vị *</label>
-            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Tên đầy đủ của đơn vị" />
+            <Input
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Tên đầy đủ của đơn vị"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Thứ tự hiển thị</label>
-            <Input type="number" min={0} value={form.sortOrder ?? 0} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} />
+            <Input
+              type="number"
+              min={0}
+              value={form.sortOrder ?? 0}
+              onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })}
+            />
           </div>
-          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
+          )}
         </Modal>
       )}
     </div>

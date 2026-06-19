@@ -6,23 +6,35 @@ import { reviewerFeedbackService } from '../../services/reviewerFeedbackService'
 import type { ReviewerFeedbackDto } from '../../services/reviewerFeedbackService'
 
 export default function RoundResultsPanel({
-  roundId, councilId, showFeedback = false,
-}: { roundId: string; councilId?: string; showFeedback?: boolean }) {
+  roundId,
+  councilId,
+  showFeedback = false,
+}: {
+  roundId: string
+  councilId?: string
+  showFeedback?: boolean
+}) {
   const [scores, setScores] = useState<ReviewScoreDto[]>([])
   const [loading, setLoading] = useState(true)
   const [feedbacks, setFeedbacks] = useState<ReviewerFeedbackDto[]>([])
 
   useEffect(() => {
-    if (!councilId) { setLoading(false); return }
+    if (!councilId) {
+      setLoading(false)
+      return
+    }
     setLoading(true)
     scoringService.getCouncilScores(councilId).then((res) => {
       if (res.success && res.data) setScores(res.data)
       setLoading(false)
     })
     if (showFeedback) {
-      reviewerFeedbackService.getByCouncil(councilId).then((res) => {
-        if (res.success && res.data) setFeedbacks(res.data)
-      }).catch(() => {})
+      reviewerFeedbackService
+        .getByCouncil(councilId)
+        .then((res) => {
+          if (res.success && res.data) setFeedbacks(res.data)
+        })
+        .catch(() => {})
     }
   }, [councilId, roundId, showFeedback])
 
@@ -30,9 +42,7 @@ export default function RoundResultsPanel({
   if (!councilId) return <p className="text-sm text-gray-400 mt-2">Chưa có hội đồng cho vòng này.</p>
   if (scores.length === 0) return <p className="text-sm text-gray-400 mt-2">Chưa có điểm chấm.</p>
 
-  const avgScore = scores.length > 0
-    ? (scores.reduce((s, r) => s + r.totalScore, 0) / scores.length).toFixed(1)
-    : null
+  const avgScore = scores.length > 0 ? (scores.reduce((s, r) => s + r.totalScore, 0) / scores.length).toFixed(1) : null
 
   return (
     <div className="mt-3 bg-gray-50 rounded-lg p-4">
@@ -42,7 +52,10 @@ export default function RoundResultsPanel({
         </span>
         {avgScore && (
           <span className="text-sm text-gray-600">
-            TB: <b className="text-gray-900">{avgScore}/{scores[0]?.maxPossibleScore ?? '?'}</b>
+            TB:{' '}
+            <b className="text-gray-900">
+              {avgScore}/{scores[0]?.maxPossibleScore ?? '?'}
+            </b>
           </span>
         )}
       </div>
@@ -64,9 +77,12 @@ export default function RoundResultsPanel({
               <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-2">
                 {s.scoreDetails.map((d) => (
                   <div key={d.id} className="text-center bg-gray-50 rounded px-2 py-1">
-                    <p className="text-[11px] text-gray-500 truncate" title={d.criterionName}>{d.criterionName}</p>
+                    <p className="text-[11px] text-gray-500 truncate" title={d.criterionName}>
+                      {d.criterionName}
+                    </p>
                     <p className="text-sm font-semibold text-gray-800">
-                      {d.givenScore}<span className="text-gray-400 text-xs">/{d.maxScore}</span>
+                      {d.givenScore}
+                      <span className="text-gray-400 text-xs">/{d.maxScore}</span>
                     </p>
                   </div>
                 ))}
@@ -92,9 +108,7 @@ export default function RoundResultsPanel({
               <div key={f.id} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
                 <p className="font-medium text-gray-800 mb-2">{f.reviewerName ?? 'Phản biện'}</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
-                  {f.urgencyScore != null && (
-                    <ScoreBadge label="Tính cấp thiết" score={f.urgencyScore} />
-                  )}
+                  {f.urgencyScore != null && <ScoreBadge label="Tính cấp thiết" score={f.urgencyScore} />}
                   {f.scientificContributionScore != null && (
                     <ScoreBadge label="Đóng góp KH" score={f.scientificContributionScore} />
                   )}
@@ -106,11 +120,11 @@ export default function RoundResultsPanel({
                   )}
                 </div>
                 {f.overallAssessment && (
-                  <p className="text-gray-700 whitespace-pre-wrap border-t border-gray-100 pt-2">{f.overallAssessment}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap border-t border-gray-100 pt-2">
+                    {f.overallAssessment}
+                  </p>
                 )}
-                {f.otherComments && (
-                  <p className="text-gray-500 text-xs mt-1">{f.otherComments}</p>
-                )}
+                {f.otherComments && <p className="text-gray-500 text-xs mt-1">{f.otherComments}</p>}
                 {f.submittedAt && (
                   <p className="text-gray-400 text-xs mt-1">{new Date(f.submittedAt).toLocaleString('vi-VN')}</p>
                 )}
@@ -124,7 +138,8 @@ export default function RoundResultsPanel({
 }
 
 function ScoreBadge({ label, score }: { label: string; score: number }) {
-  const color = score >= 4 ? 'bg-green-50 text-green-700' : score >= 3 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
+  const color =
+    score >= 4 ? 'bg-green-50 text-green-700' : score >= 3 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
   return (
     <div className={`text-center rounded px-2 py-1 ${color}`}>
       <p className="text-[10px] truncate">{label}</p>

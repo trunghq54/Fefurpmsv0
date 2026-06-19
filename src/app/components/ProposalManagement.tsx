@@ -9,15 +9,31 @@ import ProposalDocumentPreview from './ProposalDocumentPreview'
 import { Button, Input, Select } from './ui-kit'
 
 const STATUSES = [
-  'DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'CONTRACT_SIGNED', 'IN_PROGRESS',
-  'ACCEPTANCE_PENDING', 'ACCEPTED', 'REJECTED', 'WITHDRAWN', 'SUSPENDED',
+  'DRAFT',
+  'SUBMITTED',
+  'UNDER_REVIEW',
+  'APPROVED',
+  'CONTRACT_SIGNED',
+  'IN_PROGRESS',
+  'ACCEPTANCE_PENDING',
+  'ACCEPTED',
+  'REJECTED',
+  'WITHDRAWN',
+  'SUSPENDED',
 ]
 
 const STATUS_LABEL: Record<string, string> = {
-  DRAFT: 'Bản nháp', SUBMITTED: 'Đã nộp', UNDER_REVIEW: 'Đang xét duyệt',
-  APPROVED: 'Đã duyệt', CONTRACT_SIGNED: 'Đã ký HĐ', IN_PROGRESS: 'Đang thực hiện',
-  ACCEPTANCE_PENDING: 'Chờ nghiệm thu', ACCEPTED: 'Đã nghiệm thu',
-  REJECTED: 'Từ chối', WITHDRAWN: 'Rút lại', SUSPENDED: 'Tạm dừng',
+  DRAFT: 'Bản nháp',
+  SUBMITTED: 'Đã nộp',
+  UNDER_REVIEW: 'Đang xét duyệt',
+  APPROVED: 'Đã duyệt',
+  CONTRACT_SIGNED: 'Đã ký HĐ',
+  IN_PROGRESS: 'Đang thực hiện',
+  ACCEPTANCE_PENDING: 'Chờ nghiệm thu',
+  ACCEPTED: 'Đã nghiệm thu',
+  REJECTED: 'Từ chối',
+  WITHDRAWN: 'Rút lại',
+  SUSPENDED: 'Tạm dừng',
 }
 
 const statusColor = (status: string) => {
@@ -86,13 +102,21 @@ export default function ProposalManagement() {
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="flex-1 min-w-[280px] relative">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)}
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && load()}
-              placeholder="Tìm theo tên đề tài... (Enter)" className="pl-10" />
+              placeholder="Tìm theo tên đề tài... (Enter)"
+              className="pl-10"
+            />
           </div>
           <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-auto">
             <option value="all">Tất cả trạng thái</option>
-            {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s] ?? s}</option>)}
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {STATUS_LABEL[s] ?? s}
+              </option>
+            ))}
           </Select>
           <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="w-auto">
             <option value="all">Tất cả loại</option>
@@ -110,15 +134,21 @@ export default function ProposalManagement() {
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Đã nộp</p>
-          <p className="text-2xl font-bold text-yellow-600 mt-1">{proposals.filter((p) => p.status === 'SUBMITTED').length}</p>
+          <p className="text-2xl font-bold text-yellow-600 mt-1">
+            {proposals.filter((p) => p.status === 'SUBMITTED').length}
+          </p>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Đã duyệt</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">{proposals.filter((p) => p.status === 'APPROVED').length}</p>
+          <p className="text-2xl font-bold text-green-600 mt-1">
+            {proposals.filter((p) => p.status === 'APPROVED').length}
+          </p>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Tổng kinh phí đề xuất</p>
-          <p className="text-lg font-bold text-blue-600 mt-1">{formatVnd(proposals.reduce((s, p) => s + p.totalBudget, 0))}</p>
+          <p className="text-lg font-bold text-blue-600 mt-1">
+            {formatVnd(proposals.reduce((s, p) => s + p.totalBudget, 0))}
+          </p>
         </div>
       </div>
 
@@ -154,11 +184,21 @@ export default function ProposalManagement() {
                     </td>
                     <td className="px-6 py-4 text-gray-600">{p.principalInvestigatorName}</td>
                     <td className="px-6 py-4 text-gray-600">{p.trackName || '—'}</td>
-                    <td className="px-6 py-4"><span className="px-2 py-0.5 bg-gray-100 rounded text-sm">{p.researchType}</span></td>
-                    <td className="px-6 py-4 text-gray-600">{formatVnd(p.totalBudget)}</td>
-                    <td className="px-6 py-4"><span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(p.status)}`}>{STATUS_LABEL[p.status] ?? p.status}</span></td>
                     <td className="px-6 py-4">
-                      <button onClick={() => openDetail(p.id)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="Xem chi tiết">
+                      <span className="px-2 py-0.5 bg-gray-100 rounded text-sm">{p.researchType}</span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{formatVnd(p.totalBudget)}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(p.status)}`}>
+                        {STATUS_LABEL[p.status] ?? p.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => openDetail(p.id)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                        title="Xem chi tiết"
+                      >
                         <Eye className="w-4 h-4" />
                       </button>
                     </td>
@@ -178,12 +218,18 @@ export default function ProposalManagement() {
               <h3 className="text-xl font-bold text-gray-800">Chi tiết đề xuất</h3>
               <div className="flex items-center gap-2">
                 {detail && (
-                  <Button variant="outline" size="sm" onClick={() => setPreviewDoc({ id: detail.id, title: detail.titleVI })}
-                    className="border-purple-300 text-purple-700 hover:bg-purple-50">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPreviewDoc({ id: detail.id, title: detail.titleVI })}
+                    className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                  >
                     <ClipboardList className="w-4 h-4" /> Hồ sơ (Word/Excel)
                   </Button>
                 )}
-                <button onClick={() => setDetail(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+                <button onClick={() => setDetail(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
             </div>
             {loadingDetail ? (
@@ -194,7 +240,9 @@ export default function ProposalManagement() {
                   <h4 className="text-lg font-semibold text-gray-800">{detail.titleVI}</h4>
                   <p className="text-sm text-gray-500">{detail.titleEN}</p>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(detail.status)}`}>{detail.status}</span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor(detail.status)}`}>
+                      {detail.status}
+                    </span>
                     <span className="px-3 py-1 rounded-full text-sm bg-gray-100">{detail.researchType}</span>
                     <span className="px-3 py-1 rounded-full text-sm bg-gray-100">{detail.durationMonths} tháng</span>
                   </div>
@@ -210,11 +258,15 @@ export default function ProposalManagement() {
                 {detail.expectedOutput && <Block label="Sản phẩm dự kiến" value={detail.expectedOutput} />}
 
                 <div>
-                  <h5 className="flex items-center gap-2 font-semibold text-gray-800 mb-2"><Users className="w-4 h-4" /> Thành viên ({detail.members.length})</h5>
+                  <h5 className="flex items-center gap-2 font-semibold text-gray-800 mb-2">
+                    <Users className="w-4 h-4" /> Thành viên ({detail.members.length})
+                  </h5>
                   <div className="border border-gray-200 rounded-lg divide-y">
                     {detail.members.map((m) => (
                       <div key={m.id} className="px-4 py-2 text-sm flex justify-between">
-                        <span className="text-gray-800">{m.fullName} <span className="text-gray-400">· {m.role}</span></span>
+                        <span className="text-gray-800">
+                          {m.fullName} <span className="text-gray-400">· {m.role}</span>
+                        </span>
                         <span className="text-gray-500">{m.workMonths} tháng</span>
                       </div>
                     ))}
@@ -223,7 +275,9 @@ export default function ProposalManagement() {
                 </div>
 
                 <div>
-                  <h5 className="flex items-center gap-2 font-semibold text-gray-800 mb-2"><Wallet className="w-4 h-4" /> Kinh phí ({detail.budgetItems.length})</h5>
+                  <h5 className="flex items-center gap-2 font-semibold text-gray-800 mb-2">
+                    <Wallet className="w-4 h-4" /> Kinh phí ({detail.budgetItems.length})
+                  </h5>
                   <div className="border border-gray-200 rounded-lg divide-y">
                     {detail.budgetItems.map((b) => (
                       <div key={b.id} className="px-4 py-2 text-sm flex justify-between">
@@ -251,7 +305,11 @@ export default function ProposalManagement() {
       )}
 
       {previewDoc && (
-        <ProposalDocumentPreview proposalId={previewDoc.id} title={previewDoc.title} onClose={() => setPreviewDoc(null)} />
+        <ProposalDocumentPreview
+          proposalId={previewDoc.id}
+          title={previewDoc.title}
+          onClose={() => setPreviewDoc(null)}
+        />
       )}
     </div>
   )

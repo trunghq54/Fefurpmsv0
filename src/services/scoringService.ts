@@ -103,12 +103,17 @@ export const scoringService = {
   },
 
   finalizeDecision: async (councilId: string, data: FinalizeDecisionRequest) => {
-    const res = await api.post<ApiResponse<CouncilDecisionDto>>(`/api/review-scoring/councils/${councilId}/decision`, data)
+    const res = await api.post<ApiResponse<CouncilDecisionDto>>(
+      `/api/review-scoring/councils/${councilId}/decision`,
+      data,
+    )
     return res.data
   },
 
   getDecision: async (councilId: string) => {
-    const res = await api.get<ApiResponse<CouncilDecisionDto | null>>(`/api/review-scoring/councils/${councilId}/decision`)
+    const res = await api.get<ApiResponse<CouncilDecisionDto | null>>(
+      `/api/review-scoring/councils/${councilId}/decision`,
+    )
     return res.data
   },
 
@@ -143,7 +148,10 @@ export const scoringService = {
       REVISION_REQUIRED: 'REVISION_REQUIRED',
     }
     const result = resultMap[data.outcome] ?? 'APPROVED'
-    const res = await api.post<ApiResponse<{ id: string; status: string; result: string }>>(`/api/rounds/${roundId}/close`, { result })
+    const res = await api.post<ApiResponse<{ id: string; status: string; result: string }>>(
+      `/api/rounds/${roundId}/close`,
+      { result },
+    )
     if (res.data.success && res.data.data) {
       return { ...res.data, data: { status: res.data.data.status, outcome: data.outcome } }
     }

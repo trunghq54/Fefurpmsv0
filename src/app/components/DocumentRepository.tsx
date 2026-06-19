@@ -24,8 +24,7 @@ export default function DocumentRepository() {
 
   const filtered = docs.filter((d) => {
     const q = search.toLowerCase()
-    const matchSearch =
-      d.fileName.toLowerCase().includes(q) || (d.proposalTitle || '').toLowerCase().includes(q)
+    const matchSearch = d.fileName.toLowerCase().includes(q) || (d.proposalTitle || '').toLowerCase().includes(q)
     const matchType = filterType === 'all' || d.documentType === filterType
     return matchSearch && matchType
   })
@@ -41,8 +40,12 @@ export default function DocumentRepository() {
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="flex-1 min-w-[280px] relative">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm theo tên file / tên đề tài..." className="pl-10" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Tìm theo tên file / tên đề tài..."
+              className="pl-10"
+            />
           </div>
           <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="w-auto">
             <option value="all">Tất cả loại</option>
@@ -85,17 +88,24 @@ export default function DocumentRepository() {
                     </td>
                     <td className="px-6 py-4 text-gray-600 max-w-xs">
                       <p className="truncate">{d.proposalTitle || '—'}</p>
-                      {d.principalInvestigatorName && <p className="text-xs text-gray-400">{d.principalInvestigatorName}</p>}
+                      {d.principalInvestigatorName && (
+                        <p className="text-xs text-gray-400">{d.principalInvestigatorName}</p>
+                      )}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-0.5 bg-gray-100 rounded text-sm">{TYPE_LABEL[d.documentType] || d.documentType}</span>
+                      <span className="px-2 py-0.5 bg-gray-100 rounded text-sm">
+                        {TYPE_LABEL[d.documentType] || d.documentType}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-gray-600">{fmtSize(d.fileSizeBytes)}</td>
                     <td className="px-6 py-4 text-gray-600">{new Date(d.uploadedAt).toLocaleDateString('vi-VN')}</td>
                     <td className="px-6 py-4">
                       {d.proposalId ? (
-                        <button onClick={() => proposalService.downloadDocument(d.proposalId!, d.id, d.fileName)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="Tải xuống">
+                        <button
+                          onClick={() => proposalService.downloadDocument(d.proposalId!, d.id, d.fileName)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                          title="Tải xuống"
+                        >
                           <Download className="w-4 h-4" />
                         </button>
                       ) : (

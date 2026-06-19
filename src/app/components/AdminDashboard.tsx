@@ -1,11 +1,37 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router'
 import {
-  LayoutDashboard, Users, FileText, UserCheck, Calendar,
-  LogOut, Search, CalendarRange, FileEdit, Paperclip, SlidersHorizontal, BookOpen, ClipboardList,
-  Building2, Tag, ShoppingBag, Clock,
+  LayoutDashboard,
+  Users,
+  FileText,
+  UserCheck,
+  Calendar,
+  LogOut,
+  Search,
+  CalendarRange,
+  FileEdit,
+  Paperclip,
+  SlidersHorizontal,
+  BookOpen,
+  ClipboardList,
+  Building2,
+  Tag,
+  ShoppingBag,
+  Clock,
 } from 'lucide-react'
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts'
 import UserManagement from './UserManagement'
 import CycleManagement from './CycleManagement'
 import ChangeRequestQueue from './ChangeRequestQueue'
@@ -45,20 +71,35 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
   const [funnel, setFunnel] = useState<FunnelStage[]>([])
 
   useEffect(() => {
-    analyticsService.getOverview().then((r) => { if (r.success && r.data) setOverview(r.data) })
-    analyticsService.getByTrack().then((r) => { if (r.success && r.data) setByTrack(r.data) })
-    analyticsService.getFunnel().then((r) => { if (r.success && r.data) setFunnel(r.data) })
+    analyticsService.getOverview().then((r) => {
+      if (r.success && r.data) setOverview(r.data)
+    })
+    analyticsService.getByTrack().then((r) => {
+      if (r.success && r.data) setByTrack(r.data)
+    })
+    analyticsService.getFunnel().then((r) => {
+      if (r.success && r.data) setFunnel(r.data)
+    })
   }, [])
 
   const liveStats = [
     { label: 'Tổng đề xuất', value: String(overview?.totalProposals ?? '—'), icon: FileText, color: 'bg-blue-500' },
     { label: 'Giảng viên (PI)', value: String(overview?.totalPIs ?? '—'), icon: Users, color: 'bg-green-500' },
     { label: 'Phản biện', value: String(overview?.totalReviewers ?? '—'), icon: UserCheck, color: 'bg-purple-500' },
-    { label: 'Đã duyệt', value: String(overview?.totalByStatus?.['APPROVED'] ?? overview?.totalByStatus?.['Approved'] ?? 0), icon: Calendar, color: 'bg-orange-500' },
+    {
+      label: 'Đã duyệt',
+      value: String(overview?.totalByStatus?.['APPROVED'] ?? overview?.totalByStatus?.['Approved'] ?? 0),
+      icon: Calendar,
+      color: 'bg-orange-500',
+    },
   ]
   const trackChart = byTrack.map((t) => ({ name: t.trackName, total: t.total, passed: t.passed }))
   const funnelColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
-  const funnelChart = funnel.map((f, i) => ({ name: f.stage, value: f.count, color: funnelColors[i % funnelColors.length] }))
+  const funnelChart = funnel.map((f, i) => ({
+    name: f.stage,
+    value: f.count,
+    color: funnelColors[i % funnelColors.length],
+  }))
 
   const menuItems = [
     { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard },
@@ -102,11 +143,16 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
         </nav>
 
         <div className="p-4 border-t border-gray-200">
-          <button onClick={() => navigate('/guide')}
-            className="w-full flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition mb-2">
-            <BookOpen className="w-4 h-4" /><span>Hướng dẫn</span>
+          <button
+            onClick={() => navigate('/guide')}
+            className="w-full flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition mb-2"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>Hướng dẫn</span>
           </button>
-          <div className="mb-4"><RoleSwitcher /></div>
+          <div className="mb-4">
+            <RoleSwitcher />
+          </div>
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
               {user.name[0]}
@@ -117,7 +163,9 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
             </div>
           </div>
           <button
-            onClick={() => { if (window.confirm('Bạn có chắc muốn đăng xuất?')) onLogout() }}
+            onClick={() => {
+              if (window.confirm('Bạn có chắc muốn đăng xuất?')) onLogout()
+            }}
             className="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition"
           >
             <LogOut className="w-4 h-4" />
@@ -157,7 +205,9 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
             <div className="space-y-6">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800">Công cụ test</h2>
-                <p className="text-gray-500 mt-1">Tiện ích hỗ trợ kiểm thử các luồng dài ngày mà không phải chờ thật.</p>
+                <p className="text-gray-500 mt-1">
+                  Tiện ích hỗ trợ kiểm thử các luồng dài ngày mà không phải chờ thật.
+                </p>
               </div>
               <SystemClockPanel />
             </div>
@@ -167,7 +217,10 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 {liveStats.map((stat, index) => (
-                  <div key={index} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                  <div
+                    key={index}
+                    className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition"
+                  >
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-gray-500 text-sm">{stat.label}</p>
@@ -210,7 +263,8 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                       <PieChart>
                         <Pie
                           data={funnelChart}
-                          cx="50%" cy="50%"
+                          cx="50%"
+                          cy="50%"
                           labelLine={false}
                           label={({ name, value }) => `${name}: ${value}`}
                           outerRadius={100}

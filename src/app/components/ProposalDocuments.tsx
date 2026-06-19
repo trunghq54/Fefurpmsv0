@@ -4,7 +4,8 @@ import { proposalService } from '../../services/proposalService'
 import type { ProposalDocumentDto } from '../../types/proposal'
 import { Button, Select } from './ui-kit'
 
-const fmtSize = (b: number) => (b < 1024 ? `${b} B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`)
+const fmtSize = (b: number) =>
+  b < 1024 ? `${b} B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`
 
 export default function ProposalDocuments({ proposalId, canEdit = true }: { proposalId: string; canEdit?: boolean }) {
   const [docs, setDocs] = useState<ProposalDocumentDto[]>([])
@@ -26,7 +27,8 @@ export default function ProposalDocuments({ proposalId, canEdit = true }: { prop
   const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setBusy(true); setError('')
+    setBusy(true)
+    setError('')
     try {
       const res = await proposalService.uploadDocument(proposalId, file, docType)
       if (res.success && res.data) setDocs((prev) => [res.data!, ...prev])
@@ -48,7 +50,9 @@ export default function ProposalDocuments({ proposalId, canEdit = true }: { prop
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <h5 className="flex items-center gap-2 font-semibold text-gray-800"><Paperclip className="w-4 h-4" /> Tài liệu ({docs.length})</h5>
+        <h5 className="flex items-center gap-2 font-semibold text-gray-800">
+          <Paperclip className="w-4 h-4" /> Tài liệu ({docs.length})
+        </h5>
         {canEdit && (
           <div className="flex items-center gap-2">
             <Select value={docType} onChange={(e) => setDocType(e.target.value)} className="w-auto py-1.5">
@@ -59,17 +63,27 @@ export default function ProposalDocuments({ proposalId, canEdit = true }: { prop
             <Button size="sm" onClick={() => fileRef.current?.click()} disabled={busy}>
               <Upload className="w-4 h-4" /> {busy ? 'Đang tải...' : 'Tải lên'}
             </Button>
-            <input ref={fileRef} type="file" onChange={onPick} accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" className="hidden" />
+            <input
+              ref={fileRef}
+              type="file"
+              onChange={onPick}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+              className="hidden"
+            />
           </div>
         )}
       </div>
 
-      {error && <div className="mb-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
+      {error && (
+        <div className="mb-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>
+      )}
 
       {loading ? (
         <p className="text-sm text-gray-400">Đang tải...</p>
       ) : docs.length === 0 ? (
-        <p className="text-sm text-gray-400">Chưa có tài liệu. {canEdit && 'Hỗ trợ PDF, DOC(X), XLS(X), ảnh — tối đa 10MB.'}</p>
+        <p className="text-sm text-gray-400">
+          Chưa có tài liệu. {canEdit && 'Hỗ trợ PDF, DOC(X), XLS(X), ảnh — tối đa 10MB.'}
+        </p>
       ) : (
         <div className="border border-gray-200 rounded-lg divide-y">
           {docs.map((d) => (
@@ -77,13 +91,26 @@ export default function ProposalDocuments({ proposalId, canEdit = true }: { prop
               <div className="flex items-center gap-2 text-sm">
                 <FileText className="w-4 h-4 text-gray-400" />
                 <span className="text-gray-800">{d.fileName}</span>
-                <span className="text-gray-400">· {d.documentType} · {fmtSize(d.fileSizeBytes)}</span>
+                <span className="text-gray-400">
+                  · {d.documentType} · {fmtSize(d.fileSizeBytes)}
+                </span>
               </div>
               <div className="flex items-center gap-1">
-                <button onClick={() => proposalService.downloadDocument(proposalId, d.id, d.fileName)}
-                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" title="Tải xuống"><Download className="w-4 h-4" /></button>
+                <button
+                  onClick={() => proposalService.downloadDocument(proposalId, d.id, d.fileName)}
+                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
+                  title="Tải xuống"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
                 {canEdit && (
-                  <button onClick={() => remove(d)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg" title="Xóa"><Trash2 className="w-4 h-4" /></button>
+                  <button
+                    onClick={() => remove(d)}
+                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
+                    title="Xóa"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 )}
               </div>
             </div>

@@ -11,9 +11,12 @@ export default function NotificationBell() {
   const ref = useRef<HTMLDivElement>(null)
 
   const refreshCount = () => {
-    notificationService.getCount().then((res) => {
-      if (res.success && res.data) setUnread(res.data.unread)
-    }).catch(() => {})
+    notificationService
+      .getCount()
+      .then((res) => {
+        if (res.success && res.data) setUnread(res.data.unread)
+      })
+      .catch(() => {})
   }
 
   useEffect(() => {
@@ -70,7 +73,10 @@ export default function NotificationBell() {
         <div className="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-[70vh] overflow-hidden flex flex-col">
           <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
             <h3 className="font-semibold text-gray-800">Thông báo</h3>
-            <button onClick={handleReadAll} className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800">
+            <button
+              onClick={handleReadAll}
+              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+            >
               <CheckCheck className="w-4 h-4" /> Đọc tất cả
             </button>
           </div>

@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import {
-  BookOpen, Shield, Users, FileText, ClipboardCheck,
-  ChevronDown, ChevronRight, ArrowLeft,
-} from 'lucide-react'
+import { BookOpen, Shield, Users, FileText, ClipboardCheck, ChevronDown, ChevronRight, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
-interface Step { step: string; detail?: string }
-interface Section { title: string; steps: Step[] }
+interface Step {
+  step: string
+  detail?: string
+}
+interface Section {
+  title: string
+  steps: Step[]
+}
 
 const GUIDES: Record<string, { label: string; icon: React.ElementType; color: string; sections: Section[] }> = {
   Admin: {
@@ -30,7 +33,10 @@ const GUIDES: Record<string, { label: string; icon: React.ElementType; color: st
           { step: 'Tab "Đợt nộp" → bấm "Tạo đợt nộp mới" → điền tên đợt, năm học, hạn nộp, hạn mức kinh phí → Lưu.' },
           { step: 'Bấm "Quản lý Track" trên đợt vừa tạo → thêm các track nghiên cứu → kích hoạt track.' },
           { step: 'Bấm "Kích hoạt đợt" để mở nộp đề xuất cho giảng viên.' },
-          { step: 'Chỉ 1 đợt được kích hoạt tại một thời điểm. Huỷ kích hoạt đợt cũ trước khi tạo đợt mới.', detail: '' },
+          {
+            step: 'Chỉ 1 đợt được kích hoạt tại một thời điểm. Huỷ kích hoạt đợt cũ trước khi tạo đợt mới.',
+            detail: '',
+          },
         ],
       },
       {
@@ -111,9 +117,7 @@ const GUIDES: Record<string, { label: string; icon: React.ElementType; color: st
       },
       {
         title: 'Đổi vai trò',
-        steps: [
-          { step: 'Bấm biểu tượng đổi vai trò ở góc trên bên phải (khi có nhiều vai trò).' },
-        ],
+        steps: [{ step: 'Bấm biểu tượng đổi vai trò ở góc trên bên phải (khi có nhiều vai trò).' }],
       },
     ],
   },
@@ -126,10 +130,14 @@ const GUIDES: Record<string, { label: string; icon: React.ElementType; color: st
         title: 'Tạo đề xuất mới',
         steps: [
           { step: 'Trang chủ Faculty → bấm "Tạo đề xuất mới" (hoặc đảm bảo đang ở chế độ tạo mới).' },
-          { step: 'Bước 1 – Thông tin: điền tên đề tài (VI/EN), chọn Track, loại nghiên cứu, thời gian, mục tiêu, phương pháp, sản phẩm dự kiến.' },
+          {
+            step: 'Bước 1 – Thông tin: điền tên đề tài (VI/EN), chọn Track, loại nghiên cứu, thời gian, mục tiêu, phương pháp, sản phẩm dự kiến.',
+          },
           { step: 'Bước 2 – Thành viên: bấm "Thêm thành viên" → điền họ tên, vai trò, số tháng tham gia.' },
           { step: 'Bước 3 – Kinh phí: bấm "Thêm khoản" → điền hạng mục và số tiền. Theo dõi thanh hạn mức.' },
-          { step: 'Bước 4 – Tài liệu: chọn loại tài liệu (Thuyết minh / Lý lịch / Khác) → "Chọn file" → tải lên nhiều file.' },
+          {
+            step: 'Bước 4 – Tài liệu: chọn loại tài liệu (Thuyết minh / Lý lịch / Khác) → "Chọn file" → tải lên nhiều file.',
+          },
           { step: 'Bước 5 – Xem lại & Lưu nháp: kiểm tra tóm tắt → bấm "Lưu nháp".' },
           { step: 'Biểu mẫu tự động lưu nháp trên trình duyệt (F5 không mất dữ liệu).' },
         ],
@@ -159,14 +167,18 @@ const GUIDES: Record<string, { label: string; icon: React.ElementType; color: st
       {
         title: 'Yêu cầu thay đổi',
         steps: [
-          { step: 'Bấm "Yêu cầu thay đổi" trên đề xuất đã gửi → chọn loại (Gia hạn / Thay đổi nội dung / Nhân sự / Kinh phí / Tạm dừng).' },
+          {
+            step: 'Bấm "Yêu cầu thay đổi" trên đề xuất đã gửi → chọn loại (Gia hạn / Thay đổi nội dung / Nhân sự / Kinh phí / Tạm dừng).',
+          },
           { step: 'Nhập mô tả lý do → Gửi yêu cầu. Admin sẽ phê duyệt.' },
         ],
       },
       {
         title: 'Đổi vai trò',
         steps: [
-          { step: 'Bấm biểu tượng đổi vai trò ở góc trên bên phải (khi có nhiều vai trò, VD vừa là Faculty vừa là ReviewCommittee).' },
+          {
+            step: 'Bấm biểu tượng đổi vai trò ở góc trên bên phải (khi có nhiều vai trò, VD vừa là Faculty vừa là ReviewCommittee).',
+          },
         ],
       },
     ],
@@ -187,7 +199,9 @@ const GUIDES: Record<string, { label: string; icon: React.ElementType; color: st
       {
         title: 'Chấm điểm (Vòng Xét duyệt / Kiểm tra)',
         steps: [
-          { step: 'Màn hình chấm: phần trên hiển thị đầy đủ thông tin đề xuất — tiêu đề, chủ nhiệm, mục tiêu, phương pháp, thành viên, kinh phí, và tài liệu đính kèm.' },
+          {
+            step: 'Màn hình chấm: phần trên hiển thị đầy đủ thông tin đề xuất — tiêu đề, chủ nhiệm, mục tiêu, phương pháp, thành viên, kinh phí, và tài liệu đính kèm.',
+          },
           { step: 'Bấm vào tên file để tải xuống thuyết minh PDF và đọc trước khi chấm.' },
           { step: 'Bấm "✨ AI gợi ý" bên cạnh từng tiêu chí để nhận gợi ý nhận xét từ AI (cần Gemini API key).' },
           { step: 'Điều chỉnh thanh điểm cho từng tiêu chí; xem tổng điểm cập nhật real-time.' },
@@ -214,9 +228,7 @@ const GUIDES: Record<string, { label: string; icon: React.ElementType; color: st
       },
       {
         title: 'Đổi vai trò',
-        steps: [
-          { step: 'Bấm biểu tượng đổi vai trò ở góc trên bên phải (khi có nhiều vai trò).' },
-        ],
+        steps: [{ step: 'Bấm biểu tượng đổi vai trò ở góc trên bên phải (khi có nhiều vai trò).' }],
       },
     ],
   },
@@ -231,7 +243,11 @@ function SectionBlock({ section, idx }: { section: Section; idx: number }) {
         className="w-full flex items-center justify-between px-5 py-4 bg-gray-50 hover:bg-gray-100 transition text-left"
       >
         <span className="font-medium text-gray-800">{section.title}</span>
-        {expanded ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
+        {expanded ? (
+          <ChevronDown className="w-4 h-4 text-gray-500" />
+        ) : (
+          <ChevronRight className="w-4 h-4 text-gray-500" />
+        )}
       </button>
       {expanded && (
         <div className="px-5 py-4 space-y-3 bg-white">

@@ -6,9 +6,12 @@ import { Button, Input } from './ui-kit'
 
 const statusColor = (s: string) => {
   const map: Record<string, string> = {
-    Draft: 'bg-gray-100 text-gray-800', Submitted: 'bg-yellow-100 text-yellow-800',
-    UnderReview: 'bg-blue-100 text-blue-800', Approved: 'bg-green-100 text-green-800',
-    Accepted: 'bg-green-100 text-green-800', RejectedAtReview: 'bg-red-100 text-red-800',
+    Draft: 'bg-gray-100 text-gray-800',
+    Submitted: 'bg-yellow-100 text-yellow-800',
+    UnderReview: 'bg-blue-100 text-blue-800',
+    Approved: 'bg-green-100 text-green-800',
+    Accepted: 'bg-green-100 text-green-800',
+    RejectedAtReview: 'bg-red-100 text-red-800',
     RejectedAtAcceptance: 'bg-red-100 text-red-800',
   }
   return map[s] || 'bg-gray-100 text-gray-800'
@@ -43,11 +46,18 @@ export default function AdvancedSearch() {
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <div className="relative">
           <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)}
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && runSearch()}
-            placeholder="Nhập từ khoá rồi nhấn Enter..." className="pl-10 pr-28 py-3" />
-          <Button onClick={runSearch} disabled={loading || !q.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 py-1.5">
+            placeholder="Nhập từ khoá rồi nhấn Enter..."
+            className="pl-10 pr-28 py-3"
+          />
+          <Button
+            onClick={runSearch}
+            disabled={loading || !q.trim()}
+            className="absolute right-2 top-1/2 -translate-y-1/2 py-1.5"
+          >
             {loading ? 'Đang tìm...' : 'Tìm'}
           </Button>
         </div>
@@ -79,7 +89,9 @@ export default function AdvancedSearch() {
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor(p.status)}`}>{p.status}</span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor(p.status)}`}>
+                      {p.status}
+                    </span>
                     <p className="text-sm text-gray-500 mt-1">{formatVnd(p.totalBudget)}</p>
                   </div>
                 </div>

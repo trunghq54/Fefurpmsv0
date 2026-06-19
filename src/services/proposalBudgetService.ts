@@ -26,7 +26,7 @@ export const proposalBudgetService = {
   updateLaborDetail: async (proposalId: string, detailId: number, data: UpdateLaborDetailRequest) => {
     const res = await api.put<ApiResponse<LaborDetailResponse>>(
       `/api/proposals/${proposalId}/budget/labor/${detailId}`,
-      data
+      data,
     )
     return res.data
   },

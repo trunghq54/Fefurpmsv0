@@ -38,8 +38,7 @@ const buttonVariants = cva(
 )
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   loading?: boolean
 }
 
@@ -74,12 +73,17 @@ const badgeVariants = cva('inline-block px-2 py-0.5 rounded-full text-xs font-me
   },
   defaultVariants: { tone: 'gray' },
 })
-export function Badge({ tone, className, children }: VariantProps<typeof badgeVariants> & { className?: string; children: React.ReactNode }) {
+export function Badge({
+  tone,
+  className,
+  children,
+}: VariantProps<typeof badgeVariants> & { className?: string; children: React.ReactNode }) {
   return <span className={cn(badgeVariants({ tone }), className)}>{children}</span>
 }
 
 // Form controls ----------------------------------------------------------------
-const controlCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50'
+const controlCls =
+  'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50'
 
 export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => <input ref={ref} className={cn(controlCls, className)} {...props} />,
@@ -92,16 +96,32 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTML
 Textarea.displayName = 'Textarea'
 
 export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(
-  ({ className, children, ...props }, ref) => <select ref={ref} className={cn(controlCls, className)} {...props}>{children}</select>,
+  ({ className, children, ...props }, ref) => (
+    <select ref={ref} className={cn(controlCls, className)} {...props}>
+      {children}
+    </select>
+  ),
 )
 Select.displayName = 'Select'
 
 export function Label({ className, children, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
-  return <label className={cn('block text-sm font-medium text-gray-700 mb-1', className)} {...props}>{children}</label>
+  return (
+    <label className={cn('block text-sm font-medium text-gray-700 mb-1', className)} {...props}>
+      {children}
+    </label>
+  )
 }
 
 // Field = Label + control (children) -------------------------------------------
-export function Field({ label, children, className }: { label: React.ReactNode; children: React.ReactNode; className?: string }) {
+export function Field({
+  label,
+  children,
+  className,
+}: {
+  label: React.ReactNode
+  children: React.ReactNode
+  className?: string
+}) {
   return (
     <div className={className}>
       <Label>{label}</Label>
@@ -120,19 +140,35 @@ export function Spinner({ text, className }: { text?: string; className?: string
 }
 
 export function EmptyState({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn('bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400', className)}>{children}</div>
+  return (
+    <div className={cn('bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400', className)}>
+      {children}
+    </div>
+  )
 }
 
 // Modal — shell chung cho dialog (header + body + footer). `className` để chỉnh max-width panel.
-export function Modal({ title, onClose, children, footer, className }: {
-  title: React.ReactNode; onClose: () => void; children: React.ReactNode; footer?: React.ReactNode; className?: string
+export function Modal({
+  title,
+  onClose,
+  children,
+  footer,
+  className,
+}: {
+  title: React.ReactNode
+  onClose: () => void
+  children: React.ReactNode
+  footer?: React.ReactNode
+  className?: string
 }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className={cn('bg-white rounded-2xl shadow-2xl w-full max-w-md', className)}>
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h3 className="text-xl font-bold text-gray-800">{title}</h3>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+            <X className="w-5 h-5" />
+          </button>
         </div>
         <div className="p-6 space-y-4">{children}</div>
         {footer && <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">{footer}</div>}

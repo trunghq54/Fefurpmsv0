@@ -36,7 +36,13 @@ function Block({ label, value }: { label: string; value: string }) {
   )
 }
 
-export default function ProposalDetailView({ proposal, assignmentId }: { proposal: ProposalDto; assignmentId?: string }) {
+export default function ProposalDetailView({
+  proposal,
+  assignmentId,
+}: {
+  proposal: ProposalDto
+  assignmentId?: string
+}) {
   return (
     <div className="space-y-5">
       <div>
@@ -46,9 +52,13 @@ export default function ProposalDetailView({ proposal, assignmentId }: { proposa
         </div>
         <p className="text-sm text-gray-500 ml-6">{proposal.titleEN}</p>
         <div className="flex flex-wrap gap-2 mt-2 ml-6">
-          <span className={`px-3 py-0.5 rounded-full text-xs font-medium ${statusColor(proposal.status)}`}>{proposal.status}</span>
+          <span className={`px-3 py-0.5 rounded-full text-xs font-medium ${statusColor(proposal.status)}`}>
+            {proposal.status}
+          </span>
           <span className="px-3 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">{proposal.researchType}</span>
-          <span className="px-3 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">{proposal.durationMonths} tháng</span>
+          <span className="px-3 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">
+            {proposal.durationMonths} tháng
+          </span>
         </div>
       </div>
 
@@ -70,7 +80,9 @@ export default function ProposalDetailView({ proposal, assignmentId }: { proposa
         <div className="border border-gray-200 rounded-lg divide-y text-sm">
           {proposal.members.map((m) => (
             <div key={m.id} className="px-4 py-2 flex justify-between">
-              <span className="text-gray-800">{m.fullName} <span className="text-gray-400">· {m.role}</span></span>
+              <span className="text-gray-800">
+                {m.fullName} <span className="text-gray-400">· {m.role}</span>
+              </span>
               <span className="text-gray-500">{m.workMonths} tháng</span>
             </div>
           ))}

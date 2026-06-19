@@ -1,6 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router'
-import { LayoutDashboard, Calendar, UserPlus, LogOut, FileText, Users, UserCheck, CheckCircle, BookOpen, ClipboardList, ShoppingBag } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Calendar,
+  UserPlus,
+  LogOut,
+  FileText,
+  Users,
+  UserCheck,
+  CheckCircle,
+  BookOpen,
+  ClipboardList,
+  ShoppingBag,
+} from 'lucide-react'
 import { analyticsService } from '../../services/analyticsService'
 import type { AnalyticsOverview } from '../../types/analytics'
 import ProposalManagement from './ProposalManagement'
@@ -28,7 +40,12 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null)
 
   useEffect(() => {
-    analyticsService.getOverview().then((r) => { if (r.success && r.data) setOverview(r.data) }).catch(() => {})
+    analyticsService
+      .getOverview()
+      .then((r) => {
+        if (r.success && r.data) setOverview(r.data)
+      })
+      .catch(() => {})
   }, [])
 
   const menuItems = [
@@ -40,10 +57,25 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
   ]
 
   const cards = [
-    { label: 'Tổng đề xuất', value: overview?.totalProposals ?? '—', icon: FileText, color: 'bg-blue-100 text-blue-600' },
+    {
+      label: 'Tổng đề xuất',
+      value: overview?.totalProposals ?? '—',
+      icon: FileText,
+      color: 'bg-blue-100 text-blue-600',
+    },
     { label: 'Giảng viên (PI)', value: overview?.totalPIs ?? '—', icon: Users, color: 'bg-green-100 text-green-600' },
-    { label: 'Phản biện', value: overview?.totalReviewers ?? '—', icon: UserCheck, color: 'bg-purple-100 text-purple-600' },
-    { label: 'Đã duyệt', value: overview?.totalByStatus?.['APPROVED'] ?? overview?.totalByStatus?.['Approved'] ?? 0, icon: CheckCircle, color: 'bg-orange-100 text-orange-600' },
+    {
+      label: 'Phản biện',
+      value: overview?.totalReviewers ?? '—',
+      icon: UserCheck,
+      color: 'bg-purple-100 text-purple-600',
+    },
+    {
+      label: 'Đã duyệt',
+      value: overview?.totalByStatus?.['APPROVED'] ?? overview?.totalByStatus?.['Approved'] ?? 0,
+      icon: CheckCircle,
+      color: 'bg-orange-100 text-orange-600',
+    },
   ]
 
   const renderContent = () => {
@@ -69,7 +101,9 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
                 const Icon = c.icon
                 return (
                   <div key={c.label} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div className={`inline-flex p-3 rounded-lg mb-4 ${c.color}`}><Icon className="w-6 h-6" /></div>
+                    <div className={`inline-flex p-3 rounded-lg mb-4 ${c.color}`}>
+                      <Icon className="w-6 h-6" />
+                    </div>
                     <p className="text-gray-500 text-sm">{c.label}</p>
                     <p className="text-3xl font-bold text-gray-800 mt-1">{c.value}</p>
                   </div>
@@ -78,19 +112,34 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              <button onClick={() => setActiveMenu('reviewers')}
-                className="text-left bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-400 transition">
-                <div className="flex items-center gap-3 mb-2"><UserPlus className="w-5 h-5 text-blue-600" /><h3 className="font-semibold text-gray-800">Đề xuất & Phân công</h3></div>
+              <button
+                onClick={() => setActiveMenu('reviewers')}
+                className="text-left bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-400 transition"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <UserPlus className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-semibold text-gray-800">Đề xuất & Phân công</h3>
+                </div>
                 <p className="text-sm text-gray-500">Mở đề xuất, tạo vòng phản biện, phân công người chấm.</p>
               </button>
-              <button onClick={() => setActiveMenu('meetings')}
-                className="text-left bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-400 transition">
-                <div className="flex items-center gap-3 mb-2"><Calendar className="w-5 h-5 text-blue-600" /><h3 className="font-semibold text-gray-800">Quản lý lịch họp</h3></div>
+              <button
+                onClick={() => setActiveMenu('meetings')}
+                className="text-left bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-400 transition"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-semibold text-gray-800">Quản lý lịch họp</h3>
+                </div>
                 <p className="text-sm text-gray-500">Xem toàn bộ cuộc họp hội đồng của các vòng phản biện.</p>
               </button>
-              <button onClick={() => setActiveMenu('contracts')}
-                className="text-left bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-400 transition">
-                <div className="flex items-center gap-3 mb-2"><ClipboardList className="w-5 h-5 text-blue-600" /><h3 className="font-semibold text-gray-800">Hợp đồng</h3></div>
+              <button
+                onClick={() => setActiveMenu('contracts')}
+                className="text-left bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-400 transition"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <ClipboardList className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-semibold text-gray-800">Hợp đồng</h3>
+                </div>
                 <p className="text-sm text-gray-500">Tạo, ký kết, giải ngân và thanh lý hợp đồng nghiên cứu.</p>
               </button>
             </div>
@@ -126,17 +175,24 @@ export default function StaffDashboard({ user, onLogout }: StaffDashboardProps) 
         </nav>
 
         <div className="p-4 border-t border-gray-200">
-          <button onClick={() => navigate('/guide')}
-            className="w-full flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition mb-2">
-            <BookOpen className="w-4 h-4" /><span>Hướng dẫn</span>
+          <button
+            onClick={() => navigate('/guide')}
+            className="w-full flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition mb-2"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>Hướng dẫn</span>
           </button>
-          <div className="mb-4"><RoleSwitcher /></div>
+          <div className="mb-4">
+            <RoleSwitcher />
+          </div>
           <div className="bg-gray-50 rounded-lg p-4 mb-4">
             <p className="text-sm font-medium text-gray-800">{user.name}</p>
             <p className="text-xs text-gray-500 mt-1">Staff</p>
           </div>
           <button
-            onClick={() => { if (window.confirm('Bạn có chắc muốn đăng xuất?')) onLogout() }}
+            onClick={() => {
+              if (window.confirm('Bạn có chắc muốn đăng xuất?')) onLogout()
+            }}
             className="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition"
           >
             <LogOut className="w-4 h-4" />

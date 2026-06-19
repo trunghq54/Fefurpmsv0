@@ -29,40 +29,82 @@ function AppRoutes() {
 
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-400">Đang tải…</div>}>
-    <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route
-        path="/login"
-        element={isAuthenticated ? <Navigate to={loggedInTarget()} replace /> : <Login />}
-      />
-      <Route path="/select-role" element={<ProtectedRoute><SelectRole /></ProtectedRoute>} />
-      <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
-      <Route
-        path="/admin"
-        element={<ProtectedRoute roles={['Admin']}><AdminDashboard user={legacyUser} onLogout={logout} /></ProtectedRoute>}
-      />
-      <Route
-        path="/staff"
-        element={<ProtectedRoute roles={['Staff']}><StaffDashboard user={legacyUser} onLogout={logout} /></ProtectedRoute>}
-      />
-      <Route
-        path="/faculty"
-        element={<ProtectedRoute roles={['Faculty']}><ProposalSubmission user={legacyUser} onLogout={logout} /></ProtectedRoute>}
-      />
-      <Route
-        path="/reviewer"
-        element={<ProtectedRoute roles={['ReviewCommittee']}><ReviewerInterface user={legacyUser} onLogout={logout} /></ProtectedRoute>}
-      />
-      <Route
-        path="/meetings"
-        element={<ProtectedRoute roles={['Admin']}><MeetingsOverview /></ProtectedRoute>}
-      />
-      <Route path="/guide" element={<ProtectedRoute><UserGuide /></ProtectedRoute>} />
-      <Route
-        path="/contracts"
-        element={<ProtectedRoute roles={['Staff', 'Admin', 'Faculty']}><ContractManagement /></ProtectedRoute>}
-      />
-    </Routes>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to={loggedInTarget()} replace /> : <Login />} />
+        <Route
+          path="/select-role"
+          element={
+            <ProtectedRoute>
+              <SelectRole />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute roles={['Admin']}>
+              <AdminDashboard user={legacyUser} onLogout={logout} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/staff"
+          element={
+            <ProtectedRoute roles={['Staff']}>
+              <StaffDashboard user={legacyUser} onLogout={logout} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/faculty"
+          element={
+            <ProtectedRoute roles={['Faculty']}>
+              <ProposalSubmission user={legacyUser} onLogout={logout} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reviewer"
+          element={
+            <ProtectedRoute roles={['ReviewCommittee']}>
+              <ReviewerInterface user={legacyUser} onLogout={logout} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/meetings"
+          element={
+            <ProtectedRoute roles={['Admin']}>
+              <MeetingsOverview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/guide"
+          element={
+            <ProtectedRoute>
+              <UserGuide />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/contracts"
+          element={
+            <ProtectedRoute roles={['Staff', 'Admin', 'Faculty']}>
+              <ContractManagement />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </Suspense>
   )
 }

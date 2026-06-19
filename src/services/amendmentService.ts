@@ -9,18 +9,12 @@ export const amendmentService = {
   },
 
   approve: async (id: string, data: ReviewAmendmentRequest) => {
-    const res = await api.post<ApiResponse<AmendmentDetailResponse>>(
-      `/api/amendments/${id}/approve`,
-      data
-    )
+    const res = await api.post<ApiResponse<AmendmentDetailResponse>>(`/api/amendments/${id}/approve`, data)
     return res.data
   },
 
   reject: async (id: string, data: ReviewAmendmentRequest) => {
-    const res = await api.post<ApiResponse<AmendmentDetailResponse>>(
-      `/api/amendments/${id}/reject`,
-      data
-    )
+    const res = await api.post<ApiResponse<AmendmentDetailResponse>>(`/api/amendments/${id}/reject`, data)
     return res.data
   },
 }

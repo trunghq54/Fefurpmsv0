@@ -117,9 +117,7 @@ export default function CycleManagement() {
 
   const handleToggle = async (cycle: CycleDto) => {
     try {
-      const res = cycle.status === 'Open'
-        ? await cycleService.close(cycle.id)
-        : await cycleService.open(cycle.id)
+      const res = cycle.status === 'Open' ? await cycleService.close(cycle.id) : await cycleService.open(cycle.id)
       if (res.success && res.data) {
         setCycles((prev) => prev.map((c) => (c.id === cycle.id ? res.data! : c)))
       }
@@ -159,9 +157,7 @@ export default function CycleManagement() {
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Tổng số track</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
-            {cycles.reduce((sum, c) => sum + c.trackCount, 0)}
-          </p>
+          <p className="text-2xl font-bold text-blue-600 mt-1">{cycles.reduce((sum, c) => sum + c.trackCount, 0)}</p>
         </div>
       </div>
 
@@ -216,9 +212,7 @@ export default function CycleManagement() {
                     <td className="px-6 py-4">
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          cycle.status === 'Open'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
+                          cycle.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                         }`}
                       >
                         {cycle.status === 'Open' ? 'Đang mở' : 'Đã đóng'}
@@ -226,8 +220,13 @@ export default function CycleManagement() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => setWorkspaceCycle(cycle)} title="Quản lý track"
-                          className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setWorkspaceCycle(cycle)}
+                          title="Quản lý track"
+                          className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                        >
                           <Layers className="w-4 h-4" /> Tracks ({cycle.trackCount})
                         </Button>
                         <button
@@ -275,35 +274,69 @@ export default function CycleManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Tên đợt *</label>
-                  <Input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="vd: NCKH Cấp Trường 2026" />
+                  <Input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="vd: NCKH Cấp Trường 2026"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Năm học *</label>
-                  <Input type="text" value={formData.academicYear} onChange={(e) => setFormData({ ...formData, academicYear: e.target.value })} placeholder="vd: 2025-2026" />
+                  <Input
+                    type="text"
+                    value={formData.academicYear}
+                    onChange={(e) => setFormData({ ...formData, academicYear: e.target.value })}
+                    placeholder="vd: 2025-2026"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Ngày mở nộp *</label>
-                  <Input type="date" value={formData.submissionStartDate} onChange={(e) => setFormData({ ...formData, submissionStartDate: e.target.value })} />
+                  <Input
+                    type="date"
+                    value={formData.submissionStartDate}
+                    onChange={(e) => setFormData({ ...formData, submissionStartDate: e.target.value })}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Hạn Quý I (Applied) *</label>
-                  <Input type="date" value={formData.submissionEndDateApplied} onChange={(e) => setFormData({ ...formData, submissionEndDateApplied: e.target.value })} />
+                  <Input
+                    type="date"
+                    value={formData.submissionEndDateApplied}
+                    onChange={(e) => setFormData({ ...formData, submissionEndDateApplied: e.target.value })}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Hạn Quý II (Basic) *</label>
-                  <Input type="date" value={formData.submissionEndDateBasic} onChange={(e) => setFormData({ ...formData, submissionEndDateBasic: e.target.value })} />
+                  <Input
+                    type="date"
+                    value={formData.submissionEndDateBasic}
+                    onChange={(e) => setFormData({ ...formData, submissionEndDateBasic: e.target.value })}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Hạn mức KP Applied (₫)</label>
-                  <Input type="number" value={formData.fundingCapApplied} onChange={(e) => setFormData({ ...formData, fundingCapApplied: Number(e.target.value) })} />
+                  <Input
+                    type="number"
+                    value={formData.fundingCapApplied}
+                    onChange={(e) => setFormData({ ...formData, fundingCapApplied: Number(e.target.value) })}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Hạn mức KP Basic (₫)</label>
-                  <Input type="number" value={formData.fundingCapBasic} onChange={(e) => setFormData({ ...formData, fundingCapBasic: Number(e.target.value) })} />
+                  <Input
+                    type="number"
+                    value={formData.fundingCapBasic}
+                    onChange={(e) => setFormData({ ...formData, fundingCapBasic: Number(e.target.value) })}
+                  />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
-                  <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} />
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
+                  />
                 </div>
               </div>
 
@@ -315,7 +348,9 @@ export default function CycleManagement() {
             </div>
 
             <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3 sticky bottom-0">
-              <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
+              <Button variant="outline" onClick={() => setShowModal(false)}>
+                Hủy
+              </Button>
               <Button onClick={handleSave} disabled={saving}>
                 {saving ? 'Đang lưu...' : editingCycle ? 'Cập nhật' : 'Tạo mới'}
               </Button>

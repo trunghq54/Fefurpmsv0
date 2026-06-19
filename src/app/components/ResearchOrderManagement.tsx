@@ -21,7 +21,13 @@ export default function ResearchOrderManagement() {
   const [cycles, setCycles] = useState<CycleDto[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
-  const [form, setForm] = useState({ cycleId: 0, orderingUnitId: 0, researchArea: '', problemDescription: '', expectedProducts: '' })
+  const [form, setForm] = useState({
+    cycleId: 0,
+    orderingUnitId: 0,
+    researchArea: '',
+    problemDescription: '',
+    expectedProducts: '',
+  })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
@@ -49,13 +55,21 @@ export default function ResearchOrderManagement() {
       problemDescription: '',
       expectedProducts: '',
     })
-    setError(''); setShowModal(true)
+    setError('')
+    setShowModal(true)
   }
 
   const create = async () => {
-    if (!form.researchArea.trim() || !form.problemDescription.trim()) { setError('Nhập lĩnh vực và mô tả vấn đề'); return }
-    if (!form.cycleId || !form.orderingUnitId) { setError('Chọn đợt nghiên cứu và đơn vị'); return }
-    setSaving(true); setError('')
+    if (!form.researchArea.trim() || !form.problemDescription.trim()) {
+      setError('Nhập lĩnh vực và mô tả vấn đề')
+      return
+    }
+    if (!form.cycleId || !form.orderingUnitId) {
+      setError('Chọn đợt nghiên cứu và đơn vị')
+      return
+    }
+    setSaving(true)
+    setError('')
     try {
       const res = await researchOrderService.create({
         cycleId: form.cycleId,
@@ -64,11 +78,15 @@ export default function ResearchOrderManagement() {
         problemDescription: form.problemDescription,
         expectedProducts: form.expectedProducts || undefined,
       })
-      if (res.success) { setShowModal(false); load() }
-      else setError(res.message || 'Lưu thất bại')
+      if (res.success) {
+        setShowModal(false)
+        load()
+      } else setError(res.message || 'Lưu thất bại')
     } catch (e: any) {
       setError(e.response?.data?.message || 'Có lỗi xảy ra')
-    } finally { setSaving(false) }
+    } finally {
+      setSaving(false)
+    }
   }
 
   const filteredOrders = filterStatus === 'all' ? orders : orders.filter((o) => o.status === filterStatus)
@@ -80,13 +98,18 @@ export default function ResearchOrderManagement() {
           <h2 className="text-2xl font-bold text-gray-800">Đặt hàng nghiên cứu</h2>
           <p className="text-gray-500 mt-1">Đơn vị yêu cầu nghiên cứu để giải quyết vấn đề thực tế</p>
         </div>
-        <Button onClick={openModal}><Plus className="w-4 h-4" /> Tạo đặt hàng</Button>
+        <Button onClick={openModal}>
+          <Plus className="w-4 h-4" /> Tạo đặt hàng
+        </Button>
       </div>
 
       <div className="flex gap-2">
         {['all', 'OPEN', 'MATCHED', 'CLOSED'].map((s) => (
-          <button key={s} onClick={() => setFilterStatus(s)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${filterStatus === s ? 'bg-blue-600 text-white' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
+          <button
+            key={s}
+            onClick={() => setFilterStatus(s)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${filterStatus === s ? 'bg-blue-600 text-white' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+          >
             {s === 'all' ? 'Tất cả' : (STATUS_LABEL[s] ?? s)}
           </button>
         ))}
@@ -107,7 +130,9 @@ export default function ResearchOrderManagement() {
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-gray-800">{o.researchArea}</span>
-                      <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${STATUS_COLOR[o.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                      <span
+                        className={`px-2 py-0.5 text-xs rounded-full font-medium ${STATUS_COLOR[o.status] ?? 'bg-gray-100 text-gray-700'}`}
+                      >
                         {STATUS_LABEL[o.status] ?? o.status}
                       </span>
                     </div>
@@ -116,7 +141,9 @@ export default function ResearchOrderManagement() {
                       <p className="text-xs text-gray-400">Sản phẩm kỳ vọng: {o.expectedProducts}</p>
                     )}
                     <div className="flex items-center gap-3 text-xs text-gray-400 mt-1">
-                      <span>Đơn vị: <b className="text-gray-600">{o.orderingUnitName}</b></span>
+                      <span>
+                        Đơn vị: <b className="text-gray-600">{o.orderingUnitName}</b>
+                      </span>
                       <span>· {new Date(o.createdAt).toLocaleDateString('vi-VN')}</span>
                       {o.matchedProposalId && (
                         <span className="flex items-center gap-1 text-blue-600">
@@ -137,39 +164,71 @@ export default function ResearchOrderManagement() {
           title="Tạo đặt hàng nghiên cứu"
           onClose={() => setShowModal(false)}
           className="max-w-lg"
-          footer={<>
-            <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
-            <Button onClick={create} disabled={saving}>{saving ? 'Đang tạo...' : 'Tạo đặt hàng'}</Button>
-          </>}
+          footer={
+            <>
+              <Button variant="outline" onClick={() => setShowModal(false)}>
+                Hủy
+              </Button>
+              <Button onClick={create} disabled={saving}>
+                {saving ? 'Đang tạo...' : 'Tạo đặt hàng'}
+              </Button>
+            </>
+          }
         >
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Đợt nghiên cứu *</label>
               <Select value={form.cycleId} onChange={(e) => setForm({ ...form, cycleId: Number(e.target.value) })}>
-                {cycles.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {cycles.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
               </Select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Đơn vị đặt hàng *</label>
-              <Select value={form.orderingUnitId} onChange={(e) => setForm({ ...form, orderingUnitId: Number(e.target.value) })}>
-                {units.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+              <Select
+                value={form.orderingUnitId}
+                onChange={(e) => setForm({ ...form, orderingUnitId: Number(e.target.value) })}
+              >
+                {units.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name}
+                  </option>
+                ))}
               </Select>
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Lĩnh vực nghiên cứu *</label>
-            <Input value={form.researchArea} onChange={(e) => setForm({ ...form, researchArea: e.target.value })} placeholder="VD: AI trong giáo dục, Năng lượng tái tạo..." />
+            <Input
+              value={form.researchArea}
+              onChange={(e) => setForm({ ...form, researchArea: e.target.value })}
+              placeholder="VD: AI trong giáo dục, Năng lượng tái tạo..."
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả vấn đề *</label>
-            <Textarea rows={3} value={form.problemDescription} onChange={(e) => setForm({ ...form, problemDescription: e.target.value })}
-              placeholder="Mô tả chi tiết vấn đề cần nghiên cứu giải quyết..." className="resize-none" />
+            <Textarea
+              rows={3}
+              value={form.problemDescription}
+              onChange={(e) => setForm({ ...form, problemDescription: e.target.value })}
+              placeholder="Mô tả chi tiết vấn đề cần nghiên cứu giải quyết..."
+              className="resize-none"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Sản phẩm kỳ vọng</label>
-            <Input value={form.expectedProducts} onChange={(e) => setForm({ ...form, expectedProducts: e.target.value })} placeholder="Hệ thống phần mềm, bài báo ISI, quy trình..." />
+            <Input
+              value={form.expectedProducts}
+              onChange={(e) => setForm({ ...form, expectedProducts: e.target.value })}
+              placeholder="Hệ thống phần mềm, bài báo ISI, quy trình..."
+            />
           </div>
-          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
+          )}
         </Modal>
       )}
     </div>

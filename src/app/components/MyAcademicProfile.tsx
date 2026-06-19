@@ -33,7 +33,12 @@ const emptyForm: AcademicProfileRequest = {
   specializationAreas: '',
 }
 
-interface Field { label: string; key: keyof AcademicProfileRequest; type?: string; options?: string[] }
+interface Field {
+  label: string
+  key: keyof AcademicProfileRequest
+  type?: string
+  options?: string[]
+}
 
 export default function MyAcademicProfile({ userId }: { userId: string }) {
   const [form, setForm] = useState<AcademicProfileRequest>(emptyForm)
@@ -44,49 +49,58 @@ export default function MyAcademicProfile({ userId }: { userId: string }) {
 
   useEffect(() => {
     setLoading(true)
-    academicProfileService.get(userId).then((res) => {
-      if (res.success && res.data) {
-        const p = res.data
-        setForm({
-          academicTitle: p.academicTitle ?? '',
-          scientificRank: p.scientificRank ?? '',
-          degreeLevel: p.degreeLevel ?? '',
-          specialization: p.specialization ?? '',
-          dateOfBirth: p.dateOfBirth ?? '',
-          gender: p.gender ?? '',
-          hometown: p.hometown ?? '',
-          nationality: p.nationality ?? 'Việt Nam',
-          gsPgsYear: p.gsPgsYear ?? undefined,
-          gsPgsInstitution: p.gsPgsInstitution ?? '',
-          isiScopusCount: p.isiScopusCount,
-          intlJournalCount: p.intlJournalCount,
-          domesticJournalCount: p.domesticJournalCount,
-          intlConferenceCount: p.intlConferenceCount,
-          domesticConferenceCount: p.domesticConferenceCount,
-          patentsCount: p.patentsCount,
-          phdSupervisedCount: p.phdSupervisedCount,
-          masterSupervisedCount: p.masterSupervisedCount,
-          institution: p.institution ?? '',
-          institutionAddress: p.institutionAddress ?? '',
-          specializationAreas: p.specializationAreas ?? '',
-        })
-      }
-      setLoading(false)
-    }).catch(() => setLoading(false))
+    academicProfileService
+      .get(userId)
+      .then((res) => {
+        if (res.success && res.data) {
+          const p = res.data
+          setForm({
+            academicTitle: p.academicTitle ?? '',
+            scientificRank: p.scientificRank ?? '',
+            degreeLevel: p.degreeLevel ?? '',
+            specialization: p.specialization ?? '',
+            dateOfBirth: p.dateOfBirth ?? '',
+            gender: p.gender ?? '',
+            hometown: p.hometown ?? '',
+            nationality: p.nationality ?? 'Việt Nam',
+            gsPgsYear: p.gsPgsYear ?? undefined,
+            gsPgsInstitution: p.gsPgsInstitution ?? '',
+            isiScopusCount: p.isiScopusCount,
+            intlJournalCount: p.intlJournalCount,
+            domesticJournalCount: p.domesticJournalCount,
+            intlConferenceCount: p.intlConferenceCount,
+            domesticConferenceCount: p.domesticConferenceCount,
+            patentsCount: p.patentsCount,
+            phdSupervisedCount: p.phdSupervisedCount,
+            masterSupervisedCount: p.masterSupervisedCount,
+            institution: p.institution ?? '',
+            institutionAddress: p.institutionAddress ?? '',
+            specializationAreas: p.specializationAreas ?? '',
+          })
+        }
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [userId])
 
   const set = (key: keyof AcademicProfileRequest, value: string | number | undefined) =>
     setForm((f) => ({ ...f, [key]: value }))
 
   const save = async () => {
-    setSaving(true); setError(''); setSaved(false)
+    setSaving(true)
+    setError('')
+    setSaved(false)
     try {
       const res = await academicProfileService.upsert(userId, form)
-      if (res.success) { setSaved(true); setTimeout(() => setSaved(false), 2500) }
-      else setError(res.message || 'Lưu thất bại')
+      if (res.success) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2500)
+      } else setError(res.message || 'Lưu thất bại')
     } catch (e: any) {
       setError(e.response?.data?.message || 'Có lỗi xảy ra')
-    } finally { setSaving(false) }
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (loading) return <div className="p-8 text-center text-gray-400">Đang tải hồ sơ...</div>
@@ -114,14 +128,54 @@ export default function MyAcademicProfile({ userId }: { userId: string }) {
           <GraduationCap className="w-5 h-5 text-blue-600" /> Thông tin cá nhân & học vị
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SelectField label="Danh hiệu KH" options={['', ...TITLE_OPTIONS]} value={form.academicTitle ?? ''} onChange={(v) => set('academicTitle', v)} />
-          <SelectField label="Chức danh" options={RANK_OPTIONS} value={form.scientificRank ?? ''} onChange={(v) => set('scientificRank', v)} />
-          <SelectField label="Trình độ" options={['', ...DEGREE_OPTIONS]} value={form.degreeLevel ?? ''} onChange={(v) => set('degreeLevel', v)} />
-          <InputField label="Chuyên ngành" value={form.specialization ?? ''} onChange={(v) => set('specialization', v)} placeholder="VD: Công nghệ thông tin" />
-          <InputField label="Ngày sinh" type="date" value={form.dateOfBirth ?? ''} onChange={(v) => set('dateOfBirth', v)} />
-          <SelectField label="Giới tính" options={['', ...GENDER_OPTIONS]} value={form.gender ?? ''} onChange={(v) => set('gender', v)} />
-          <InputField label="Quê quán" value={form.hometown ?? ''} onChange={(v) => set('hometown', v)} placeholder="VD: Hà Nội" />
-          <InputField label="Quốc tịch" value={form.nationality ?? ''} onChange={(v) => set('nationality', v)} placeholder="Việt Nam" />
+          <SelectField
+            label="Danh hiệu KH"
+            options={['', ...TITLE_OPTIONS]}
+            value={form.academicTitle ?? ''}
+            onChange={(v) => set('academicTitle', v)}
+          />
+          <SelectField
+            label="Chức danh"
+            options={RANK_OPTIONS}
+            value={form.scientificRank ?? ''}
+            onChange={(v) => set('scientificRank', v)}
+          />
+          <SelectField
+            label="Trình độ"
+            options={['', ...DEGREE_OPTIONS]}
+            value={form.degreeLevel ?? ''}
+            onChange={(v) => set('degreeLevel', v)}
+          />
+          <InputField
+            label="Chuyên ngành"
+            value={form.specialization ?? ''}
+            onChange={(v) => set('specialization', v)}
+            placeholder="VD: Công nghệ thông tin"
+          />
+          <InputField
+            label="Ngày sinh"
+            type="date"
+            value={form.dateOfBirth ?? ''}
+            onChange={(v) => set('dateOfBirth', v)}
+          />
+          <SelectField
+            label="Giới tính"
+            options={['', ...GENDER_OPTIONS]}
+            value={form.gender ?? ''}
+            onChange={(v) => set('gender', v)}
+          />
+          <InputField
+            label="Quê quán"
+            value={form.hometown ?? ''}
+            onChange={(v) => set('hometown', v)}
+            placeholder="VD: Hà Nội"
+          />
+          <InputField
+            label="Quốc tịch"
+            value={form.nationality ?? ''}
+            onChange={(v) => set('nationality', v)}
+            placeholder="Việt Nam"
+          />
         </div>
       </div>
 
@@ -131,15 +185,42 @@ export default function MyAcademicProfile({ userId }: { userId: string }) {
           <BookOpen className="w-5 h-5 text-blue-600" /> Công nhận GS/PGS
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InputField label="Năm công nhận" type="number" value={String(form.gsPgsYear ?? '')} onChange={(v) => set('gsPgsYear', v ? Number(v) : undefined)} placeholder="VD: 2020" />
-          <InputField label="Cơ sở công nhận" value={form.gsPgsInstitution ?? ''} onChange={(v) => set('gsPgsInstitution', v)} placeholder="VD: Hội đồng CDGSNN" />
-          <InputField label="Đơn vị công tác" value={form.institution ?? ''} onChange={(v) => set('institution', v)} placeholder="VD: ĐH FPT" className="md:col-span-2" />
-          <InputField label="Địa chỉ đơn vị" value={form.institutionAddress ?? ''} onChange={(v) => set('institutionAddress', v)} placeholder="VD: Khu CNC Hòa Lạc, Thạch Thất, HN" className="md:col-span-2" />
+          <InputField
+            label="Năm công nhận"
+            type="number"
+            value={String(form.gsPgsYear ?? '')}
+            onChange={(v) => set('gsPgsYear', v ? Number(v) : undefined)}
+            placeholder="VD: 2020"
+          />
+          <InputField
+            label="Cơ sở công nhận"
+            value={form.gsPgsInstitution ?? ''}
+            onChange={(v) => set('gsPgsInstitution', v)}
+            placeholder="VD: Hội đồng CDGSNN"
+          />
+          <InputField
+            label="Đơn vị công tác"
+            value={form.institution ?? ''}
+            onChange={(v) => set('institution', v)}
+            placeholder="VD: ĐH FPT"
+            className="md:col-span-2"
+          />
+          <InputField
+            label="Địa chỉ đơn vị"
+            value={form.institutionAddress ?? ''}
+            onChange={(v) => set('institutionAddress', v)}
+            placeholder="VD: Khu CNC Hòa Lạc, Thạch Thất, HN"
+            className="md:col-span-2"
+          />
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Lĩnh vực chuyên môn</label>
-            <Textarea rows={2} value={form.specializationAreas ?? ''}
+            <Textarea
+              rows={2}
+              value={form.specializationAreas ?? ''}
               onChange={(e) => set('specializationAreas', e.target.value)}
-              placeholder="VD: Trí tuệ nhân tạo, Học máy, Xử lý ngôn ngữ tự nhiên" className="resize-none" />
+              placeholder="VD: Trí tuệ nhân tạo, Học máy, Xử lý ngôn ngữ tự nhiên"
+              className="resize-none"
+            />
           </div>
         </div>
       </div>
@@ -152,9 +233,21 @@ export default function MyAcademicProfile({ userId }: { userId: string }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <CountField label="ISI/Scopus" value={form.isiScopusCount} onChange={(v) => set('isiScopusCount', v)} />
           <CountField label="Tạp chí QT" value={form.intlJournalCount} onChange={(v) => set('intlJournalCount', v)} />
-          <CountField label="Tạp chí trong nước" value={form.domesticJournalCount} onChange={(v) => set('domesticJournalCount', v)} />
-          <CountField label="Hội nghị QT" value={form.intlConferenceCount} onChange={(v) => set('intlConferenceCount', v)} />
-          <CountField label="Hội nghị trong nước" value={form.domesticConferenceCount} onChange={(v) => set('domesticConferenceCount', v)} />
+          <CountField
+            label="Tạp chí trong nước"
+            value={form.domesticJournalCount}
+            onChange={(v) => set('domesticJournalCount', v)}
+          />
+          <CountField
+            label="Hội nghị QT"
+            value={form.intlConferenceCount}
+            onChange={(v) => set('intlConferenceCount', v)}
+          />
+          <CountField
+            label="Hội nghị trong nước"
+            value={form.domesticConferenceCount}
+            onChange={(v) => set('domesticConferenceCount', v)}
+          />
           <CountField label="Bằng sáng chế" value={form.patentsCount} onChange={(v) => set('patentsCount', v)} />
         </div>
       </div>
@@ -165,8 +258,16 @@ export default function MyAcademicProfile({ userId }: { userId: string }) {
           <Users className="w-5 h-5 text-blue-600" /> Hướng dẫn nghiên cứu sinh / học viên
         </h3>
         <div className="grid grid-cols-2 gap-4">
-          <CountField label="NCS Tiến sĩ đã hướng dẫn" value={form.phdSupervisedCount} onChange={(v) => set('phdSupervisedCount', v)} />
-          <CountField label="Học viên Thạc sĩ đã hướng dẫn" value={form.masterSupervisedCount} onChange={(v) => set('masterSupervisedCount', v)} />
+          <CountField
+            label="NCS Tiến sĩ đã hướng dẫn"
+            value={form.phdSupervisedCount}
+            onChange={(v) => set('phdSupervisedCount', v)}
+          />
+          <CountField
+            label="Học viên Thạc sĩ đã hướng dẫn"
+            value={form.masterSupervisedCount}
+            onChange={(v) => set('masterSupervisedCount', v)}
+          />
         </div>
       </div>
     </div>
@@ -174,8 +275,20 @@ export default function MyAcademicProfile({ userId }: { userId: string }) {
 }
 
 function InputField({
-  label, value, onChange, placeholder, type = 'text', className = '',
-}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; className?: string }) {
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = 'text',
+  className = '',
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  type?: string
+  className?: string
+}) {
   return (
     <div className={className}>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -185,13 +298,25 @@ function InputField({
 }
 
 function SelectField({
-  label, options, value, onChange,
-}: { label: string; options: string[]; value: string; onChange: (v: string) => void }) {
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string
+  options: string[]
+  value: string
+  onChange: (v: string) => void
+}) {
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       <Select value={value} onChange={(e) => onChange(e.target.value)}>
-        {options.map((o) => <option key={o} value={o}>{o || '— Chọn —'}</option>)}
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o || '— Chọn —'}
+          </option>
+        ))}
       </Select>
     </div>
   )

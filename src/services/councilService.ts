@@ -14,10 +14,7 @@ export const councilService = {
   },
 
   addMember: async (councilId: string, data: AddCouncilMemberRequest) => {
-    const res = await api.post<ApiResponse<CouncilMemberResponse>>(
-      `/api/councils/${councilId}/members`,
-      data
-    )
+    const res = await api.post<ApiResponse<CouncilMemberResponse>>(`/api/councils/${councilId}/members`, data)
     return res.data
   },
 }

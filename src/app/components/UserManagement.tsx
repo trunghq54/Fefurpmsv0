@@ -64,7 +64,6 @@ export default function UserManagement() {
 
   useEffect(() => {
     loadUsers()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const filteredUsers = users.filter((u) => {
@@ -175,8 +174,13 @@ export default function UserManagement() {
           <div className="flex-1 min-w-[300px]">
             <div className="relative">
               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <Input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Tìm kiếm theo tên hoặc email..." className="pl-10" />
+              <Input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Tìm kiếm theo tên hoặc email..."
+                className="pl-10"
+              />
             </div>
           </div>
 
@@ -187,7 +191,9 @@ export default function UserManagement() {
           >
             <option value="all">Tất cả vai trò</option>
             {ALL_ROLES.map((r) => (
-              <option key={r} value={r}>{ROLE_LABEL[r]} ({r})</option>
+              <option key={r} value={r}>
+                {ROLE_LABEL[r]} ({r})
+              </option>
             ))}
           </select>
 
@@ -217,9 +223,7 @@ export default function UserManagement() {
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">Đang hoạt động</p>
-          <p className="text-2xl font-bold text-purple-600 mt-1">
-            {users.filter((u) => u.isActive).length}
-          </p>
+          <p className="text-2xl font-bold text-purple-600 mt-1">{users.filter((u) => u.isActive).length}</p>
         </div>
       </div>
 
@@ -323,25 +327,44 @@ export default function UserManagement() {
           title={editingUser ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}
           onClose={() => setShowModal(false)}
           className="max-w-2xl"
-          footer={<>
-            <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? 'Đang lưu...' : editingUser ? 'Cập nhật' : 'Thêm mới'}</Button>
-          </>}
+          footer={
+            <>
+              <Button variant="outline" onClick={() => setShowModal(false)}>
+                Hủy
+              </Button>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? 'Đang lưu...' : editingUser ? 'Cập nhật' : 'Thêm mới'}
+              </Button>
+            </>
+          }
         >
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Họ tên *</label>
-            <Input type="text" value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} />
+            <Input
+              type="text"
+              value={formData.fullName}
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-              <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                disabled={!!editingUser} className="disabled:text-gray-500" />
+              <Input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                disabled={!!editingUser}
+                className="disabled:text-gray-500"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
-              <Input type="tel" value={formData.phoneNumber} onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} />
+              <Input
+                type="tel"
+                value={formData.phoneNumber}
+                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+              />
             </div>
           </div>
 
@@ -356,8 +379,15 @@ export default function UserManagement() {
                     key={r}
                     className={`flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer ${checked ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
                   >
-                    <input type="checkbox" checked={checked} onChange={() => toggleRole(value)} className="accent-blue-600" />
-                    <span className="text-sm text-gray-800">{ROLE_LABEL[r]} <span className="text-gray-400">({r})</span></span>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleRole(value)}
+                      className="accent-blue-600"
+                    />
+                    <span className="text-sm text-gray-800">
+                      {ROLE_LABEL[r]} <span className="text-gray-400">({r})</span>
+                    </span>
                   </label>
                 )
               })}
@@ -367,17 +397,28 @@ export default function UserManagement() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Khoa</label>
-            <Select value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })}>
+            <Select
+              value={formData.department}
+              onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+            >
               <option value="">Chọn khoa</option>
-              {departments.map((dept) => (<option key={dept} value={dept}>{dept}</option>))}
+              {departments.map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
+              ))}
             </Select>
           </div>
 
           {!editingUser && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu tạm thời *</label>
-              <Input type="password" value={formData.temporaryPassword} onChange={(e) => setFormData({ ...formData, temporaryPassword: e.target.value })}
-                placeholder="Người dùng phải đổi mật khẩu khi đăng nhập lần đầu" />
+              <Input
+                type="password"
+                value={formData.temporaryPassword}
+                onChange={(e) => setFormData({ ...formData, temporaryPassword: e.target.value })}
+                placeholder="Người dùng phải đổi mật khẩu khi đăng nhập lần đầu"
+              />
             </div>
           )}
 

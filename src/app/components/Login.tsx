@@ -59,21 +59,31 @@ export default function Login() {
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                className="px-4 py-3 focus:border-transparent" placeholder="Nhập email" required disabled={loading} />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="px-4 py-3 focus:border-transparent"
+                placeholder="Nhập email"
+                required
+                disabled={loading}
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu</label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                className="px-4 py-3 focus:border-transparent" placeholder="Nhập mật khẩu" required disabled={loading} />
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="px-4 py-3 focus:border-transparent"
+                placeholder="Nhập mật khẩu"
+                required
+                disabled={loading}
+              />
             </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
+            {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>}
 
             <Button type="submit" disabled={loading} className="w-full py-3 font-semibold shadow-lg hover:shadow-xl">
               {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
