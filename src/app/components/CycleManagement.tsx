@@ -1,38 +1,34 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit, X, Power, Layers, CalendarRange, Wallet } from 'lucide-react'
 import { cycleService } from '../../services/cycleService'
-import type { CycleDto } from '../../types/cycle'
+import type { CycleDto, ResearchTypeOption } from '../../types/cycle'
 import TrackWorkspace from './TrackWorkspace'
 import { Button, Input, Textarea } from './ui-kit'
 
 interface CycleForm {
   name: string
   academicYear: string
+  researchTypeId: number
   submissionStartDate: string
-  submissionEndDateApplied: string
-  submissionEndDateBasic: string
-  fundingCapApplied: number
-  fundingCapBasic: number
+  submissionDeadline: string
   description: string
 }
 
 const defaultForm: CycleForm = {
   name: '',
   academicYear: '',
+  researchTypeId: 0,
   submissionStartDate: '',
-  submissionEndDateApplied: '',
-  submissionEndDateBasic: '',
-  fundingCapApplied: 150_000_000,
-  fundingCapBasic: 100_000_000,
+  submissionDeadline: '',
   description: '',
 }
 
 const toDateInput = (iso: string) => (iso ? iso.slice(0, 10) : '')
-const toIso = (d: string) => (d ? `${d}T00:00:00Z` : '')
 const formatVnd = (n: number) => n.toLocaleString('vi-VN') + ' ₫'
 
 export default function CycleManagement() {
   const [cycles, setCycles] = useState<CycleDto[]>([])
+  const [researchTypes, setResearchTypes] = useState<ResearchTypeOption[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingCycle, setEditingCycle] = useState<CycleDto | null>(null)
@@ -42,11 +38,14 @@ export default function CycleManagement() {
   const [workspaceCycle, setWorkspaceCycle] = useState<CycleDto | null>(null)
 
   useEffect(() => {
-    cycleService.getAll().then((res) => {
-      if (res.success && res.data) setCycles(res.data)
+    Promise.all([cycleService.getAll(), cycleService.getResearchTypes()]).then(([cycleRes, typeRes]) => {
+      if (cycleRes.success && cycleRes.data) setCycles(cycleRes.data)
+      if (typeRes.success && typeRes.data) setResearchTypes(typeRes.data)
       setLoading(false)
     })
   }, [])
+
+  const selectedType = researchTypes.find((t) => t.id === formData.researchTypeId) ?? null
 
   const handleOpenModal = (cycle?: CycleDto) => {
     if (cycle) {
@@ -54,11 +53,9 @@ export default function CycleManagement() {
       setFormData({
         name: cycle.name,
         academicYear: cycle.academicYear,
+        researchTypeId: cycle.researchTypeId,
         submissionStartDate: toDateInput(cycle.submissionStartDate),
-        submissionEndDateApplied: toDateInput(cycle.submissionEndDateApplied),
-        submissionEndDateBasic: toDateInput(cycle.submissionEndDateBasic),
-        fundingCapApplied: cycle.fundingCapApplied,
-        fundingCapBasic: cycle.fundingCapBasic,
+        submissionDeadline: toDateInput(cycle.submissionDeadline),
         description: cycle.description || '',
       })
     } else {
@@ -74,7 +71,11 @@ export default function CycleManagement() {
       setFormError('Tên đợt và năm học là bắt buộc')
       return
     }
-    if (!formData.submissionStartDate || !formData.submissionEndDateApplied || !formData.submissionEndDateBasic) {
+    if (!formData.researchTypeId) {
+      setFormError('Vui lòng chọn loại đề tài')
+      return
+    }
+    if (!formData.submissionStartDate || !formData.submissionDeadline) {
       setFormError('Vui lòng nhập đầy đủ các mốc thời gian')
       return
     }
@@ -84,11 +85,9 @@ export default function CycleManagement() {
       const payload = {
         name: formData.name,
         academicYear: formData.academicYear,
-        submissionStartDate: toIso(formData.submissionStartDate),
-        submissionEndDateApplied: toIso(formData.submissionEndDateApplied),
-        submissionEndDateBasic: toIso(formData.submissionEndDateBasic),
-        fundingCapApplied: Number(formData.fundingCapApplied),
-        fundingCapBasic: Number(formData.fundingCapBasic),
+        researchTypeId: formData.researchTypeId,
+        submissionStartDate: formData.submissionStartDate,
+        submissionDeadline: formData.submissionDeadline,
         description: formData.description || undefined,
       }
       if (editingCycle) {
@@ -108,8 +107,9 @@ export default function CycleManagement() {
           setFormError(res.message || 'Tạo đợt thất bại')
         }
       }
-    } catch (err: any) {
-      setFormError(err.response?.data?.message || err.message || 'Có lỗi xảy ra')
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } }; message?: string }
+      setFormError(e.response?.data?.message || e.message || 'Có lỗi xảy ra')
     } finally {
       setSaving(false)
     }
@@ -126,7 +126,6 @@ export default function CycleManagement() {
     }
   }
 
-  // Track workspace (6.4)
   if (workspaceCycle) {
     return <TrackWorkspace cycle={workspaceCycle} onBack={() => setWorkspaceCycle(null)} />
   }
@@ -138,7 +137,7 @@ export default function CycleManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Quản lý Đợt nộp (Cycles)</h2>
-          <p className="text-gray-500 mt-1">Cấu hình đợt NCKH, mốc thời gian và hạn mức kinh phí</p>
+          <p className="text-gray-500 mt-1">Cấu hình đợt NCKH — mỗi đợt thuộc một loại đề tài</p>
         </div>
         <Button onClick={() => handleOpenModal()}>
           <Plus className="w-5 h-5" /> Tạo đợt mới
@@ -176,6 +175,7 @@ export default function CycleManagement() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Đợt nộp</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Loại đề tài</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Thời gian nộp</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Hạn mức KP</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Trạng thái</th>
@@ -196,17 +196,16 @@ export default function CycleManagement() {
                         </div>
                       </div>
                     </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {cycle.researchTypeName || '—'}
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       <p>Mở: {new Date(cycle.submissionStartDate).toLocaleDateString('vi-VN')}</p>
-                      <p>Quý I: {new Date(cycle.submissionEndDateApplied).toLocaleDateString('vi-VN')}</p>
-                      <p>Quý II: {new Date(cycle.submissionEndDateBasic).toLocaleDateString('vi-VN')}</p>
+                      <p>Hạn nộp: {new Date(cycle.submissionDeadline).toLocaleDateString('vi-VN')}</p>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       <p className="flex items-center gap-1">
-                        <Wallet className="w-4 h-4 text-gray-400" /> Applied: {formatVnd(cycle.fundingCapApplied)}
-                      </p>
-                      <p className="flex items-center gap-1">
-                        <Wallet className="w-4 h-4 text-gray-400" /> Basic: {formatVnd(cycle.fundingCapBasic)}
+                        <Wallet className="w-4 h-4 text-gray-400" /> {formatVnd(cycle.fundingCap)}
                       </p>
                     </td>
                     <td className="px-6 py-4">
@@ -287,9 +286,36 @@ export default function CycleManagement() {
                     type="text"
                     value={formData.academicYear}
                     onChange={(e) => setFormData({ ...formData, academicYear: e.target.value })}
-                    placeholder="vd: 2025-2026"
+                    placeholder="vd: 2026"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Loại đề tài *</label>
+                  <select
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formData.researchTypeId}
+                    onChange={(e) => setFormData({ ...formData, researchTypeId: Number(e.target.value) })}
+                  >
+                    <option value={0}>-- Chọn loại --</option>
+                    {researchTypes.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {selectedType && (
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Hạn mức kinh phí tối đa (theo loại)
+                    </label>
+                    <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700">
+                      <Wallet className="w-4 h-4 text-gray-400" />
+                      {formatVnd(selectedType.maxBudgetCap)}
+                      <span className="text-gray-400 ml-1">(chỉ xem — xác định theo loại đề tài)</span>
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Ngày mở nộp *</label>
                   <Input
@@ -299,35 +325,11 @@ export default function CycleManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Hạn Quý I (Applied) *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Hạn nộp đề cương *</label>
                   <Input
                     type="date"
-                    value={formData.submissionEndDateApplied}
-                    onChange={(e) => setFormData({ ...formData, submissionEndDateApplied: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Hạn Quý II (Basic) *</label>
-                  <Input
-                    type="date"
-                    value={formData.submissionEndDateBasic}
-                    onChange={(e) => setFormData({ ...formData, submissionEndDateBasic: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Hạn mức KP Applied (₫)</label>
-                  <Input
-                    type="number"
-                    value={formData.fundingCapApplied}
-                    onChange={(e) => setFormData({ ...formData, fundingCapApplied: Number(e.target.value) })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Hạn mức KP Basic (₫)</label>
-                  <Input
-                    type="number"
-                    value={formData.fundingCapBasic}
-                    onChange={(e) => setFormData({ ...formData, fundingCapBasic: Number(e.target.value) })}
+                    value={formData.submissionDeadline}
+                    onChange={(e) => setFormData({ ...formData, submissionDeadline: e.target.value })}
                   />
                 </div>
                 <div className="col-span-2">

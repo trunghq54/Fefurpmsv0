@@ -297,7 +297,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   }, [showSubmissions])
 
   const activeTracks = (activeCycle?.tracks || []).filter((t) => t.isActive)
-  const fundingCap = researchType === 1 ? (activeCycle?.fundingCapApplied ?? 0) : (activeCycle?.fundingCapBasic ?? 0)
+  const fundingCap = activeCycle?.fundingCap ?? 0
   const totalBudget = budgetItems.reduce((s, b) => s + (Number(b.amount) || 0), 0)
   const overCap = activeCycle != null && totalBudget > fundingCap
 
@@ -639,8 +639,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                   Đợt đang mở: {activeCycle.name} ({activeCycle.academicYear})
                 </p>
                 <p className="text-sm text-blue-700">
-                  Hạn nộp Quý I: {new Date(activeCycle.submissionEndDateApplied).toLocaleDateString('vi-VN')} · Hạn mức:
-                  Applied {formatVnd(activeCycle.fundingCapApplied)} / Basic {formatVnd(activeCycle.fundingCapBasic)}
+                  Hạn nộp: {new Date(activeCycle.submissionDeadline).toLocaleDateString('vi-VN')} · Hạn mức: {formatVnd(activeCycle.fundingCap)}
                 </p>
               </>
             ) : (
@@ -813,8 +812,8 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                             onChange={(e) => setResearchType(Number(e.target.value))}
                             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                           >
-                            <option value={1}>Applied (Quý I)</option>
-                            <option value={2}>Basic (Quý II)</option>
+                            <option value={1}>Ứng dụng</option>
+                            <option value={2}>Cơ bản</option>
                           </select>
                         </div>
                         <div>
@@ -1105,7 +1104,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                         <Row label="Tên đề tài (VI)" value={titleVI || '—'} />
                         <Row label="Tên đề tài (EN)" value={titleEN || '—'} />
                         <Row label="Track" value={activeTracks.find((t) => t.id === trackId)?.name || '—'} />
-                        <Row label="Loại nghiên cứu" value={researchType === 1 ? 'Applied' : 'Basic'} />
+                        <Row label="Loại nghiên cứu" value={researchType === 1 ? 'Ứng dụng' : 'Cơ bản'} />
                         <Row label="Thời gian" value={`${durationMonths} tháng`} />
                         <Row label="Số thành viên" value={String(members.filter((m) => m.fullName.trim()).length)} />
                         <Row

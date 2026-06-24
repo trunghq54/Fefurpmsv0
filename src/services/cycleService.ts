@@ -1,6 +1,6 @@
 import api from '../lib/api'
 import type { ApiResponse } from '../types/auth'
-import type { CycleDto, TrackDto, CreateCycleRequest, CreateTrackRequest } from '../types/cycle'
+import type { CycleDto, TrackDto, CreateCycleRequest, CreateTrackRequest, ResearchTypeOption } from '../types/cycle'
 
 interface UpdateTrackRequest {
   name?: string
@@ -11,6 +11,11 @@ interface AssignOwnerRequest {
 }
 
 export const cycleService = {
+  getResearchTypes: async () => {
+    const res = await api.get<ApiResponse<ResearchTypeOption[]>>('/api/cycles/research-types')
+    return res.data
+  },
+
   getAll: async () => {
     const res = await api.get<ApiResponse<CycleDto[]>>('/api/cycles')
     return res.data

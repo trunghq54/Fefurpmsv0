@@ -9,16 +9,23 @@ export interface TrackDto {
   createdAt: string
 }
 
+export interface ResearchTypeOption {
+  id: number
+  code: string
+  name: string
+  maxBudgetCap: number
+}
+
 export interface CycleDto {
   id: string
   name: string
   academicYear: string
   status: string
+  researchTypeId: number
+  researchTypeName: string
   submissionStartDate: string
-  submissionEndDateApplied: string
-  submissionEndDateBasic: string
-  fundingCapApplied: number
-  fundingCapBasic: number
+  submissionDeadline: string
+  fundingCap: number
   description?: string
   createdAt: string
   trackCount: number
@@ -28,11 +35,9 @@ export interface CycleDto {
 export interface CreateCycleRequest {
   name: string
   academicYear: string
+  researchTypeId: number
   submissionStartDate: string
-  submissionEndDateApplied: string
-  submissionEndDateBasic: string
-  fundingCapApplied: number
-  fundingCapBasic: number
+  submissionDeadline: string
   description?: string
 }
 

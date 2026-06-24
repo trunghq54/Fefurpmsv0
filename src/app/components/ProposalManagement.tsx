@@ -120,8 +120,8 @@ export default function ProposalManagement() {
           </Select>
           <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="w-auto">
             <option value="all">Tất cả loại</option>
-            <option value="Applied">Applied</option>
-            <option value="Basic">Basic</option>
+            <option value="Applied">Ứng dụng</option>
+            <option value="Basic">Cơ bản</option>
           </Select>
         </div>
       </div>

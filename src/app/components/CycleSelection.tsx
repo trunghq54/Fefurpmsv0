@@ -46,10 +46,10 @@ export default function CycleSelection({ onSelect }: { onSelect: (cycle: CycleDt
                     {c.name} <span className="text-gray-400 font-normal">· Năm học {c.academicYear}</span>
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    Cửa sổ nộp: <b>{fmtDate(c.submissionStartDate)}</b> – <b>{fmtDate(c.submissionEndDateApplied)}</b>
+                    Cửa sổ nộp: <b>{fmtDate(c.submissionStartDate)}</b> – <b>{fmtDate(c.submissionDeadline)}</b>
                   </p>
                   <p className="text-sm text-gray-500 mt-0.5">
-                    Hạn mức: Ứng dụng {fmtVnd(c.fundingCapApplied)} · Cơ bản {fmtVnd(c.fundingCapBasic)}
+                    Loại: {c.researchTypeName} · Hạn mức: {fmtVnd(c.fundingCap)}
                   </p>
                   {c.description && <p className="text-sm text-gray-400 mt-1">{c.description}</p>}
                 </div>
