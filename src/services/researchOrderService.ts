@@ -11,6 +11,7 @@ export interface ResearchOrderDto {
   expectedProducts?: string
   status: string
   matchedProposalId?: string
+  registeredCount?: number // số PI đã đăng ký (cạnh tranh)
   createdBy: string
   createdAt: string
 }

@@ -105,6 +105,7 @@ export interface CreateBudgetItemRequest {
 
 export interface CreateProposalRequest {
   cycleId?: number
+  orderId?: number // Applied: đề tài đặt hàng PI đăng ký (nhiều PI cùng OrderId = cạnh tranh)
   trackId: string
   titleVI: string
   titleEN: string

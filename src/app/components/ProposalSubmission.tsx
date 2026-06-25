@@ -30,6 +30,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import MyAcademicProfile from './MyAcademicProfile'
 import { cycleService } from '../../services/cycleService'
 import { proposalService } from '../../services/proposalService'
+import { researchOrderService } from '../../services/researchOrderService'
+import type { ResearchOrderDto } from '../../services/researchOrderService'
 import { changeRequestService } from '../../services/changeRequestService'
 import { roundService } from '../../services/roundService'
 import { budgetExpenseCategoryService } from '../../services/masterDataService'
@@ -91,6 +93,9 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   // Luồng mới: chọn đợt → workspace
   const [pickingCycle, setPickingCycle] = useState(false)
   const [selectedCycleId, setSelectedCycleId] = useState<number | undefined>(undefined)
+  // Applied: đề tài đặt hàng PI đăng ký (nhiều PI cùng OrderId = cạnh tranh, chọn 1 winner)
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null)
+  const [orders, setOrders] = useState<ResearchOrderDto[]>([])
   const [workspaceId, setWorkspaceId] = useState<string | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
 
@@ -333,6 +338,17 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   const totalBudget = budgetItems.reduce((s, b) => s + (Number(b.amount) || 0), 0)
   const overCap = activeCycle != null && totalBudget > fundingCap
 
+  // Nạp danh mục đề tài đặt hàng (OPEN) của đợt đang mở — cho PI đăng ký (Applied).
+  useEffect(() => {
+    if (!activeCycle?.id) {
+      setOrders([])
+      return
+    }
+    researchOrderService.getAll({ cycleId: Number(activeCycle.id), status: 'OPEN' }).then((res) => {
+      if (res.success && res.data) setOrders(res.data)
+    })
+  }, [activeCycle?.id])
+
   const resetForm = () => {
     setTitleVI('')
     setTitleEN('')
@@ -345,6 +361,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     setMembers([{ ...emptyMember, role: 'Chủ nhiệm' }])
     setBudgetItems([{ ...emptyBudget }])
     setPendingDocs([])
+    setSelectedOrderId(null)
     setCurrentStep(1)
     setError('')
   }
@@ -478,6 +495,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
     setError('')
     const payload = {
       cycleId: selectedCycleId,
+      orderId: selectedOrderId ?? undefined,
       trackId,
       titleVI,
       titleEN,
@@ -831,6 +849,55 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                         </button>
                         {extractMsg && <p className="text-xs mt-2 text-gray-700">{extractMsg}</p>}
                       </div>
+
+                      {/* Applied: danh mục đề tài đặt hàng để PI đăng ký (cạnh tranh, chọn 1 winner) */}
+                      {researchType === 1 && orders.length > 0 && (
+                        <div className="rounded-xl border border-amber-300 bg-amber-50/50 p-4">
+                          <p className="text-sm font-medium text-amber-800">Đề tài đặt hàng (Ứng dụng)</p>
+                          <p className="text-xs text-gray-500 mt-0.5 mb-2">
+                            Chọn 1 đề tài đặt hàng để đăng ký. Nhiều giảng viên có thể cùng đăng ký — hội đồng chọn 1 người.
+                          </p>
+                          <div className="space-y-2">
+                            {orders.map((o) => (
+                              <div
+                                key={o.id}
+                                className={`flex items-start justify-between gap-3 rounded-lg border p-3 ${
+                                  selectedOrderId === o.id ? 'border-amber-500 bg-amber-100/60' : 'border-gray-200 bg-white'
+                                }`}
+                              >
+                                <div>
+                                  <p className="text-sm font-medium text-gray-800">{o.researchArea}</p>
+                                  <p className="text-xs text-gray-500">{o.problemDescription}</p>
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    Đặt hàng bởi: {o.orderingUnitName ?? '—'} · {o.registeredCount ?? 0} PI đã đăng ký
+                                  </p>
+                                </div>
+                                {selectedOrderId === o.id ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedOrderId(null)}
+                                    className="shrink-0 text-xs px-2 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50"
+                                  >
+                                    Bỏ chọn
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedOrderId(o.id)
+                                      if (!titleVI.trim()) setTitleVI(o.researchArea)
+                                      if (!objectives.trim()) setObjectives(o.problemDescription)
+                                    }}
+                                    className="shrink-0 text-xs px-2 py-1 rounded bg-amber-600 text-white hover:bg-amber-700"
+                                  >
+                                    Đăng ký
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
