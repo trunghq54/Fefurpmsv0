@@ -117,6 +117,26 @@ export const scoringService = {
     return res.data
   },
 
+  // Thư ký soạn/sửa biên bản (nháp) — chưa khóa, chưa đổi status đề tài.
+  saveMinutes: async (
+    councilId: string,
+    data: { result: string; councilComments?: string; recommendations?: string },
+  ) => {
+    const res = await api.post<ApiResponse<CouncilDecisionDto>>(
+      `/api/review-scoring/councils/${councilId}/minutes`,
+      data,
+    )
+    return res.data
+  },
+
+  // Chủ tịch duyệt = khóa biên bản + cập nhật status đề tài.
+  approveMinutes: async (councilId: string) => {
+    const res = await api.post<ApiResponse<CouncilDecisionDto>>(
+      `/api/review-scoring/councils/${councilId}/minutes/approve`,
+    )
+    return res.data
+  },
+
   // Aliases used by ReviewerInterface — maps councilId-based scoring
   getRubric: async (councilId: string) => {
     const res = await api.get<ApiResponse<ReviewScoreDto | null>>(`/api/review-scoring/councils/${councilId}/scores/my`)

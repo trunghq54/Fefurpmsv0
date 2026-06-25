@@ -15,7 +15,7 @@ import {
 import { reviewerFeedbackService } from '../../services/reviewerFeedbackService'
 import { roundService } from '../../services/roundService'
 import { scoringService } from '../../services/scoringService'
-import type { SubmitScoreRequest, RubricTemplateDto } from '../../services/scoringService'
+import type { SubmitScoreRequest, RubricTemplateDto, CouncilDecisionDto } from '../../services/scoringService'
 import { aiService } from '../../services/aiService'
 import { proposalService } from '../../services/proposalService'
 import RoleSwitcher from './RoleSwitcher'
@@ -222,6 +222,8 @@ function ScoringPanel({ assignment, onBack }: { assignment: MyAssignmentDto; onB
       ) : (
         <RubricForm assignment={assignment} onDone={onBack} />
       )}
+
+      <MinutesPanel assignment={assignment} />
 
       <FeedbackPanel councilId={assignment.councilId} />
     </div>
@@ -477,6 +479,150 @@ function VoteForm({ assignment, onDone }: { assignment: MyAssignmentDto; onDone:
           Xong
         </Button>
       </div>
+    </div>
+  )
+}
+
+// Biên bản hội đồng: Thư ký soạn nháp → Chủ tịch duyệt = khóa (điểm/phiếu chỉ tham khảo).
+function MinutesPanel({ assignment }: { assignment: MyAssignmentDto }) {
+  const councilId = assignment.councilId
+  const isSecretary = assignment.role === 'Secretary'
+  const isChair = assignment.role === 'Chair'
+
+  const [decision, setDecision] = useState<CouncilDecisionDto | null>(null)
+  const [result, setResult] = useState('APPROVED')
+  const [comments, setComments] = useState('')
+  const [recommendations, setRecommendations] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState('')
+
+  useEffect(() => {
+    scoringService.getDecision(councilId).then((res) => {
+      if (res.success && res.data) {
+        setDecision(res.data)
+        setResult(res.data.result || 'APPROVED')
+        setComments(res.data.councilComments || '')
+        setRecommendations(res.data.recommendations || '')
+      }
+    })
+  }, [councilId])
+
+  // Chỉ Thư ký / Chủ tịch thấy panel này.
+  if (!isSecretary && !isChair) return null
+
+  const locked = !!decision?.finalizedAt
+  const RESULT_LABEL: Record<string, string> = {
+    APPROVED: 'Đạt (APPROVED)',
+    REJECTED: 'Không đạt (REJECTED)',
+    REVISION_REQUIRED: 'Cần chỉnh sửa (REVISION_REQUIRED)',
+  }
+
+  const saveDraft = async () => {
+    setBusy(true)
+    setMsg('')
+    try {
+      const res = await scoringService.saveMinutes(councilId, {
+        result,
+        councilComments: comments || undefined,
+        recommendations: recommendations || undefined,
+      })
+      if (res.success && res.data) {
+        setDecision(res.data)
+        setMsg('✅ Đã lưu nháp biên bản (chưa khóa, chưa đổi trạng thái đề tài).')
+      } else setMsg(res.message || 'Lưu thất bại')
+    } catch (e: any) {
+      setMsg(e?.response?.data?.message || 'Lỗi khi lưu biên bản')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const approve = async () => {
+    if (!window.confirm('Duyệt & KHÓA biên bản? Sau khi khóa không sửa được và sẽ cập nhật trạng thái đề tài.')) return
+    setBusy(true)
+    setMsg('')
+    try {
+      const res = await scoringService.approveMinutes(councilId)
+      if (res.success && res.data) {
+        setDecision(res.data)
+        setMsg('✅ Đã duyệt & khóa biên bản. Trạng thái đề tài đã cập nhật.')
+      } else setMsg(res.message || 'Duyệt thất bại')
+    } catch (e: any) {
+      setMsg(e?.response?.data?.message || 'Lỗi khi duyệt biên bản')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-800">Biên bản hội đồng</h3>
+        {locked ? (
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Đã khóa</span>
+        ) : (
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Nháp</span>
+        )}
+      </div>
+
+      {decision && (
+        <p className="text-xs text-gray-500">
+          Tham khảo: điểm TB {decision.averageScore ?? '—'} · {decision.validBallots}/{decision.attendingMembers} phiếu
+          hợp lệ. (Kết quả do Chủ tịch chốt, hệ thống không tự đếm phiếu.)
+        </p>
+      )}
+
+      {locked ? (
+        <div className="text-sm text-gray-700">
+          <p>
+            Kết quả: <b>{RESULT_LABEL[decision!.result] ?? decision!.result}</b>
+          </p>
+          {decision?.councilComments && <p className="mt-1 whitespace-pre-wrap">{decision.councilComments}</p>}
+        </div>
+      ) : (
+        <>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Kết quả</label>
+            <select
+              value={result}
+              onChange={(e) => setResult(e.target.value)}
+              disabled={!isSecretary}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100"
+            >
+              <option value="APPROVED">Đạt (APPROVED)</option>
+              <option value="REJECTED">Không đạt (REJECTED)</option>
+              <option value="REVISION_REQUIRED">Cần chỉnh sửa (REVISION_REQUIRED)</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nội dung biên bản</label>
+            <Textarea
+              value={comments}
+              onChange={(e) => setComments(e.target.value)}
+              rows={3}
+              disabled={!isSecretary}
+              className="px-4 resize-y disabled:bg-gray-100"
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            {isSecretary && (
+              <Button onClick={saveDraft} disabled={busy}>
+                {busy ? 'Đang lưu...' : 'Lưu nháp biên bản'}
+              </Button>
+            )}
+            {isChair && (
+              <Button variant="success" onClick={approve} disabled={busy || !decision}>
+                {busy ? 'Đang xử lý...' : 'Duyệt & khóa biên bản'}
+              </Button>
+            )}
+            {isChair && !decision && (
+              <span className="text-xs text-gray-400">Chờ Thư ký soạn biên bản trước.</span>
+            )}
+          </div>
+        </>
+      )}
+
+      {msg && <p className="text-xs text-gray-700">{msg}</p>}
     </div>
   )
 }
