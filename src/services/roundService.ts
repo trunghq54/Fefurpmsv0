@@ -150,6 +150,12 @@ export const roundService = {
     await api.delete(`/api/rounds/${roundId}/members/${memberId}`)
   },
 
+  // POST /api/councils/{councilId}/send-invitations → gửi thư mời đồng loạt
+  sendInvitations: async (councilId: string): Promise<ApiResponse<unknown>> => {
+    const res = await api.post<ApiResponse<unknown>>(`/api/councils/${councilId}/send-invitations`, {})
+    return res.data
+  },
+
   // PATCH /api/council-members/{memberId}/respond
   respond: async (memberId: string, accept: boolean): Promise<ApiResponse<ReviewAssignmentDto>> => {
     const res = await api.patch<ApiResponse<BeCouncilMember>>(`/api/council-members/${memberId}/respond`, { accept })

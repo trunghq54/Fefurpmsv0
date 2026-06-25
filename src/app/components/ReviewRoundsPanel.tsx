@@ -10,7 +10,12 @@ import type { ReviewRoundDto } from '../../types/review'
 import { ROUND_TYPE_LABEL, ROUND_STATUS_LABEL, ASSIGNMENT_ROLE } from '../../types/review'
 import type { UserDto } from '../../types/user'
 
-const ROLE_LABEL: Record<string, string> = { Member: 'Thành viên', Chair: 'Chủ tịch', Opponent: 'Phản biện' }
+const ROLE_LABEL: Record<string, string> = {
+  Member: 'Thành viên',
+  Chair: 'Chủ tịch',
+  Secretary: 'Thư ký',
+  Opponent: 'Phản biện',
+}
 const MEMBER_STATUS_COLOR: Record<string, string> = {
   Pending: 'bg-yellow-100 text-yellow-800',
   Accepted: 'bg-green-100 text-green-800',
@@ -56,6 +61,21 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
       if (res.success && res.data) setRounds((prev) => [...prev, res.data!])
     } finally {
       setCreating(false)
+    }
+  }
+
+  // Gán reviewer hết rồi bấm 1 nút gửi thư mời đồng loạt (tránh spam khi còn sửa).
+  const handleSendInvites = async (councilId?: string) => {
+    if (!councilId) return
+    setBusy(true)
+    try {
+      const res = await roundService.sendInvitations(councilId)
+      window.alert(res.message || 'Đã gửi thư mời.')
+      loadRounds()
+    } catch (e: any) {
+      window.alert(e?.response?.data?.message || 'Gửi thư mời thất bại')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -231,10 +251,20 @@ export default function ReviewRoundsPanel({ proposalId }: { proposalId: string }
                 >
                   <option value="Member">Thành viên</option>
                   <option value="Chair">Chủ tịch</option>
+                  <option value="Secretary">Thư ký</option>
                   <option value="Opponent">Phản biện</option>
                 </Select>
                 <Button variant="success" size="sm" onClick={() => handleAssign(round.id)} disabled={busy}>
                   <Plus className="w-4 h-4" /> Phân công
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSendInvites(round.councilId)}
+                  disabled={busy || !round.councilId}
+                  title="Gửi thư mời xác nhận cho toàn bộ thành viên đã gán"
+                >
+                  <UserCheck className="w-4 h-4" /> Gửi thư mời
                 </Button>
               </div>
               {assignError[round.id] && (

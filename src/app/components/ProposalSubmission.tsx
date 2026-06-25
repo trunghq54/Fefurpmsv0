@@ -113,6 +113,38 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   const docFileRef = useRef<HTMLInputElement>(null)
   const [pendingDocType, setPendingDocType] = useState('Proposal')
 
+  // Đường B: upload đề cương → AI trích xuất → prefill form (nhập tay vẫn là fallback).
+  const aiFileRef = useRef<HTMLInputElement>(null)
+  const [extracting, setExtracting] = useState(false)
+  const [extractMsg, setExtractMsg] = useState('')
+
+  const handleExtract = async (file: File) => {
+    setExtracting(true)
+    setExtractMsg('')
+    try {
+      const res = await proposalService.extract(file)
+      if (res.success && res.data) {
+        const d = res.data
+        if (d.titleVi) setTitleVI(d.titleVi)
+        if (d.titleEn) setTitleEN(d.titleEn)
+        if (d.researchObjectives) setObjectives(d.researchObjectives)
+        else if (d.abstractVi) setObjectives(d.abstractVi)
+        if (d.methodology) setMethodology(d.methodology)
+        if (d.expectedOutput) setExpectedOutput(d.expectedOutput)
+        if (d.durationMonths) setDurationMonths(d.durationMonths)
+        // Giữ file gốc làm tài liệu đính kèm (cả 2 đường).
+        setPendingDocs((prev) => [...prev, { file, documentType: 'Proposal' }])
+        setExtractMsg(d.warning ? `⚠️ ${d.warning}` : '✅ Đã điền từ AI — vui lòng kiểm tra & chỉnh sửa trước khi nộp.')
+      } else {
+        setExtractMsg(res.message || 'Trích xuất thất bại — vui lòng nhập tay.')
+      }
+    } catch (e: any) {
+      setExtractMsg(e?.response?.data?.message || 'Lỗi khi trích xuất — vui lòng nhập tay.')
+    } finally {
+      setExtracting(false)
+    }
+  }
+
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -771,6 +803,35 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                   {currentStep === 1 && (
                     <div className="space-y-5">
                       <h2 className="text-xl font-semibold text-gray-800">Thông tin cơ bản</h2>
+
+                      {/* Đường B: upload đề cương Word/PDF để AI tự điền (tùy chọn) */}
+                      <div className="rounded-xl border border-dashed border-blue-300 bg-blue-50/50 p-4">
+                        <p className="text-sm font-medium text-blue-800">Điền nhanh bằng AI (tùy chọn)</p>
+                        <p className="text-xs text-gray-500 mt-0.5 mb-2">
+                          Upload file đề cương (PDF/Word) → AI đọc & tự điền các ô bên dưới. Bạn vẫn có thể sửa tay hoặc bỏ qua.
+                        </p>
+                        <input
+                          ref={aiFileRef}
+                          type="file"
+                          accept=".pdf,.docx,.txt"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0]
+                            if (f) handleExtract(f)
+                            e.target.value = ''
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => aiFileRef.current?.click()}
+                          disabled={extracting}
+                          className="px-3 py-1.5 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                        >
+                          {extracting ? 'Đang đọc file...' : 'Upload & để AI điền'}
+                        </button>
+                        {extractMsg && <p className="text-xs mt-2 text-gray-700">{extractMsg}</p>}
+                      </div>
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Tên đề tài (Tiếng Việt) *

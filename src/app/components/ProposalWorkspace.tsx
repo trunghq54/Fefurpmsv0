@@ -61,18 +61,27 @@ export default function ProposalWorkspace({
 
   const isDraft = p?.status?.toUpperCase() === 'DRAFT'
 
-  const submit = async () => {
+  const submit = async (confirmCv = false) => {
     setSubmitting(true)
     setSubmitMsg('')
     try {
-      const res = await proposalService.submit(proposalId)
+      const res = await proposalService.submit(proposalId, confirmCv)
       if (res.success) {
         setSubmitMsg('OK')
         onChanged?.()
         load()
       } else setSubmitMsg(res.message || 'Nộp thất bại')
     } catch (e: any) {
-      setSubmitMsg(e?.response?.data?.message || 'Có lỗi khi nộp')
+      const msg = e?.response?.data?.message || 'Có lỗi khi nộp'
+      // Nhắc cập nhật CV: BE trả 409 khi CV thiếu/cũ → cho PI xác nhận rồi nộp lại.
+      if (!confirmCv && /CV|lý lịch/i.test(msg)) {
+        setSubmitting(false)
+        if (window.confirm(`${msg}\n\nBạn xác nhận lý lịch khoa học vẫn đúng và muốn nộp?`)) {
+          await submit(true)
+        }
+        return
+      }
+      setSubmitMsg(msg)
     } finally {
       setSubmitting(false)
     }
@@ -103,7 +112,7 @@ export default function ProposalWorkspace({
           </div>
         </div>
         {isDraft && (
-          <Button variant="success" size="lg" onClick={submit} disabled={submitting}>
+          <Button variant="success" size="lg" onClick={() => submit()} disabled={submitting}>
             {submitMsg === 'OK' ? <CheckCircle className="w-4 h-4" /> : <Send className="w-4 h-4" />}
             {submitMsg === 'OK' ? 'Đã nộp' : submitting ? 'Đang nộp...' : 'Nộp duyệt'}
           </Button>

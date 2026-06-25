@@ -29,6 +29,18 @@ export interface ProposalDocumentDto {
   principalInvestigatorName?: string
 }
 
+export interface ExtractedProposalDto {
+  titleVi?: string
+  titleEn?: string
+  abstractVi?: string
+  researchObjectives?: string
+  methodology?: string
+  expectedOutput?: string
+  durationMonths?: number
+  totalBudget?: number
+  warning?: string
+}
+
 export interface ProposalDto {
   id: string
   cycleId: string

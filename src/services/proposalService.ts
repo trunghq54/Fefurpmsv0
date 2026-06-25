@@ -1,6 +1,12 @@
 import api from '../lib/api'
 import type { ApiResponse } from '../types/auth'
-import type { ProposalDto, ProposalSummaryDto, CreateProposalRequest, ProposalDocumentDto } from '../types/proposal'
+import type {
+  ProposalDto,
+  ProposalSummaryDto,
+  CreateProposalRequest,
+  ProposalDocumentDto,
+  ExtractedProposalDto,
+} from '../types/proposal'
 
 export interface ProposalQuery {
   cycleId?: string
@@ -31,13 +37,22 @@ export const proposalService = {
     return res.data
   },
 
+  // Đường B: upload Word/PDF → AI trích xuất field để prefill form (nhập tay vẫn là fallback).
+  extract: async (file: File) => {
+    const form = new FormData()
+    form.append('file', file)
+    const res = await api.post<ApiResponse<ExtractedProposalDto>>('/api/proposals/extract', form)
+    return res.data
+  },
+
   update: async (id: string, data: CreateProposalRequest) => {
     const res = await api.put<ApiResponse<ProposalDto>>(`/api/proposals/${id}`, data)
     return res.data
   },
 
-  submit: async (id: string) => {
-    const res = await api.post<ApiResponse<ProposalDto>>(`/api/proposals/${id}/submit`)
+  submit: async (id: string, confirmCv = false) => {
+    const url = `/api/proposals/${id}/submit${confirmCv ? '?confirmCv=true' : ''}`
+    const res = await api.post<ApiResponse<ProposalDto>>(url)
     return res.data
   },
 
