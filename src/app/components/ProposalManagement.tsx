@@ -168,7 +168,7 @@ export default function ProposalManagement() {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Đề tài</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Chủ nhiệm</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Track</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Lĩnh vực</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Loại</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Kinh phí</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Trạng thái</th>
@@ -250,7 +250,7 @@ export default function ProposalManagement() {
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <Field label="Chủ nhiệm" value={detail.principalInvestigatorName} />
                   <Field label="Đợt" value={detail.cycleName} />
-                  <Field label="Track" value={detail.trackName} />
+                  <Field label="Lĩnh vực" value={detail.trackName} />
                   <Field label="Tổng kinh phí" value={formatVnd(detail.totalBudget)} />
                 </div>
                 {detail.objectives && <Block label="Mục tiêu" value={detail.objectives} />}

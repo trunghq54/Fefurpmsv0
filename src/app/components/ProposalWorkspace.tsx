@@ -231,9 +231,9 @@ function InfoSection({ proposal, onSaved }: { proposal: ProposalDto; onSaved: ()
           <Input value={f.titleEN} onChange={(e) => set('titleEN', e.target.value)} />
         </div>
         <div>
-          <Label>Track *</Label>
+          <Label>Lĩnh vực *</Label>
           <Select value={f.trackId} onChange={(e) => set('trackId', e.target.value)}>
-            <option value="">— Chọn track —</option>
+            <option value="">— Chọn lĩnh vực —</option>
             {tracks.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name}

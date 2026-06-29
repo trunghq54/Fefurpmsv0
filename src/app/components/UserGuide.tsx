@@ -28,10 +28,10 @@ const GUIDES: Record<string, { label: string; icon: React.ElementType; color: st
         ],
       },
       {
-        title: 'Tạo đợt nộp (Cycle) & Track',
+        title: 'Tạo đợt nộp (Cycle) & Lĩnh vực',
         steps: [
           { step: 'Tab "Đợt nộp" → bấm "Tạo đợt nộp mới" → điền tên đợt, năm học, hạn nộp, hạn mức kinh phí → Lưu.' },
-          { step: 'Bấm "Quản lý Track" trên đợt vừa tạo → thêm các track nghiên cứu → kích hoạt track.' },
+          { step: 'Bấm "Quản lý Lĩnh vực" trên đợt vừa tạo → thêm các lĩnh vực nghiên cứu → kích hoạt lĩnh vực.' },
           { step: 'Bấm "Kích hoạt đợt" để mở nộp đề xuất cho giảng viên.' },
           {
             step: 'Chỉ 1 đợt được kích hoạt tại một thời điểm. Huỷ kích hoạt đợt cũ trước khi tạo đợt mới.',
@@ -51,7 +51,7 @@ const GUIDES: Record<string, { label: string; icon: React.ElementType; color: st
       {
         title: 'Xem & quản lý đề xuất',
         steps: [
-          { step: 'Tab "Đề xuất" → bảng danh sách tất cả đề xuất kèm bộ lọc trạng thái / track / loại.' },
+          { step: 'Tab "Đề xuất" → bảng danh sách tất cả đề xuất kèm bộ lọc trạng thái / lĩnh vực / loại.' },
           { step: 'Bấm "Xem" để mở chi tiết: thông tin, kinh phí, thành viên, tài liệu đính kèm, kết quả các vòng.' },
           { step: '"Tóm tắt AI" → mở panel bên phải, bấm "Tóm tắt tài liệu" (cần Gemini API key).' },
         ],
@@ -68,7 +68,7 @@ const GUIDES: Record<string, { label: string; icon: React.ElementType; color: st
       {
         title: 'Xem phân tích & thống kê',
         steps: [
-          { step: 'Tab "Tổng quan" → biểu đồ: số đề xuất theo trạng thái, phân bổ theo track, kênh chuyển tiếp.' },
+          { step: 'Tab "Tổng quan" → biểu đồ: số đề xuất theo trạng thái, phân bổ theo lĩnh vực, kênh chuyển tiếp.' },
           { step: 'Lọc theo đợt nộp để so sánh giữa các năm.' },
         ],
       },
@@ -131,7 +131,7 @@ const GUIDES: Record<string, { label: string; icon: React.ElementType; color: st
         steps: [
           { step: 'Trang chủ Faculty → bấm "Tạo đề xuất mới" (hoặc đảm bảo đang ở chế độ tạo mới).' },
           {
-            step: 'Bước 1 – Thông tin: điền tên đề tài (VI/EN), chọn Track, loại nghiên cứu, thời gian, mục tiêu, phương pháp, sản phẩm dự kiến.',
+            step: 'Bước 1 – Thông tin: điền tên đề tài (VI/EN), chọn lĩnh vực, loại nghiên cứu, thời gian, mục tiêu, phương pháp, sản phẩm dự kiến.',
           },
           { step: 'Bước 2 – Thành viên: bấm "Thêm thành viên" → điền họ tên, vai trò, số tháng tham gia.' },
           { step: 'Bước 3 – Kinh phí: bấm "Thêm khoản" → điền hạng mục và số tiền. Theo dõi thanh hạn mức.' },

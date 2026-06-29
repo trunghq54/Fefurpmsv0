@@ -1,0 +1,45 @@
+{
+  "common": {
+    "track": "Lĩnh vực",
+    "tracks": "Lĩnh vực",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "add": "Thêm",
+    "edit": "Chỉnh sửa",
+    "delete": "Xóa",
+    "close": "Đóng",
+    "back": "Quay lại",
+    "loading": "Đang tải...",
+    "description": "Mô tả",
+    "actions": "Hành động",
+    "status": "Trạng thái"
+  },
+  "track": {
+    "manage": "Quản lý lĩnh vực",
+    "manageDesc": "Quản lý các Lĩnh vực",
+    "name": "Tên lĩnh vực",
+    "add": "Thêm lĩnh vực",
+    "addNew": "Thêm lĩnh vực mới",
+    "edit": "Chỉnh sửa lĩnh vực",
+    "count": "Tổng số lĩnh vực",
+    "owner": "Người phụ trách",
+    "namePlaceholder": "vd: Công nghệ thông tin",
+    "empty": "Chưa có lĩnh vực nào",
+    "emptyInCycle": "Chưa có lĩnh vực nào trong đợt này.",
+    "ofCycle": "Lĩnh vực của đợt",
+    "required": "Tên lĩnh vực là bắt buộc",
+    "createFailed": "Tạo lĩnh vực thất bại",
+    "deactivateConfirm": "Vô hiệu hóa lĩnh vực \"{{name}}\"?"
+  },
+  "researchType": {
+    "applied": "Ứng dụng",
+    "basic": "Cơ bản",
+    "label": "Loại đề tài"
+  },
+  "councilRole": {
+    "Chair": "Chủ tịch",
+    "Secretary": "Thư ký",
+    "Opponent": "Phản biện",
+    "Member": "Thành viên"
+  }
+}

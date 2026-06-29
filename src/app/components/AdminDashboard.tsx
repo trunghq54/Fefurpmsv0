@@ -105,7 +105,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard },
     { id: 'search', label: 'Tìm kiếm', icon: Search },
     { id: 'users', label: 'Người dùng', icon: Users },
-    { id: 'cycles', label: 'Đợt & Track', icon: CalendarRange },
+    { id: 'cycles', label: 'Đợt & Lĩnh vực', icon: CalendarRange },
     { id: 'proposals', label: 'Đề xuất', icon: FileText },
     { id: 'change-requests', label: 'Yêu cầu thay đổi', icon: FileEdit },
     { id: 'documents', label: 'Tài liệu', icon: Paperclip },
@@ -236,7 +236,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
 
               <div className="grid lg:grid-cols-2 gap-6">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Đề xuất theo Track</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Đề xuất theo Lĩnh vực</h3>
                   {trackChart.length === 0 ? (
                     <p className="text-sm text-gray-400 py-12 text-center">Chưa có dữ liệu.</p>
                   ) : (

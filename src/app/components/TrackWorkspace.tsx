@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Plus, Edit, X, Trash2, UserCheck, Layers } from 'lucide-react'
 import { cycleService } from '../../services/cycleService'
 import { userService } from '../../services/userService'
@@ -20,6 +21,7 @@ interface TrackForm {
 const defaultForm: TrackForm = { name: '', description: '', ownerId: '' }
 
 export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
+  const { t } = useTranslation()
   const [tracks, setTracks] = useState<TrackDto[]>([])
   const [users, setUsers] = useState<UserDto[]>([])
   const [loading, setLoading] = useState(true)
@@ -57,7 +59,7 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      setFormError('Tên track là bắt buộc')
+      setFormError(t('track.required'))
       return
     }
     setSaving(true)
@@ -82,7 +84,7 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
           setTracks((prev) => [...prev, res.data!])
           setShowModal(false)
         } else {
-          setFormError(res.message || 'Tạo track thất bại')
+          setFormError(res.message || t('track.createFailed'))
         }
       }
     } catch (err: any) {
@@ -104,7 +106,7 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
   }
 
   const handleDeactivate = async (track: TrackDto) => {
-    if (!window.confirm(`Vô hiệu hóa track "${track.name}"?`)) return
+    if (!window.confirm(t('track.deactivateConfirm', { name: track.name }))) return
     try {
       await cycleService.deactivateTrack(cycle.id, track.id)
       setTracks((prev) => prev.map((t) => (t.id === track.id ? { ...t, isActive: false } : t)))
@@ -127,11 +129,13 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
           </button>
           <div>
             <h2 className="text-2xl font-bold text-gray-800">{cycle.name}</h2>
-            <p className="text-gray-500 mt-1">Năm học {cycle.academicYear} · Quản lý các Track (lĩnh vực)</p>
+            <p className="text-gray-500 mt-1">
+              Năm học {cycle.academicYear} · {t('track.manageDesc')}
+            </p>
           </div>
         </div>
         <Button onClick={() => handleOpenModal()}>
-          <Plus className="w-5 h-5" /> Thêm track
+          <Plus className="w-5 h-5" /> {t('track.add')}
         </Button>
       </div>
 
@@ -142,14 +146,14 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
         ) : tracks.length === 0 ? (
           <div className="p-12 text-center text-gray-400">
             <Layers className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            Chưa có track nào trong đợt này.
+            {t('track.emptyInCycle')}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Track</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('common.track')}</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Người phụ trách</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Trạng thái</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Hành động</th>
@@ -227,7 +231,7 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
       {/* Modal */}
       {showModal && (
         <Modal
-          title={editingTrack ? 'Chỉnh sửa track' : 'Thêm track mới'}
+          title={editingTrack ? t('track.edit') : t('track.addNew')}
           onClose={() => setShowModal(false)}
           className="max-w-lg"
           footer={
@@ -242,7 +246,7 @@ export default function TrackWorkspace({ cycle, onBack }: TrackWorkspaceProps) {
           }
         >
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tên track *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('track.name')} *</label>
             <Input
               type="text"
               value={formData.name}

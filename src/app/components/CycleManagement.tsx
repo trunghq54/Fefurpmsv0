@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Edit, X, Power, Layers, CalendarRange, Wallet } from 'lucide-react'
 import { cycleService } from '../../services/cycleService'
 import type { CycleDto, ResearchTypeOption } from '../../types/cycle'
+import { useTranslation } from 'react-i18next'
 import TrackWorkspace from './TrackWorkspace'
 import { Button, Input, Textarea } from './ui-kit'
 
@@ -27,6 +28,7 @@ const toDateInput = (iso: string) => (iso ? iso.slice(0, 10) : '')
 const formatVnd = (n: number) => n.toLocaleString('vi-VN') + ' ₫'
 
 export default function CycleManagement() {
+  const { t } = useTranslation()
   const [cycles, setCycles] = useState<CycleDto[]>([])
   const [researchTypes, setResearchTypes] = useState<ResearchTypeOption[]>([])
   const [loading, setLoading] = useState(true)
@@ -155,7 +157,7 @@ export default function CycleManagement() {
           <p className="text-2xl font-bold text-green-600 mt-1">{openCount}</p>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-          <p className="text-sm text-gray-500">Tổng số track</p>
+          <p className="text-sm text-gray-500">{t('track.count')}</p>
           <p className="text-2xl font-bold text-blue-600 mt-1">{cycles.reduce((sum, c) => sum + c.trackCount, 0)}</p>
         </div>
       </div>
@@ -223,10 +225,10 @@ export default function CycleManagement() {
                           variant="ghost"
                           size="sm"
                           onClick={() => setWorkspaceCycle(cycle)}
-                          title="Quản lý track"
+                          title={t('track.manage')}
                           className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                         >
-                          <Layers className="w-4 h-4" /> Tracks ({cycle.trackCount})
+                          <Layers className="w-4 h-4" /> {t('common.tracks')} ({cycle.trackCount})
                         </Button>
                         <button
                           onClick={() => handleOpenModal(cycle)}

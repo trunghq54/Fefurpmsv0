@@ -65,7 +65,7 @@ export default function ProposalDetailView({
       <div className="grid md:grid-cols-2 gap-3 text-sm">
         <Field label="Chủ nhiệm" value={proposal.principalInvestigatorName} />
         <Field label="Đợt" value={proposal.cycleName} />
-        <Field label="Track" value={proposal.trackName} />
+        <Field label="Lĩnh vực" value={proposal.trackName} />
         <Field label="Tổng kinh phí" value={formatVnd(proposal.totalBudget)} />
       </div>
 

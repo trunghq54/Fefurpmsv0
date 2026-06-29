@@ -395,7 +395,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
   const validateStep = (step: number): string => {
     if (step === 1) {
       if (!titleVI.trim()) return 'Tên đề tài (VI) là bắt buộc'
-      if (!trackId) return 'Vui lòng chọn Track'
+      if (!trackId) return 'Vui lòng chọn lĩnh vực'
       if (!durationMonths || durationMonths <= 0) return 'Thời gian thực hiện không hợp lệ'
     }
     if (step === 3 && overCap) return `Tổng kinh phí vượt hạn mức ${formatVnd(fundingCap)}`
@@ -919,13 +919,13 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                       </div>
                       <div className="grid md:grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Track *</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Lĩnh vực *</label>
                           <select
                             value={trackId}
                             onChange={(e) => setTrackId(e.target.value)}
                             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                           >
-                            <option value="">— Chọn track —</option>
+                            <option value="">— Chọn lĩnh vực —</option>
                             {activeTracks.map((t) => (
                               <option key={t.id} value={t.id}>
                                 {t.name}
@@ -1231,7 +1231,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                       <div className="bg-gray-50 rounded-lg p-6 space-y-3 text-sm">
                         <Row label="Tên đề tài (VI)" value={titleVI || '—'} />
                         <Row label="Tên đề tài (EN)" value={titleEN || '—'} />
-                        <Row label="Track" value={activeTracks.find((t) => t.id === trackId)?.name || '—'} />
+                        <Row label="Lĩnh vực" value={activeTracks.find((t) => t.id === trackId)?.name || '—'} />
                         <Row label="Loại nghiên cứu" value={researchType === 1 ? 'Ứng dụng' : 'Cơ bản'} />
                         <Row label="Thời gian" value={`${durationMonths} tháng`} />
                         <Row label="Số thành viên" value={String(members.filter((m) => m.fullName.trim()).length)} />
@@ -1317,7 +1317,7 @@ export default function ProposalSubmission({ user, onLogout }: ProposalSubmissio
                   <div className="bg-gray-50 rounded-lg p-5 space-y-2 text-sm">
                     <Row label="Tên đề tài (VI)" value={viewProposal.titleVI || '—'} />
                     <Row label="Tên đề tài (EN)" value={viewProposal.titleEN || '—'} />
-                    <Row label="Track" value={viewProposal.trackName || '—'} />
+                    <Row label="Lĩnh vực" value={viewProposal.trackName || '—'} />
                     <Row
                       label="Loại nghiên cứu"
                       value={viewProposal.researchType === 'Applied' ? 'Ứng dụng' : 'Cơ bản'}
@@ -1609,7 +1609,7 @@ function MySubmissions({
                   <h3 className="text-lg font-semibold text-gray-800">{p.titleVI}</h3>
                   <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-600">
                     <span className="px-2 py-0.5 bg-gray-100 rounded">{p.researchType}</span>
-                    <span>Track: {p.trackName || '—'}</span>
+                    <span>Lĩnh vực: {p.trackName || '—'}</span>
                     <span>•</span>
                     <span>{formatVnd(p.totalBudget)}</span>
                     <span>•</span>
