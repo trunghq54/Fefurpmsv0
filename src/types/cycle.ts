@@ -14,6 +14,21 @@ export interface ResearchTypeOption {
   code: string
   name: string
   maxBudgetCap: number
+  requireOrderingUnit?: boolean
+  isActive?: boolean
+}
+
+export interface CreateResearchTypeRequest {
+  code?: string
+  name: string
+  maxBudgetCap: number
+  requireOrderingUnit?: boolean
+}
+
+export interface UpdateResearchTypeRequest {
+  name?: string
+  maxBudgetCap?: number
+  requireOrderingUnit?: boolean
 }
 
 export interface CycleDto {

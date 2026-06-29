@@ -1,6 +1,14 @@
 import api from '../lib/api'
 import type { ApiResponse } from '../types/auth'
-import type { CycleDto, TrackDto, CreateCycleRequest, CreateTrackRequest, ResearchTypeOption } from '../types/cycle'
+import type {
+  CycleDto,
+  TrackDto,
+  CreateCycleRequest,
+  CreateTrackRequest,
+  ResearchTypeOption,
+  CreateResearchTypeRequest,
+  UpdateResearchTypeRequest,
+} from '../types/cycle'
 
 interface UpdateTrackRequest {
   name?: string
@@ -11,8 +19,34 @@ interface AssignOwnerRequest {
 }
 
 export const cycleService = {
-  getResearchTypes: async () => {
-    const res = await api.get<ApiResponse<ResearchTypeOption[]>>('/api/cycles/research-types')
+  getResearchTypes: async (includeInactive = false) => {
+    const url = `/api/cycles/research-types${includeInactive ? '?includeInactive=true' : ''}`
+    const res = await api.get<ApiResponse<ResearchTypeOption[]>>(url)
+    return res.data
+  },
+
+  createResearchType: async (data: CreateResearchTypeRequest) => {
+    const res = await api.post<ApiResponse<ResearchTypeOption>>('/api/cycles/research-types', data)
+    return res.data
+  },
+
+  updateResearchType: async (id: number, data: UpdateResearchTypeRequest) => {
+    const res = await api.put<ApiResponse<ResearchTypeOption>>(`/api/cycles/research-types/${id}`, data)
+    return res.data
+  },
+
+  deactivateResearchType: async (id: number) => {
+    const res = await api.patch<ApiResponse<ResearchTypeOption>>(`/api/cycles/research-types/${id}/deactivate`)
+    return res.data
+  },
+
+  reactivateResearchType: async (id: number) => {
+    const res = await api.patch<ApiResponse<ResearchTypeOption>>(`/api/cycles/research-types/${id}/reactivate`)
+    return res.data
+  },
+
+  deleteResearchType: async (id: number) => {
+    const res = await api.delete<ApiResponse<null>>(`/api/cycles/research-types/${id}`)
     return res.data
   },
 

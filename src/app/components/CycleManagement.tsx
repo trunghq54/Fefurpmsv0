@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit, X, Power, Layers, CalendarRange, Wallet } from 'lucide-react'
+import { Plus, Edit, X, Power, Layers, CalendarRange, Wallet, Tag } from 'lucide-react'
 import { cycleService } from '../../services/cycleService'
 import type { CycleDto, ResearchTypeOption } from '../../types/cycle'
 import { useTranslation } from 'react-i18next'
 import TrackWorkspace from './TrackWorkspace'
+import ResearchTypeManagement from './ResearchTypeManagement'
 import { Button, Input, Textarea } from './ui-kit'
 
 interface CycleForm {
@@ -38,6 +39,7 @@ export default function CycleManagement() {
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
   const [workspaceCycle, setWorkspaceCycle] = useState<CycleDto | null>(null)
+  const [showTypeManager, setShowTypeManager] = useState(false)
 
   useEffect(() => {
     Promise.all([cycleService.getAll(), cycleService.getResearchTypes()]).then(([cycleRes, typeRes]) => {
@@ -132,6 +134,10 @@ export default function CycleManagement() {
     return <TrackWorkspace cycle={workspaceCycle} onBack={() => setWorkspaceCycle(null)} />
   }
 
+  if (showTypeManager) {
+    return <ResearchTypeManagement onBack={() => setShowTypeManager(false)} />
+  }
+
   const openCount = cycles.filter((c) => c.status === 'Open').length
 
   return (
@@ -141,9 +147,14 @@ export default function CycleManagement() {
           <h2 className="text-2xl font-bold text-gray-800">Quản lý Đợt nộp (Cycles)</h2>
           <p className="text-gray-500 mt-1">Cấu hình đợt NCKH — mỗi đợt thuộc một loại đề tài</p>
         </div>
-        <Button onClick={() => handleOpenModal()}>
-          <Plus className="w-5 h-5" /> Tạo đợt mới
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setShowTypeManager(true)}>
+            <Tag className="w-4 h-4" /> Quản lý loại đề tài
+          </Button>
+          <Button onClick={() => handleOpenModal()}>
+            <Plus className="w-5 h-5" /> Tạo đợt mới
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
