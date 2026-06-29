@@ -162,7 +162,7 @@ export function Modal({
   className?: string
 }) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className={cn('bg-white rounded-2xl shadow-2xl w-full max-w-md', className)}>
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h3 className="text-xl font-bold text-gray-800">{title}</h3>

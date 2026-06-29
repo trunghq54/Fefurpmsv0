@@ -212,7 +212,7 @@ export default function ProposalManagement() {
 
       {/* Detail modal */}
       {(detail || loadingDetail) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 bg-white">
               <h3 className="text-xl font-bold text-gray-800">Chi tiết đề xuất</h3>
