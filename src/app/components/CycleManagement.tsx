@@ -135,7 +135,17 @@ export default function CycleManagement() {
   }
 
   if (showTypeManager) {
-    return <ResearchTypeManagement onBack={() => setShowTypeManager(false)} />
+    return (
+      <ResearchTypeManagement
+        onBack={() => {
+          setShowTypeManager(false)
+          // Reload loại đề tài để dropdown "Tạo đợt" thấy loại vừa thêm/sửa.
+          cycleService.getResearchTypes().then((r) => {
+            if (r.success && r.data) setResearchTypes(r.data)
+          })
+        }}
+      />
+    )
   }
 
   const openCount = cycles.filter((c) => c.status === 'Open').length
