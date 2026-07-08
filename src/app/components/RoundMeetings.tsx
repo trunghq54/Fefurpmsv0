@@ -13,7 +13,9 @@ const PLATFORM_LABEL: Record<string, string> = {
 const toIso = (v: string) => (v ? `${v}:00Z` : '')
 
 export default function RoundMeetings({ roundId, councilId }: { roundId: string; councilId?: string }) {
-  const id = councilId ?? roundId
+  // Lịch họp gắn theo HỘI ĐỒNG. Vòng chưa lập hội đồng (chưa phân công ai) thì
+  // không có council → KHÔNG gọi API (trước đây fallback về roundId gây 404).
+  const id = councilId
   const [meetings, setMeetings] = useState<MeetingDto[]>([])
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
@@ -24,13 +26,14 @@ export default function RoundMeetings({ roundId, councilId }: { roundId: string;
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
+    if (!id) return
     meetingService.getByRound(id).then((res) => {
       if (res.success && res.data) setMeetings(res.data)
     })
   }, [id])
 
   const create = async () => {
-    if (!title.trim() || !scheduledAt) return
+    if (!title.trim() || !scheduledAt || !id) return
     setBusy(true)
     try {
       const res = await meetingService.create(id, {

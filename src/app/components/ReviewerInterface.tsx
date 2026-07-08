@@ -34,7 +34,7 @@ interface ReviewerInterfaceProps {
   onLogout: () => void
 }
 
-const ROLE_LABEL: Record<string, string> = { Member: 'Thành viên', Chair: 'Chủ tịch', Opponent: 'Phản biện' }
+const ROLE_LABEL: Record<string, string> = { Member: 'Thành viên', Chair: 'Chủ tịch', Secretary: 'Thư ký', Opponent: 'Phản biện' }
 const STATUS_COLOR: Record<string, string> = {
   Pending: 'bg-yellow-100 text-yellow-800',
   Accepted: 'bg-green-100 text-green-800',

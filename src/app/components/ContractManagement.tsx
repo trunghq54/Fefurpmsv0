@@ -282,7 +282,8 @@ function DeliverablesTab({ contractId, isStaff, isPi }: { contractId: string; is
                   Nộp sản phẩm
                 </button>
               )}
-              {d.submittedAt && !d.acceptanceStatus && isStaff && (
+              {/* BE set PENDING khi PI nộp → PENDING = chờ đánh giá (chỉ PASSED/FAILED là đã chấm) */}
+              {d.submittedAt && (!d.acceptanceStatus || d.acceptanceStatus === 'PENDING') && isStaff && (
                 <button
                   onClick={() => {
                     setEvalTarget(d.id)

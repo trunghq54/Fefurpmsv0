@@ -3,7 +3,7 @@ import type { ApiResponse } from '../types/auth'
 
 export interface FinalReportDto {
   id: string
-  contractId: string
+  projectId: string
   status: string
   reportFileUrl?: string
   summaryFileUrl?: string

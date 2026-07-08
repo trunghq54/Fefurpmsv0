@@ -63,9 +63,9 @@ export interface ConfirmDisbursementRequest {
 
 export interface DeliverableResponse {
   id: number
-  contractId: string
-  expectedProductId: number | null
-  categoryId: number
+  projectId: string
+  contractId: string | null
+  categoryId: number | null
   categoryName: string | null
   productName: string
   description: string | null

@@ -1,3 +1,6 @@
 node_modules
 .env.local
 dist
+
+# E2E smoke-test artifacts (screenshots + scripts do Claude tạo khi test)
+.e2e/
